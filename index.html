@@ -216,7 +216,7 @@ document.getElementById('runCalc').addEventListener('click', function () {
   const ssStart = ssStr ? parse(ssStr) : null;
   const penStart = penStr ? parse(penStr) : null;
 
-  const currentYear = today.getFullYear();
+  const currentYear = today.getFullYear() + 1;
   const endYear = dobDate.getFullYear() + 100;
 
   const timeline = [];
