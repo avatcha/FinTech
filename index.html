@@ -204,6 +204,13 @@ document.getElementById('runCalc').addEventListener('click', function () {
   const penStr = document.getElementById('pensiondate').value;
   const penAmt = Number(document.getElementById('pensions').value || 0);
 
+  function yearsFromToday(targetYear) {
+  const now = new Date();
+  const then = new Date(targetYear, now.getMonth(), now.getDate());
+  const diffMs = then - now;
+  return diffMs / (365.25 * 24 * 3600 * 1000);
+}
+  
   function parse(s) { const [y,m,d] = s.split("-").map(Number); return new Date(y, (m||1)-1, d||1); }
 
   if (!dobStr || !retireStr) {
@@ -245,7 +252,7 @@ document.getElementById('runCalc').addEventListener('click', function () {
 function deflateSeries(path) {
   if (!inflationActive) return path;
   return path.map((val, i) => {
-    const yearsFromNow = Math.max(0, timeline[i] - currentYear);
+    const yearsFromNow = yearsFromToday(timeline[i]);
     const factor = Math.pow(1 + INFLATION_RATE, yearsFromNow);
     return val / factor;
   });
