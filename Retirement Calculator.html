@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<!-- saved from url=(0067)file:///C:/Users/Owner/Desktop/Website/Retirement%20Calculator.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Retirement Calculator</title>
+
+  <!-- Coinbase-like font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+  <link href="./Retirement Calculator_files/css2" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f7f9fc;
+      margin: 0;
+      padding: 40px 0;
+      color: #0a0f2c;
+    }
+
+    .cb-wrap { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
+    .cb-header { margin-bottom: 28px; text-align: left; }
+    .cb-title { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+    .cb-sub { font-size: 17px; color: #4a5568; margin-top: 6px; }
+
+    .cb-stack { display: flex; flex-direction: column; gap: 32px; }
+    .cb-card { background: white; padding: 28px; border-radius: 18px; box-shadow: 0 10px 30px rgba(2,6,23,0.07); border: 1px solid #e5e9f2; }
+
+    .cb-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+    @media (min-width: 1100px) { .cb-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; } }
+
+    .cb-field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 14px; font-weight: 500; color: #2d3748; }
+
+    input[type="date"], input[type="number"] {
+      font-size: 18px; padding: 16px 14px; border-radius: 14px; border: 1px solid #e5e9f2; background: #fdfdfd;
+    }
+    input:focus { border-color: #b8cdfd; outline: none; box-shadow: 0 0 0 4px rgba(0,82,255,0.12); }
+
+    .cb-actions { margin-top: 24px; text-align: left; }
+    #runCalc { background: #1a73e8; color: white; border: none; font-size: 16px; padding: 14px 20px; border-radius: 14px; font-weight: 600; cursor: pointer; transition: 0.15s ease; }
+    #runCalc:hover { background: #0f5ad2; }
+
+    #chart { border-radius: 14px; background: white; }
+
+    /* Remove number spinners */
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+
+    /* Tooltip ("?" icon) styling */
+    .tooltip-click-container { position: relative; display: inline-flex; align-items: center; gap: 8px; }
+    .click-icon { width: 18px; height: 18px; font-size: 12px; border-radius: 50%; background: #1a73e8; color: white; display: inline-flex; justify-content: center; align-items: center; cursor: pointer; user-select: none; font-weight: 600; }
+    .tooltip-click-box {
+      display: none; position: absolute; top: 26px; left: 0; width: 280px; background: white;
+      border: 1px solid #e5e9f2; border-radius: 12px; padding: 14px 16px; font-size: 13px; color: #1a1f33;
+      box-shadow: 0 8px 24px rgba(2,6,23,0.15); z-index: 9999;
+    }
+
+    /* Toggle section */
+    #postCalcOptions {
+      border: 1px solid #d7dce5 !important; background: #f1f4f9 !important;
+      padding: 16px !important; border-radius: 12px !important; display: none;
+    }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 40px; flex-wrap: nowrap; }
+    .toggle-item { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+
+    .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
+    .switch input { display: none; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: 0.2s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: 0.2s; border-radius: 50%; }
+    input:checked + .slider { background-color: #1a73e8; }
+    input:checked + .slider:before { transform: translateX(22px); }
+  </style>
+
+  <!-- Highcharts -->
+  <script src="./Retirement Calculator_files/highcharts.js.download"></script>
+
+</head>
+<body>
+
+<div class="cb-wrap">
+  <div class="cb-header">
+    <h1 class="cb-title">Retirement Calculator</h1>
+    <div class="cb-sub">Use the best retirement calculator on the web to understand your financial future so you can achieve your retirement goals!</div>
+  </div>
+
+  <div class="cb-stack">
+
+    <!-- INPUT CARD -->
+    <div class="cb-card">
+      <div class="cb-row">
+        <div class="cb-field"><label>Enter your date of birth</label><input id="dob" type="date"></div>
+        <div class="cb-field"><label>When do you plan on retiring?</label><input id="retireDate" type="date"></div>
+        <div class="cb-field"><label>Current retirement savings ($)</label><input id="retiresavings" type="number" min="0"></div>
+        <div class="cb-field"><label>Projected future annual contribution till retirement ($)</label><input id="futureretiresavings" type="number" min="0"></div>
+        <div class="cb-field"><label>Project Social Security start date</label><input id="socsecAge" type="date"></div>
+
+        <div class="cb-field">
+          <label class="tooltip-click-container">
+            Estimated annual Social Security ($)
+            <span class="click-icon" id="ssInfoBtn">?</span>
+            <div class="tooltip-click-box" id="ssInfoBox" style="display: none;">
+              Unsure how much Social Security you will receive?
+              <br><br>
+              • View your personalized estimate:<br>
+              <a href="https://www.ssa.gov/myaccount" target="_blank">SSA MyAccount</a><br><br>
+              • Calculate benefits:<br>
+              <a href="https://www.ssa.gov/OACT/quickcalc/" target="_blank">SSA Quick Calculator</a>
+            </div>
+          </label>
+          <input id="socsecAmt" type="number" min="0">
+        </div>
+
+        <div class="cb-field"><label>Pension/Defined Benefits Plan start date</label><input id="pensiondate" type="date"></div>
+        <div class="cb-field"><label>Annual pension/Defined Benefits Plan amount ($)</label><input id="pensions" type="number" min="0"></div>
+      </div>
+
+      <div class="cb-actions"><button id="runCalc">Run Calculation</button></div>
+    </div>
+
+    <!-- TOGGLE CARD -->
+    <div id="postCalcOptions" class="cb-card">
+      <div class="toggle-row">
+        <div class="toggle-item">
+          <label class="toggle-label">
+            Would you like to account for inflation?
+            <span class="click-icon" id="inflationQM">?</span>
+            <div class="tooltip-click-box" id="inflationBox" style="display: none;">
+              The industry generally estimates inflation at <b>3%</b>. Turning this ON shows results in <b>today’s dollars</b>.
+            </div>
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="inflationToggle"><span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="toggle-item">
+          <label class="toggle-label">
+            Would you like to model plan distributions?
+            <span class="click-icon" id="withdrawQM">?</span>
+            <div class="tooltip-click-box" id="withdrawBox" style="display: none;">
+              The industry generally uses a <b>4%</b> annual withdrawal estimate.
+            </div>
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="withdrawToggle"><span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHART -->
+    <div class="cb-card">
+      <div id="chart" style="height: 360px;"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Tooltip JS -->
+<script>
+function setupTooltip(btnId, boxId) {
+  const btn = document.getElementById(btnId);
+  const box = document.getElementById(boxId);
+  if (!btn || !box) return;
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    box.style.display = (box.style.display === "block") ? "none" : "block";
+  });
+
+  document.addEventListener("click", () => { box.style.display = "none"; });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  setupTooltip("ssInfoBtn", "ssInfoBox");
+  setupTooltip("inflationQM", "inflationBox");
+  setupTooltip("withdrawQM", "withdrawBox");
+});
+</script>
+
+<!-- Calculator + Highcharts -->
+<script>
+let hcChart = null;
+
+document.getElementById('runCalc').addEventListener('click', function () {
+  // Reveal the post-calc options
+  document.getElementById("postCalcOptions").style.display = "block";
+
+  const today = new Date();
+
+  const dobStr = document.getElementById('dob').value;
+  const retireStr = document.getElementById('retireDate').value;
+
+  const currentSavings = Number(document.getElementById('retiresavings').value || 0);
+  const annualContribution = Number(document.getElementById('futureretiresavings').value || 0);
+
+  const ssStr = document.getElementById('socsecAge').value;
+  const ssAmt = Number(document.getElementById('socsecAmt').value || 0);
+
+  const penStr = document.getElementById('pensiondate').value;
+  const penAmt = Number(document.getElementById('pensions').value || 0);
+
+  function parse(s) { const [y,m,d] = s.split("-").map(Number); return new Date(y, (m||1)-1, d||1); }
+
+  if (!dobStr || !retireStr) {
+    alert("Please enter your Date of Birth and Retirement Date.");
+    return;
+  }
+
+  const dobDate = parse(dobStr);
+  const retireDateObj = parse(retireStr);
+  const ssStart = ssStr ? parse(ssStr) : null;
+  const penStart = penStr ? parse(penStr) : null;
+
+  const currentYear = today.getFullYear();
+  const endYear = dobDate.getFullYear() + 100;
+
+  const timeline = [];
+  for (let y = currentYear; y <= endYear; y++) timeline.push(y);
+
+  const retireYear = retireDateObj.getFullYear();
+
+  const flowContrib = timeline.map(y => (y < retireYear ? annualContribution : 0));
+  const flowSS = timeline.map(y => (ssStart && y >= ssStart.getFullYear() ? ssAmt : 0));
+  const flowPension = timeline.map(y =>
+    (penStart && y >= penStart.getFullYear() && y <= dobDate.getFullYear() + 92) ? penAmt : 0
+  );
+
+  // Nominal inflows (no inflation applied here)
+  let inflow = timeline.map((_, i) => flowContrib[i] + flowSS[i] + flowPension[i]);
+
+  // --- Toggles (single source of truth) ---
+  const inflationActive = document.getElementById('inflationToggle')?.checked === true;
+  const withdrawActive  = document.getElementById('withdrawToggle')?.checked === true;
+
+  const INFLATION_RATE = 0.03; // 3%
+  const WITHDRAW_RATE  = 0.04; // 4%
+
+  // Helper: turn a balance path into today's dollars by deflating from currentYear
+  function deflateSeries(path) {
+    if (!inflationActive) return path;
+    return path.map((val, i) => {
+      const yearsFromNow = Math.max(0, timeline[i] - currentYear);
+      const factor = Math.pow(1 + INFLATION_RATE, yearsFromNow);
+      return val / factor;
+    });
+  }
+
+  // Build nominal balance paths, then (optionally) deflate
+  function pathForRate(rate) {
+    let bal = currentSavings;
+    const path = [];
+    for (let i = 0; i < timeline.length; i++) {
+      bal = bal * (1 + rate) + inflow[i];
+      if (withdrawActive && timeline[i] >= retireYear) {
+        bal -= bal * WITHDRAW_RATE;
+      }
+      path.push(bal);
+    }
+    return deflateSeries(path);
+  }
+
+  const p3 = pathForRate(0.03);
+  const p5 = pathForRate(0.05);
+  const p7 = pathForRate(0.07);
+  const p9 = pathForRate(0.09);
+
+  function filter(path) {
+    const startYear = retireYear - 10;
+    return timeline.map((y, i) => (y >= startYear ? [Date.UTC(y,0,1), path[i]] : null)).filter(Boolean);
+  }
+
+  if (hcChart) hcChart.destroy();
+  hcChart = Highcharts.chart('chart', {
+    chart: { zooming: { type: 'x' }, height: 360, backgroundColor: '#ffffff' },
+    title: { text: null },
+    xAxis: { type: 'datetime', labels: { style: { color: '#334155' } } },
+    yAxis: {
+      title: { text: 'Balance ($)' },
+      labels: {
+        style: { color: '#334155' },
+        formatter: function () { return '$' + Highcharts.numberFormat(this.value, 0); }
+      },
+      gridLineColor: '#e5e9f2'
+    },
+    legend: { enabled: true, align: 'center', verticalAlign: 'top' },
+    tooltip: {
+      shared: true,
+      xDateFormat: '%Y',
+      pointFormatter: function () {
+        return '<span style="color:' + this.color + '">●</span> ' +
+               this.series.name + ': <b>$' + Highcharts.numberFormat(this.y, 0) + '</b><br/>';
+      }
+    },
+    credits: { enabled: false },
+    series: [
+      { name: "3%", data: filter(p3), type: 'line', lineWidth: 2 },
+      { name: "5%", data: filter(p5), type: 'line', lineWidth: 2 },
+      { name: "7%", data: filter(p7), type: 'line', lineWidth: 2 },
+      { name: "9%", data: filter(p9), type: 'line', lineWidth: 2 }
+    ]
+  });
+});
+</script>
+
+<!-- Auto-recalc for toggles (place LAST, before </body>) -->
+<script>
+(function () {
+  function run() {
+    const opts = document.getElementById('postCalcOptions');
+    if (opts && opts.style.display === 'none') opts.style.display = 'block';
+    const btn = document.getElementById('runCalc');
+    if (btn) btn.click();
+  }
+
+  // Re-run when either checkbox value changes
+  document.addEventListener('change', function (e) {
+    if (e.target && (e.target.id === 'inflationToggle' || e.target.id === 'withdrawToggle')) {
+      run();
+    }
+  });
+
+  // Some browsers swallow 'change' on pretty sliders — catch clicks too
+  document.querySelectorAll('#postCalcOptions .switch, #postCalcOptions .slider').forEach(function (el) {
+    el.addEventListener('click', run);
+  });
+})();
+</script>
+
+
+
+</body></html>
