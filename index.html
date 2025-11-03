@@ -217,6 +217,7 @@ document.getElementById('runCalc').addEventListener('click', function () {
   const penStart = penStr ? parse(penStr) : null;
 
   const currentYear = today.getFullYear() + 1;
+  const baselineYear = today.getFullYear(); // use THIS for inflation baseline
   const endYear = dobDate.getFullYear() + 100;
 
   const timeline = [];
@@ -241,14 +242,14 @@ document.getElementById('runCalc').addEventListener('click', function () {
   const WITHDRAW_RATE  = 0.04; // 4%
 
   // Helper: turn a balance path into today's dollars by deflating from currentYear
-  function deflateSeries(path) {
-    if (!inflationActive) return path;
-    return path.map((val, i) => {
-      const yearsFromNow = Math.max(0, timeline[i] - currentYear);
-      const factor = Math.pow(1 + INFLATION_RATE, yearsFromNow);
-      return val / factor;
-    });
-  }
+function deflateSeries(path) {
+  if (!inflationActive) return path;
+  return path.map((val, i) => {
+    const yearsFromNow = Math.max(0, timeline[i] - currentYear);
+    const factor = Math.pow(1 + INFLATION_RATE, yearsFromNow);
+    return val / factor;
+  });
+}
 
   // Build nominal balance paths, then (optionally) deflate
   function pathForRate(rate) {
