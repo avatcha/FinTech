@@ -57,6 +57,12 @@
       display: none; position: absolute; top: 26px; left: 0; width: 280px; background: white;
       border: 1px solid #e5e9f2; border-radius: 12px; padding: 14px 16px; font-size: 13px; color: #1a1f33;
       box-shadow: 0 8px 24px rgba(2,6,23,0.15); z-index: 9999;
+      /* Let tooltip text wrap even though the parent uses nowrap */
+.tooltip-click-box {
+  white-space: normal;       /* override parent nowrap */
+  max-width: 320px;          /* allow a reasonable width */
+  overflow-wrap: anywhere;   /* prevent overflow if a long URL appears */
+}
     }
 
     /* Toggle section */
