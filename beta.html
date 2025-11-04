@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Retirement Calculator</title>
 
   <!-- Coinbase-like font -->
@@ -17,7 +15,7 @@
       font-family: 'Inter', sans-serif;
       background: #f7f9fc;
       margin: 0;
-      padding: 40px 0;
+      padding-top: 70px; /* add space so sticky header doesn't overlap */
       color: #0a0f2c;
     }
 
@@ -46,23 +44,45 @@
 
     #chart { border-radius: 14px; background: white; }
 
-    /* Remove number spinners */
-    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type="number"] { -moz-appearance: textfield; }
+    /* Header (Coinbase-like) */
+    .site-header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.85);
+      border-bottom: 1px solid #e5e9f2;
+    }
+    .header-inner { display: flex; align-items: center; justify-content: space-between; min-height: 60px; }
+    .brand { font-weight: 700; letter-spacing: -0.01em; color: #0a0f2c; text-decoration: none; font-size: 20px; }
+    .nav-links { display: flex; gap: 20px; align-items: center; }
+    .nav-links a { color: #1a1f33; text-decoration: none; font-weight: 500; }
+    .nav-links a:hover { text-decoration: underline; }
+
+    /* Mobile nav */
+    .nav-toggle { display: none; background: transparent; border: 0; font-size: 22px; cursor: pointer; }
+    .sr-only { position: absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    @media (max-width: 820px) {
+      .nav-toggle { display: inline-block; }
+      .nav-links { display: none; position: absolute; right: 28px; top: 60px;
+                   background: #fff; border: 1px solid #e5e9f2; border-radius: 12px;
+                   box-shadow: 0 8px 24px rgba(2,6,23,0.12); padding: 12px; }
+      .nav-links a { display: block; padding: 8px 10px; }
+      .nav-links.open { display: block; }
+    }
 
     /* Tooltip ("?" icon) styling */
     .tooltip-click-container { position: relative; display: inline-flex; align-items: center; gap: 8px; }
     .click-icon { width: 18px; height: 18px; font-size: 12px; border-radius: 50%; background: #1a73e8; color: white; display: inline-flex; justify-content: center; align-items: center; cursor: pointer; user-select: none; font-weight: 600; }
     .tooltip-click-box {
-      display: none; position: absolute; top: 26px; left: 0; width: 280px; background: white;
-      border: 1px solid #e5e9f2; border-radius: 12px; padding: 14px 16px; font-size: 13px; color: #1a1f33;
-      box-shadow: 0 8px 24px rgba(2,6,23,0.15); z-index: 9999;
-      /* Let tooltip text wrap even though the parent uses nowrap */
-.tooltip-click-box {
-  white-space: normal;       /* override parent nowrap */
-  max-width: 320px;          /* allow a reasonable width */
-  overflow-wrap: anywhere;   /* prevent overflow if a long URL appears */
-}
+      display: none;
+      position: absolute; top: 26px; left: 0;
+      background: white; width: 280px;
+      border: 1px solid #e5e9f2; border-radius: 12px; padding: 14px 16px;
+      font-size: 13px; color: #1a1f33; box-shadow: 0 8px 24px rgba(2,6,23,0.15);
+      z-index: 9999;
+      white-space: normal;
+      max-width: 320px;
+      overflow-wrap: anywhere;
     }
 
     /* Toggle section */
@@ -72,13 +92,14 @@
     }
     .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 40px; flex-wrap: nowrap; }
     .toggle-item { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-/* Proper tooltip anchor for the toggle labels */
-.toggle-label {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
+
+    .toggle-label {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
     .switch input { display: none; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: 0.2s; border-radius: 24px; }
@@ -87,16 +108,30 @@
     input:checked + .slider:before { transform: translateX(22px); }
   </style>
 
-  <!-- Highcharts -->
   <script src="https://code.highcharts.com/highcharts.js"></script>
-
 </head>
 <body>
 
+<!-- ✅ FIXED HEADER GOES HERE -->
+<header class="site-header">
+  <div class="cb-wrap header-inner">
+    <a class="brand" href="beta.html">FinTech Tools</a>
+
+    <button class="nav-toggle" aria-expanded="false" aria-controls="primary-nav">
+      <span class="sr-only">Menu</span> ☰
+    </button>
+
+    <nav id="primary-nav" class="nav-links">
+      <a href="#retirement">Retirement Planner</a>
+      <a href="budget.html">Budget Planner</a>
+    </nav>
+  </div>
+</header>
+
 <div class="cb-wrap">
-  <div class="cb-header">
+  <div class="cb-header" id="retirement">
     <h1 class="cb-title">Retirement Calculator</h1>
-    <div class="cb-sub">Use the best retirement calculator on the web to understand your financial future so you can achieve your retirement goals!</div>
+    <div class="cb-sub">Use the best retirement calculator on the web…</div>
   </div>
 
   <div class="cb-stack">
@@ -115,8 +150,7 @@
             Estimated annual Social Security ($)
             <span class="click-icon" id="ssInfoBtn">?</span>
             <div class="tooltip-click-box" id="ssInfoBox">
-              Unsure how much Social Security you will receive?
-              <br><br>
+              Unsure how much Social Security you will receive?<br><br>
               • View your personalized estimate:<br>
               <a href="https://www.ssa.gov/myaccount" target="_blank">SSA MyAccount</a><br><br>
               • Calculate benefits:<br>
@@ -126,8 +160,8 @@
           <input id="socsecAmt" type="number" min="0" />
         </div>
 
-        <div class="cb-field"><label>Pension/Defined Benefits Plan start date</label><input id="pensiondate" type="date" /></div>
-        <div class="cb-field"><label>Annual pension/Defined Benefits Plan amount ($)</label><input id="pensions" type="number" min="0" /></div>
+        <div class="cb-field"><label>Pension start date</label><input id="pensiondate" type="date" /></div>
+        <div class="cb-field"><label>Annual pension amount ($)</label><input id="pensions" type="number" min="0" /></div>
       </div>
 
       <div class="cb-actions"><button id="runCalc">Run Calculation</button></div>
@@ -150,7 +184,7 @@
         </div>
 
         <div class="toggle-item">
-          <label class="toggle-label">
+          <label class="toggle-label tooltip-click-container">
             Would you like to model plan distributions?
             <span class="click-icon" id="withdrawQM">?</span>
             <div class="tooltip-click-box" id="withdrawBox">
@@ -172,22 +206,19 @@
   </div>
 </div>
 
-<!-- Tooltip JS -->
+<!-- ✅ Tooltip Script -->
 <script>
 function setupTooltip(btnId, boxId) {
   const btn = document.getElementById(btnId);
   const box = document.getElementById(boxId);
   if (!btn || !box) return;
 
-  // Prevent label-click from hijacking the tooltip click
   btn.addEventListener('mousedown', e => e.preventDefault());
-
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     box.style.display = (box.style.display === "block") ? "none" : "block";
   });
 
-  // Close tooltip when clicking outside
   document.addEventListener("click", () => { box.style.display = "none"; });
 }
 
@@ -198,37 +229,43 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<!-- Calculator + Highcharts -->
+<!-- ✅ Mobile nav toggle -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.querySelector('.nav-toggle');
+  const nav = document.getElementById('primary-nav');
+  if (btn && nav) {
+    btn.addEventListener('click', () => {
+      const open = nav.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+});
+</script>
+
+<!-- ✅ Calculator + Highcharts -->
 <script>
 let hcChart = null;
 
 document.getElementById('runCalc').addEventListener('click', function () {
-  // Reveal the post-calc options
   document.getElementById("postCalcOptions").style.display = "block";
 
   const today = new Date();
 
+  function yearsFromToday(targetYear) {
+    const now = new Date();
+    const then = new Date(targetYear, now.getMonth(), now.getDate());
+    const diffMs = then - now;
+    return diffMs / (365.25 * 24 * 3600 * 1000);
+  }
+
+  function parse(s) {
+    const [y,m,d] = s.split("-").map(Number);
+    return new Date(y, (m||1)-1, d||1);
+  }
+
   const dobStr = document.getElementById('dob').value;
   const retireStr = document.getElementById('retireDate').value;
-
-  const currentSavings = Number(document.getElementById('retiresavings').value || 0);
-  const annualContribution = Number(document.getElementById('futureretiresavings').value || 0);
-
-  const ssStr = document.getElementById('socsecAge').value;
-  const ssAmt = Number(document.getElementById('socsecAmt').value || 0);
-
-  const penStr = document.getElementById('pensiondate').value;
-  const penAmt = Number(document.getElementById('pensions').value || 0);
-
-  function yearsFromToday(targetYear) {
-  const now = new Date();
-  const then = new Date(targetYear, now.getMonth(), now.getDate());
-  const diffMs = then - now;
-  return diffMs / (365.25 * 24 * 3600 * 1000);
-}
-  
-  function parse(s) { const [y,m,d] = s.split("-").map(Number); return new Date(y, (m||1)-1, d||1); }
-
   if (!dobStr || !retireStr) {
     alert("Please enter your Date of Birth and Retirement Date.");
     return;
@@ -236,11 +273,19 @@ document.getElementById('runCalc').addEventListener('click', function () {
 
   const dobDate = parse(dobStr);
   const retireDateObj = parse(retireStr);
+
+  const ssStr = document.getElementById('socsecAge').value;
   const ssStart = ssStr ? parse(ssStr) : null;
+  const ssAmt = Number(document.getElementById('socsecAmt').value || 0);
+
+  const penStr = document.getElementById('pensiondate').value;
   const penStart = penStr ? parse(penStr) : null;
+  const penAmt = Number(document.getElementById('pensions').value || 0);
+
+  const currentSavings = Number(document.getElementById('retiresavings').value || 0);
+  const annualContribution = Number(document.getElementById('futureretiresavings').value || 0);
 
   const currentYear = today.getFullYear() + 1;
-  const baselineYear = today.getFullYear(); // use THIS for inflation baseline
   const endYear = dobDate.getFullYear() + 100;
 
   const timeline = [];
@@ -254,27 +299,23 @@ document.getElementById('runCalc').addEventListener('click', function () {
     (penStart && y >= penStart.getFullYear() && y <= dobDate.getFullYear() + 92) ? penAmt : 0
   );
 
-  // Nominal inflows (no inflation applied here)
   let inflow = timeline.map((_, i) => flowContrib[i] + flowSS[i] + flowPension[i]);
 
-  // --- Toggles (single source of truth) ---
   const inflationActive = document.getElementById('inflationToggle')?.checked === true;
   const withdrawActive  = document.getElementById('withdrawToggle')?.checked === true;
 
-  const INFLATION_RATE = 0.03; // 3%
-  const WITHDRAW_RATE  = 0.04; // 4%
+  const INFLATION_RATE = 0.03;
+  const WITHDRAW_RATE = 0.04;
 
-  // Helper: turn a balance path into today's dollars by deflating from currentYear
-function deflateSeries(path) {
-  if (!inflationActive) return path;
-  return path.map((val, i) => {
-    const yearsFromNow = yearsFromToday(timeline[i]);
-    const factor = Math.pow(1 + INFLATION_RATE, yearsFromNow);
-    return val / factor;
-  });
-}
+  function deflateSeries(path) {
+    if (!inflationActive) return path;
+    return path.map((val, i) => {
+      const yearsFromNow = yearsFromToday(timeline[i]);
+      const factor = Math.pow(1 + INFLATION_RATE, yearsFromNow);
+      return val / factor;
+    });
+  }
 
-  // Build nominal balance paths, then (optionally) deflate
   function pathForRate(rate) {
     let bal = currentSavings;
     const path = [];
@@ -295,10 +336,13 @@ function deflateSeries(path) {
 
   function filter(path) {
     const startYear = retireYear - 10;
-    return timeline.map((y, i) => (y >= startYear ? [Date.UTC(y,0,1), path[i]] : null)).filter(Boolean);
+    return timeline.map((y, i) => (
+      y >= startYear ? [Date.UTC(y,0,1), path[i]] : null
+    )).filter(Boolean);
   }
 
   if (hcChart) hcChart.destroy();
+
   hcChart = Highcharts.chart('chart', {
     chart: { zooming: { type: 'x' }, height: 360, backgroundColor: '#ffffff' },
     title: { text: null },
@@ -317,7 +361,8 @@ function deflateSeries(path) {
       xDateFormat: '%Y',
       pointFormatter: function () {
         return '<span style="color:' + this.color + '">●</span> ' +
-               this.series.name + ': <b>$' + Highcharts.numberFormat(this.y, 0) + '</b><br/>';
+               this.series.name + ': <b>$' +
+               Highcharts.numberFormat(this.y, 0) + '</b><br/>';
       }
     },
     credits: { enabled: false },
@@ -328,31 +373,8 @@ function deflateSeries(path) {
       { name: "9%", data: filter(p9), type: 'line', lineWidth: 2 }
     ]
   });
+
 });
-</script>
-
-<!-- Auto-recalc for toggles (place LAST, before </body>) -->
-<script>
-(function () {
-  function run() {
-    const opts = document.getElementById('postCalcOptions');
-    if (opts && opts.style.display === 'none') opts.style.display = 'block';
-    const btn = document.getElementById('runCalc');
-    if (btn) btn.click();
-  }
-
-  // Re-run when either checkbox value changes
-  document.addEventListener('change', function (e) {
-    if (e.target && (e.target.id === 'inflationToggle' || e.target.id === 'withdrawToggle')) {
-      run();
-    }
-  });
-
-  // Some browsers swallow 'change' on pretty sliders — catch clicks too
-  document.querySelectorAll('#postCalcOptions .switch, #postCalcOptions .slider').forEach(function (el) {
-    el.addEventListener('click', run);
-  });
-})();
 </script>
 
 </body>
