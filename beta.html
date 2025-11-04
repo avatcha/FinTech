@@ -254,24 +254,150 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- ✅ CALCULATOR -->
 <script>
+<script>
 let hcChart = null;
 
 document.getElementById('runCalc').addEventListener('click', function () {
-
+  // Show the toggle card
   document.getElementById("postCalcOptions").style.display = "block";
 
+  // Title helper under the chart
   function updateChartSubtitle() {
     const inf = document.getElementById('inflationToggle').checked;
     const wd  = document.getElementById('withdrawToggle').checked;
 
-    const iText = inf ?
-      "Projections include inflation adjustment (3%)."
-      :
-      "Projections do not account for inflation.";
+    const iText = inf
+      ? "Projections include inflation adjustment (3%)."
+      : "Projections do not account for inflation.";
 
-    const wText = wd ?
-      "Projections include a 4% distribution."
-      :
-      "Projections do not include distributions.";
+    const wText = wd
+      ? "Projections include a 4% distribution."
+      : "Projections do not include distributions.";
 
-    document.getElementById("cha
+    document.getElementById("chartSubtitle").textContent = iText + " " + wText;
+  }
+
+  updateChartSubtitle();
+
+  const today = new Date();
+
+  // exact fractional years from **today → Jan 1 of target year** (matches model timeline)
+  function yearsFromToday(targetYear) {
+    const now = new Date();
+    const then = new Date(targetYear, now.getMonth(), now.getDate());
+    return (then - now) / (365.25*24*3600*1000);
+  }
+
+  function parse(s) {
+    const [y,m,d] = s.split("-").map(Number);
+    return new Date(y, (m||1)-1, d||1);
+  }
+
+  // Inputs
+  const dobStr = document.getElementById('dob').value;
+  const retireStr = document.getElementById('retireDate').value;
+  if (!dobStr || !retireStr) return alert("Enter DOB and Retirement Date.");
+
+  const dob = parse(dobStr);
+  const retireDate = parse(retireStr);
+  const retireYear = retireDate.getFullYear();
+
+  const ssStr  = document.getElementById('socsecAge').value;
+  const ssAmt  = Number(document.getElementById('socsecAmt').value || 0);
+  const penStr = document.getElementById('pensiondate').value;
+  const penAmt = Number(document.getElementById('pensions').value || 0);
+
+  const ssStart  = ssStr  ? parse(ssStr)  : null;
+  const penStart = penStr ? parse(penStr) : null;
+
+  const currentSavings   = Number(document.getElementById('retiresavings').value || 0);
+  const annualContribution = Number(document.getElementById('futureretiresavings').value || 0);
+
+  // Timeline starts next year (prevents “free” current-year growth)
+  const currentYear = today.getFullYear() + 1;
+  const endYear = dob.getFullYear() + 100;
+
+  const timeline = [];
+  for (let y = currentYear; y <= endYear; y++) timeline.push(y);
+
+  // Inflows by year
+  const flowContrib = timeline.map(y => (y < retireYear ? annualContribution : 0));
+  const flowSS = timeline.map(y => (ssStart && y >= ssStart.getFullYear() ? ssAmt : 0));
+  const flowPension = timeline.map(y =>
+    (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0
+  );
+  const inflow = timeline.map((_, i) => flowContrib[i] + flowSS[i] + flowPension[i]);
+
+  // Toggles
+  const inflationActive = document.getElementById('inflationToggle').checked;
+  const withdrawActive  = document.getElementById('withdrawToggle').checked;
+
+  const INFLATION_RATE = 0.03;
+  const WITHDRAW_RATE  = 0.04;
+
+  function deflate(path) {
+    if (!inflationActive) return path;
+    return path.map((v,i) => v / Math.pow(1+INFLATION_RATE, yearsFromToday(timeline[i])));
+  }
+
+  function simulate(rate) {
+    let bal = currentSavings;
+    const out = [];
+    for (let i = 0; i < timeline.length; i++) {
+      bal = bal * (1 + rate) + inflow[i];
+      if (withdrawActive && timeline[i] >= retireYear) bal -= bal * WITHDRAW_RATE;
+      out.push(bal);
+    }
+    return deflate(out);
+  }
+
+  const p3 = simulate(0.03);
+  const p5 = simulate(0.05);
+  const p7 = simulate(0.07);
+  const p9 = simulate(0.09);
+
+  function filter(path) {
+    const startYear = retireYear - 10;
+    return timeline.map((y, i) => y >= startYear ? [Date.UTC(y,0,1), path[i]] : null).filter(Boolean);
+  }
+
+  // Rebuild chart each run
+  if (hcChart) hcChart.destroy();
+  hcChart = Highcharts.chart('chart', {
+    chart: { zooming: { type:'x' }, backgroundColor:'#fff', height: 360 },
+    title: { text: null },
+    xAxis: { type: 'datetime' },
+    yAxis: {
+      title: { text: 'Balance ($)' },
+      labels: { formatter: function(){ return '$' + Highcharts.numberFormat(this.value, 0); } }
+    },
+    legend: { enabled: true, align: 'center', verticalAlign: 'top' },
+    tooltip: { shared: true, xDateFormat: '%Y' },
+    credits: { enabled: false },
+    series: [
+      { name: '3%', data: filter(p3), type: 'line', lineWidth: 2 },
+      { name: '5%', data: filter(p5), type: 'line', lineWidth: 2 },
+      { name: '7%', data: filter(p7), type: 'line', lineWidth: 2 },
+      { name: '9%', data: filter(p9), type: 'line', lineWidth: 2 }
+    ]
+  });
+
+});
+</script>
+
+<!-- ✅ AUTO UPDATE CHART WHEN TOGGLES CHANGE -->
+<script>
+(function(){
+  function rerunFromToggle() {
+    const btn = document.getElementById('runCalc');
+    if (btn) btn.click();
+  }
+  document.addEventListener('change', (e) => {
+    if (e && (e.target?.id === 'inflationToggle' || e.target?.id === 'withdrawToggle')) {
+      rerunFromToggle();
+    }
+  });
+  document.querySelectorAll('#postCalcOptions .switch, #postCalcOptions .slider')
+    .forEach(el => el.addEventListener('click', rerunFromToggle));
+})();
+</script>
