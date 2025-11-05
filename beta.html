@@ -36,8 +36,8 @@
     .cb-field { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 14px; font-weight: 500; }
 
-    input[type="date"], input[type="number"], input[type="range"], select {
-      font-size: 18px; padding: 10px 12px; border-radius: 14px;
+    input[type="date"], input[type="number"], select {
+      font-size: 18px; padding: 12px 14px; border-radius: 14px;
       border: 1px solid #e5e9f2; background: #fdfdfd;
     }
     input:focus, select:focus {
@@ -80,7 +80,7 @@
       .nav-links a { display:block; padding:8px 10px; }
     }
 
-    /* Tooltip (used in top inputs, minimal elsewhere) */
+    /* Tooltip (used in top inputs only) */
     .tooltip-click-container { position:relative; display:inline-flex; align-items:center; gap:8px; }
     .click-icon {
       width:18px; height:18px; border-radius:50%;
@@ -159,6 +159,22 @@
     @media (max-width: 900px){
       #scenarioGrid { grid-template-columns: 1fr; }
     }
+
+    /* Suffix inside input boxes (%/yr) */
+    .with-suffix { position: relative; }
+    .with-suffix input {
+      padding-right: 70px; /* space for the suffix */
+    }
+    .with-suffix::after {
+      content: attr(data-suffix);
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #4a5568;
+      pointer-events: none;
+    }
   </style>
 
   <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -215,7 +231,7 @@
         <div class="cb-field"><label>Pension Start</label><input id="pensiondate" type="date" /></div>
         <div class="cb-field"><label>Pension Amount ($)</label><input id="pensions" type="number" /></div>
 
-        <!-- NEW: single extra input for non-retirement assets -->
+        <!-- Non-retirement assets -->
         <div class="cb-field">
           <label class="tooltip-click-container">
             Non-Retirement Assets ($)
@@ -283,32 +299,28 @@
         Set your assumptions and monthly need, then review the breakdown and long-term projection.
       </div>
 
-      <!-- ===== SCENARIO PLANNER — INPUTS ONLY (Assumptions + Monthly Need) ===== -->
+      <!-- Scenario Planner — Assumptions + Monthly Need (no tooltips, no sliders) -->
       <div class="cb-card" id="scenario-inputs" style="margin-bottom:16px;">
         <h3 style="margin:0 0 8px 0; font-size:18px;">Assumptions</h3>
         <div class="cb-row" style="grid-template-columns: repeat(4, 1fr);">
-          <div class="cb-field">
-            <label>Expected Return (%/yr)</label>
+          <div class="cb-field with-suffix" data-suffix="%/yr">
+            <label>Expected Return</label>
             <input id="spReturnPct" type="number" step="0.1" min="0" max="100" value="6" />
-            <input id="spReturnPctRange" type="range" step="0.1" min="0" max="100" value="6" />
           </div>
 
-          <div class="cb-field">
-            <label>Inflation Rate (%/yr)</label>
+          <div class="cb-field with-suffix" data-suffix="%/yr">
+            <label>Inflation Rate</label>
             <input id="spInflationPct" type="number" step="0.1" min="0" max="100" value="3" />
-            <input id="spInflationPctRange" type="range" step="0.1" min="0" max="100" value="3" />
           </div>
 
-          <div class="cb-field">
-            <label>Withdrawal Rate (%/yr)</label>
+          <div class="cb-field with-suffix" data-suffix="%/yr">
+            <label>Withdrawal Rate</label>
             <input id="spWithdrawPct" type="number" step="0.1" min="1" max="100" value="4" />
-            <input id="spWithdrawPctRange" type="range" step="0.1" min="1" max="100" value="4" />
           </div>
 
-          <div class="cb-field">
-            <label>Tax Drag on Non-Retirement Assets (%/yr)</label>
+          <div class="cb-field with-suffix" data-suffix="%/yr">
+            <label>Tax Drag on Non-Retirement Assets</label>
             <input id="spTaxDragPct" type="number" step="0.1" min="0" max="2" value="0.6" />
-            <input id="spTaxDragPctRange" type="range" step="0.1" min="0" max="2" value="0.6" />
             <small style="color:#4a5568;">Reduces taxable-account growth to approximate ongoing taxes.</small>
           </div>
         </div>
@@ -333,7 +345,7 @@
           </div>
         </div>
       </div>
-      <!-- ===== End Inputs ===== -->
+      <!-- End Inputs -->
 
       <!-- Two equal charts side-by-side -->
       <div id="scenarioGrid">
@@ -351,7 +363,7 @@
   </div>
 </div>
 
-<!-- Tooltips (top section only, minimal elsewhere) -->
+<!-- Tooltips (top section only) -->
 <script>
 function setupTooltip(btnId, boxId) {
   const btn = document.getElementById(btnId);
@@ -392,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <script>
 let hcChart = null;
 
-// ===== Defaults (Option A): include taxable assets in baseline with default tax drag =====
+// Include taxable assets in baseline with default tax drag
 const TAX_DRAG_DEFAULT = 0.006; // 0.6%/yr drag on taxable growth in the MAIN chart only
 
 /* Right-side scenario prompt */
@@ -429,7 +441,7 @@ function yearsFromToday(targetYear){
   return (then - now) / (365.25*86400000);
 }
 
-/* ===== Scenario Planner INPUT STATE + bindings ===== */
+/* Scenario Planner input state (no sliders) */
 window.spInputs = {
   returnPct: 6,
   inflationPct: 3,
@@ -439,45 +451,48 @@ window.spInputs = {
   autoInflate: 'yes'
 };
 
-function bindPair(numId, rangeId, key, min, max){
-  const n = document.getElementById(numId);
-  const r = document.getElementById(rangeId);
-  if (!n || !r) return;
-  const clamp = v => Math.min(max, Math.max(min, Number(v)));
-
-  function syncFromNumber(){
-    const v = clamp(n.value); n.value = v; r.value = v; window.spInputs[key] = v; broadcastSP();
-  }
-  function syncFromRange(){
-    const v = clamp(r.value); r.value = v; n.value = v; window.spInputs[key] = v; broadcastSP();
-  }
-  n.addEventListener('input', syncFromNumber);
-  r.addEventListener('input', syncFromRange);
-}
-
-function bindSingle(id, key, parser){
+function bindNumber(id, key, min, max){
   const el = document.getElementById(id);
   if (!el) return;
+  const clamp = v => Math.min(max, Math.max(min, Number(v)));
   function update(){
-    window.spInputs[key] = parser ? parser(el.value) : el.value;
+    const v = clamp(el.value || 0);
+    el.value = v;
+    window.spInputs[key] = v;
     broadcastSP();
   }
   el.addEventListener('input', update);
   el.addEventListener('change', update);
 }
-
+function bindSelect(id, key){
+  const el = document.getElementById(id);
+  if (!el) return;
+  function update(){
+    window.spInputs[key] = el.value;
+    broadcastSP();
+  }
+  el.addEventListener('change', update);
+}
 function broadcastSP(){
   document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  bindPair('spReturnPct','spReturnPctRange','returnPct',0,100);
-  bindPair('spInflationPct','spInflationPctRange','inflationPct',0,100);
-  bindPair('spWithdrawPct','spWithdrawPctRange','withdrawPct',1,100);
-  bindPair('spTaxDragPct','spTaxDragPctRange','taxDragPct',0,2);
+  // Bind numeric fields
+  bindNumber('spReturnPct','returnPct',0,100);
+  bindNumber('spInflationPct','inflationPct',0,100);
+  bindNumber('spWithdrawPct','withdrawPct',1,100);
+  bindNumber('spTaxDragPct','taxDragPct',0,2);
+  bindNumber('spMonthlyNeed','monthlyNeed',0,1000000);
 
-  bindSingle('spMonthlyNeed','monthlyNeed', v => Number(v||0));
-  bindSingle('spAutoInflate','autoInflate');
+  // Bind select
+  bindSelect('spAutoInflate','autoInflate');
+
+  // Initialize values explicitly
+  document.getElementById('spReturnPct').value = window.spInputs.returnPct;
+  document.getElementById('spInflationPct').value = window.spInputs.inflationPct;
+  document.getElementById('spWithdrawPct').value = window.spInputs.withdrawPct;
+  document.getElementById('spTaxDragPct').value = window.spInputs.taxDragPct;
 
   // Fire initial for charts listening
   broadcastSP();
@@ -678,7 +693,7 @@ function buildScenarioCharts() {
   const retireAnnual = Number(document.getElementById("futureretiresavings").value || 0);
   const taxableNow = Number(document.getElementById("taxableNow").value || 0);
 
-  // From Scenario Planner inputs
+  // From Scenario Planner inputs (no sliders)
   const rNom   = Number(window.spInputs.returnPct || 6) / 100;
   const infl   = Number(window.spInputs.inflationPct || 3) / 100;
   const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;
@@ -841,4 +856,5 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
 
