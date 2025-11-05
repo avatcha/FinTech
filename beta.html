@@ -36,31 +36,23 @@
     .cb-field { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 14px; font-weight: 500; }
 
-    input[type="date"], input[type="number"] {
-      font-size: 18px; padding: 14px; border-radius: 14px;
+    input[type="date"], input[type="number"], input[type="range"], select {
+      font-size: 18px; padding: 10px 12px; border-radius: 14px;
       border: 1px solid #e5e9f2; background: #fdfdfd;
     }
-    input:focus {
+    input:focus, select:focus {
       border-color: #b8cdfd;
       outline: none;
       box-shadow: 0 0 0 4px rgba(0,82,255,0.12);
     }
 
-    #runCalc {
+    #runCalc, .btn-primary {
       background: #1a73e8; color: white; border: none;
       font-size: 16px; padding: 14px 20px;
       border-radius: 14px; font-weight: 600;
       cursor: pointer; transition: 0.15s;
     }
-    #runCalc:hover { background: #0f5ad2; }
-
-    .btn-primary {
-      background: #1a73e8; color: white; border: none;
-      font-size: 16px; padding: 14px 20px;
-      border-radius: 14px; font-weight: 600;
-      cursor: pointer; transition: 0.15s;
-    }
-    .btn-primary:hover { background: #0f5ad2; }
+    #runCalc:hover, .btn-primary:hover { background: #0f5ad2; }
 
     /* Sticky Header */
     .site-header {
@@ -88,7 +80,7 @@
       .nav-links a { display:block; padding:8px 10px; }
     }
 
-    /* Tooltip */
+    /* Tooltip (used in top inputs, minimal elsewhere) */
     .tooltip-click-container { position:relative; display:inline-flex; align-items:center; gap:8px; }
     .click-icon {
       width:18px; height:18px; border-radius:50%;
@@ -288,23 +280,60 @@
     <section id="scenario-planner" class="cb-card" style="scroll-margin-top:80px; display:none;">
       <h2 style="margin:0 0 8px 0;">Scenario Planner</h2>
       <div class="cb-sub" style="margin:0 0 16px 0;">
-        Compare your plan: breakdown of annual income sources vs. total portfolio over time.
+        Set your assumptions and monthly need, then review the breakdown and long-term projection.
       </div>
 
-      <!-- Scenario controls (only here): tax drag for taxable assets -->
-      <div class="cb-row" style="grid-template-columns: 1fr 1fr; margin-bottom:12px;">
-        <div class="cb-field">
-          <label class="tooltip-click-container">
-            Tax Drag on Taxable Assets (%/yr)
-            <span class="click-icon" id="dragInfoBtn">i</span>
-            <div class="tooltip-click-box" id="dragInfoBox">
-              Annual reduction in return to approximate dividend and capital-gains taxes in a taxable account.
-              Typical range 0.3%–1.0% depending on portfolio efficiency.
-            </div>
-          </label>
-          <input id="taxDragPct" type="number" step="0.1" value="0.6" />
+      <!-- ===== SCENARIO PLANNER — INPUTS ONLY (Assumptions + Monthly Need) ===== -->
+      <div class="cb-card" id="scenario-inputs" style="margin-bottom:16px;">
+        <h3 style="margin:0 0 8px 0; font-size:18px;">Assumptions</h3>
+        <div class="cb-row" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="cb-field">
+            <label>Expected Return (%/yr)</label>
+            <input id="spReturnPct" type="number" step="0.1" min="0" max="100" value="6" />
+            <input id="spReturnPctRange" type="range" step="0.1" min="0" max="100" value="6" />
+          </div>
+
+          <div class="cb-field">
+            <label>Inflation Rate (%/yr)</label>
+            <input id="spInflationPct" type="number" step="0.1" min="0" max="100" value="3" />
+            <input id="spInflationPctRange" type="range" step="0.1" min="0" max="100" value="3" />
+          </div>
+
+          <div class="cb-field">
+            <label>Withdrawal Rate (%/yr)</label>
+            <input id="spWithdrawPct" type="number" step="0.1" min="1" max="100" value="4" />
+            <input id="spWithdrawPctRange" type="range" step="0.1" min="1" max="100" value="4" />
+          </div>
+
+          <div class="cb-field">
+            <label>Tax Drag on Non-Retirement Assets (%/yr)</label>
+            <input id="spTaxDragPct" type="number" step="0.1" min="0" max="2" value="0.6" />
+            <input id="spTaxDragPctRange" type="range" step="0.1" min="0" max="2" value="0.6" />
+            <small style="color:#4a5568;">Reduces taxable-account growth to approximate ongoing taxes.</small>
+          </div>
+        </div>
+
+        <hr style="border:none; border-top:1px solid #e5e9f2; margin:16px 0;">
+
+        <h3 style="margin:0 0 8px 0; font-size:18px;">Monthly Need</h3>
+        <div class="cb-row" style="grid-template-columns: 1fr 1fr;">
+          <div class="cb-field">
+            <label>Monthly spending needed in retirement (today’s dollars)</label>
+            <input id="spMonthlyNeed" type="number" placeholder="e.g., 4500" />
+            <small style="color:#4a5568;">Most people need <strong>70–90%</strong> of their current monthly spending.</small>
+          </div>
+
+          <div class="cb-field">
+            <label>Auto-inflate monthly need to retirement?</label>
+            <select id="spAutoInflate">
+              <option value="yes" selected>Yes (recommended)</option>
+              <option value="no">No (I’ll enter future-dollars instead)</option>
+            </select>
+            <small style="color:#4a5568;">If “Yes,” we’ll grow your monthly need from today until retirement using your inflation rate.</small>
+          </div>
         </div>
       </div>
+      <!-- ===== End Inputs ===== -->
 
       <!-- Two equal charts side-by-side -->
       <div id="scenarioGrid">
@@ -322,7 +351,7 @@
   </div>
 </div>
 
-<!-- Tooltips -->
+<!-- Tooltips (top section only, minimal elsewhere) -->
 <script>
 function setupTooltip(btnId, boxId) {
   const btn = document.getElementById(btnId);
@@ -342,7 +371,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTooltip("inflationQM", "inflationBox");
   setupTooltip("withdrawQM", "withdrawBox");
   setupTooltip("taxableInfoBtn", "taxableInfoBox");
-  setupTooltip("dragInfoBtn", "dragInfoBox");
 });
 </script>
 
@@ -401,6 +429,60 @@ function yearsFromToday(targetYear){
   return (then - now) / (365.25*86400000);
 }
 
+/* ===== Scenario Planner INPUT STATE + bindings ===== */
+window.spInputs = {
+  returnPct: 6,
+  inflationPct: 3,
+  withdrawPct: 4,
+  taxDragPct: 0.6,
+  monthlyNeed: 0,
+  autoInflate: 'yes'
+};
+
+function bindPair(numId, rangeId, key, min, max){
+  const n = document.getElementById(numId);
+  const r = document.getElementById(rangeId);
+  if (!n || !r) return;
+  const clamp = v => Math.min(max, Math.max(min, Number(v)));
+
+  function syncFromNumber(){
+    const v = clamp(n.value); n.value = v; r.value = v; window.spInputs[key] = v; broadcastSP();
+  }
+  function syncFromRange(){
+    const v = clamp(r.value); r.value = v; n.value = v; window.spInputs[key] = v; broadcastSP();
+  }
+  n.addEventListener('input', syncFromNumber);
+  r.addEventListener('input', syncFromRange);
+}
+
+function bindSingle(id, key, parser){
+  const el = document.getElementById(id);
+  if (!el) return;
+  function update(){
+    window.spInputs[key] = parser ? parser(el.value) : el.value;
+    broadcastSP();
+  }
+  el.addEventListener('input', update);
+  el.addEventListener('change', update);
+}
+
+function broadcastSP(){
+  document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  bindPair('spReturnPct','spReturnPctRange','returnPct',0,100);
+  bindPair('spInflationPct','spInflationPctRange','inflationPct',0,100);
+  bindPair('spWithdrawPct','spWithdrawPctRange','withdrawPct',1,100);
+  bindPair('spTaxDragPct','spTaxDragPctRange','taxDragPct',0,2);
+
+  bindSingle('spMonthlyNeed','monthlyNeed', v => Number(v||0));
+  bindSingle('spAutoInflate','autoInflate');
+
+  // Fire initial for charts listening
+  broadcastSP();
+});
+
 document.getElementById("runCalc").addEventListener("click", function () {
   // Reveal Section 2 (toggles + chart card)
   document.getElementById("postCalcOptions").style.display = "block";
@@ -444,7 +526,7 @@ document.getElementById("runCalc").addEventListener("click", function () {
   const retireNow = Number(document.getElementById("retiresavings").value || 0);
   const retireAnnual = Number(document.getElementById("futureretiresavings").value || 0);
 
-  // NEW: taxable bucket (only initial amount in baseline)
+  // Taxable bucket (only initial amount in baseline)
   const taxableNow = Number(document.getElementById("taxableNow").value || 0);
 
   const inflationActive = document.getElementById('inflationToggle').checked;
@@ -491,7 +573,7 @@ document.getElementById("runCalc").addEventListener("click", function () {
       balRet *= (1 + rRet);
       balTax *= (1 + rTax);
 
-      // Contributions to retirement bucket only (per Option A constraints)
+      // Contributions to retirement bucket only
       balRet += flowContribRet[i];
 
       // Withdrawals (if enabled) after retirement
@@ -575,7 +657,7 @@ document.getElementById("runCalc").addEventListener("click", function () {
 <!-- Scenario Planner charts -->
 <script>
 function buildScenarioCharts() {
-  // Gather inputs
+  // Gather core inputs
   const dobStr = document.getElementById("dob").value;
   const retireStr = document.getElementById("retireDate").value;
   if (!dobStr || !retireStr) return;
@@ -596,16 +678,18 @@ function buildScenarioCharts() {
   const retireAnnual = Number(document.getElementById("futureretiresavings").value || 0);
   const taxableNow = Number(document.getElementById("taxableNow").value || 0);
 
+  // From Scenario Planner inputs
+  const rNom   = Number(window.spInputs.returnPct || 6) / 100;
+  const infl   = Number(window.spInputs.inflationPct || 3) / 100;
+  const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;
+  const drag   = Math.max(0, Number(window.spInputs.taxDragPct || 0.6)) / 100;
+
+  const monthlyNeedToday = Number(window.spInputs.monthlyNeed || 0);
+  const autoInflate = (window.spInputs.autoInflate || 'yes') === 'yes';
+
+  // Use top toggles for display style (deflate?) and whether to model withdrawals at all
   const inflationActive = document.getElementById('inflationToggle').checked;
   const withdrawActive  = document.getElementById('withdrawToggle').checked;
-
-  // Scenario-specific tax drag (user-adjustable here)
-  const dragPct = Math.max(0, Number(document.getElementById("taxDragPct").value || 0));
-  const TAX_DRAG = dragPct / 100;
-
-  const INFL = 0.03;
-  const WD   = 0.04;
-  const RATE = 0.05; // single scenario rate for right-side chart
 
   // Timeline
   const today = new Date();
@@ -623,10 +707,10 @@ function buildScenarioCharts() {
 
   function deflate(value, idx){
     if (!inflationActive) return value;
-    return value / Math.pow(1 + INFL, yearsFromToday(timeline[idx]));
+    return value / Math.pow(1 + infl, yearsFromToday(timeline[idx]));
   }
 
-  // Dual-bucket with scenario drag
+  // Dual-bucket with scenario drag and user-chosen wd rate
   function simulateDual(rate){
     let balRet = retireNow;
     let balTax = taxableNow;
@@ -635,7 +719,7 @@ function buildScenarioCharts() {
 
     for (let i=0; i<timeline.length; i++){
       const rRet = rate;
-      const rTax = Math.max(0, rate - TAX_DRAG);
+      const rTax = Math.max(0, rate - drag);
 
       balRet *= (1 + rRet);
       balTax *= (1 + rTax);
@@ -645,7 +729,7 @@ function buildScenarioCharts() {
       let withdrawal = 0;
       if (withdrawActive && timeline[i] >= retireYear){
         const combined = balRet + balTax;
-        const wdAmt = combined * WD;
+        const wdAmt = combined * wdRate;
         const retShare = combined > 0 ? (balRet / combined) : 0.5;
         const taxShare = 1 - retShare;
         balRet -= wdAmt * retShare;
@@ -660,7 +744,7 @@ function buildScenarioCharts() {
     return { totalBal, annualWithdrawals };
   }
 
-  const sim = simulateDual(RATE);
+  const sim = simulateDual(rNom);
 
   // Breakdown (stacked) — show 30 years from retirement
   const startIdx = timeline.findIndex(y => y >= retireYear);
@@ -696,11 +780,11 @@ function buildScenarioCharts() {
     series: [
       { name:'Social Security', data: seriesSS },
       { name:'Pensions / DB', data: seriesPension },
-      { name:'Portfolio Withdrawals (4%)', data: seriesWdrawal }
+      { name:'Portfolio Withdrawals', data: seriesWdrawal }
     ]
   });
 
-  // Scenario line (single 5% path; taxable uses RATE - TAX_DRAG)
+  // Scenario line (single path; taxable uses rate - drag)
   function filterForScenario(path){
     const startYear = retireYear - 10;
     return timeline
@@ -730,18 +814,21 @@ function buildScenarioCharts() {
     },
     credits: { enabled:false },
     series: [
-      { name:'Scenario @ 5% (taxable drag applied)', type:'line', lineWidth:2, data: filterForScenario(sim.totalBal) }
+      { name:`Scenario @ ${Math.round(rNom*1000)/10}% (taxable drag applied)`, type:'line', lineWidth:2, data: filterForScenario(sim.totalBal) }
     ]
   });
 }
 
-// Update Scenario Planner charts when its controls/inputs change (if visible)
+// Rebuild Scenario charts when inputs change (and section is visible)
+document.addEventListener('scenario-inputs:change', () => {
+  const sp = document.getElementById('scenario-planner');
+  if (sp && sp.style.display !== 'none') buildScenarioCharts();
+});
 document.addEventListener('change', (e) => {
   const sp = document.getElementById('scenario-planner');
   if (!sp || sp.style.display === 'none') return;
 
   const ids = new Set([
-    'taxDragPct',
     'inflationToggle','withdrawToggle',
     'dob','retireDate','socsecAge','socsecAmt','pensiondate','pensions',
     'retiresavings','futureretiresavings','taxableNow'
@@ -754,3 +841,4 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
