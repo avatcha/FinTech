@@ -299,7 +299,7 @@
         Set your assumptions and monthly need, then review the breakdown and long-term projection.
       </div>
 
-      <!-- Scenario Planner — Assumptions + Monthly Need (no tooltips, no sliders) -->
+      <!-- Scenario Planner — Assumptions + Monthly Need (no tooltips for these dials) -->
       <div class="cb-card" id="scenario-inputs" style="margin-bottom:16px;">
         <h3 style="margin:0 0 8px 0; font-size:18px;">Assumptions</h3>
         <div class="cb-row" style="grid-template-columns: repeat(4, 1fr);">
@@ -328,20 +328,11 @@
         <hr style="border:none; border-top:1px solid #e5e9f2; margin:16px 0;">
 
         <h3 style="margin:0 0 8px 0; font-size:18px;">Monthly Need</h3>
-        <div class="cb-row" style="grid-template-columns: 1fr 1fr;">
+        <div class="cb-row" style="grid-template-columns: 1fr;">
           <div class="cb-field">
             <label>Monthly spending needed in retirement (today’s dollars)</label>
             <input id="spMonthlyNeed" type="number" placeholder="e.g., 4500" />
             <small style="color:#4a5568;">Most people need <strong>70–90%</strong> of their current monthly spending.</small>
-          </div>
-
-          <div class="cb-field">
-            <label>Auto-inflate monthly need to retirement?</label>
-            <select id="spAutoInflate">
-              <option value="yes" selected>Yes (recommended)</option>
-              <option value="no">No (I’ll enter future-dollars instead)</option>
-            </select>
-            <small style="color:#4a5568;">If “Yes,” we’ll grow your monthly need from today until retirement using your inflation rate.</small>
           </div>
         </div>
       </div>
@@ -350,11 +341,11 @@
       <!-- Two equal charts side-by-side -->
       <div id="scenarioGrid">
         <div>
-          <h3 style="margin:0 0 8px 0; font-size:16px;">Income Breakdown (Stacked)</h3>
+          <h3 style="margin:0 0 8px 0; font-size:16px;">Monthly Resources @ Retirement (Stacked)</h3>
           <div id="breakdownChart" style="height:320px;"></div>
         </div>
         <div>
-          <h3 style="margin:0 0 8px 0; font-size:16px;">Portfolio Projection (Scenario)</h3>
+          <h3 style="margin:0 0 8px 0; font-size:16px;">Portfolio Projection (Nominal)</h3>
           <div id="scenarioChart" style="height:320px;"></div>
         </div>
       </div>
@@ -400,7 +391,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
-<!-- Calculator + Highcharts -->
+<!-- Calculator + Highcharts (Main chart) -->
 <script>
 let hcChart = null;
 
@@ -435,6 +426,7 @@ function showScenarioPrompt() {
 
 /* Helpers */
 function parseDate(s){ const [y,m,d] = s.split("-").map(Number); return new Date(y,(m||1)-1,d||1); }
+function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
 function yearsFromToday(targetYear){
   const now = new Date();
   const then = new Date(targetYear, now.getMonth(), now.getDate());
@@ -447,8 +439,7 @@ window.spInputs = {
   inflationPct: 3,
   withdrawPct: 4,
   taxDragPct: 0.6,
-  monthlyNeed: 0,
-  autoInflate: 'yes'
+  monthlyNeed: 0
 };
 
 function bindNumber(id, key, min, max){
@@ -464,15 +455,6 @@ function bindNumber(id, key, min, max){
   el.addEventListener('input', update);
   el.addEventListener('change', update);
 }
-function bindSelect(id, key){
-  const el = document.getElementById(id);
-  if (!el) return;
-  function update(){
-    window.spInputs[key] = el.value;
-    broadcastSP();
-  }
-  el.addEventListener('change', update);
-}
 function broadcastSP(){
   document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
 }
@@ -485,10 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindNumber('spTaxDragPct','taxDragPct',0,2);
   bindNumber('spMonthlyNeed','monthlyNeed',0,1000000);
 
-  // Bind select
-  bindSelect('spAutoInflate','autoInflate');
-
-  // Initialize values explicitly
+  // Initialize values
   document.getElementById('spReturnPct').value = window.spInputs.returnPct;
   document.getElementById('spInflationPct').value = window.spInputs.inflationPct;
   document.getElementById('spWithdrawPct').value = window.spInputs.withdrawPct;
@@ -564,7 +543,7 @@ document.getElementById("runCalc").addEventListener("click", function () {
     (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0
   );
 
-  /* Deflator */
+  /* Deflator for main chart only (if chosen) */
   function deflate(value, idx){
     if (!inflationActive) return value;
     return value / Math.pow(1 + INFL, yearsFromToday(timeline[idx]));
@@ -669,10 +648,10 @@ document.getElementById("runCalc").addEventListener("click", function () {
 })();
 </script>
 
-<!-- Scenario Planner charts -->
+<!-- Scenario Planner charts (Nominal) -->
 <script>
 function buildScenarioCharts() {
-  // Gather core inputs
+  // Core inputs
   const dobStr = document.getElementById("dob").value;
   const retireStr = document.getElementById("retireDate").value;
   if (!dobStr || !retireStr) return;
@@ -682,9 +661,9 @@ function buildScenarioCharts() {
   const retireYear = retireDate.getFullYear();
 
   const ssStr = document.getElementById("socsecAge").value;
-  const ssAmt = Number(document.getElementById("socsecAmt").value || 0);
+  const ssAmtAnnual = Number(document.getElementById("socsecAmt").value || 0); // nominal (fixed)
   const penStr = document.getElementById("pensiondate").value;
-  const penAmt = Number(document.getElementById("pensions").value || 0);
+  const penAmtAnnual = Number(document.getElementById("pensions").value || 0); // nominal (fixed)
 
   const ssStart = ssStr ? parseDate(ssStr) : null;
   const penStart = penStr ? parseDate(penStr) : null;
@@ -693,18 +672,13 @@ function buildScenarioCharts() {
   const retireAnnual = Number(document.getElementById("futureretiresavings").value || 0);
   const taxableNow = Number(document.getElementById("taxableNow").value || 0);
 
-  // From Scenario Planner inputs (no sliders)
-  const rNom   = Number(window.spInputs.returnPct || 6) / 100;
-  const infl   = Number(window.spInputs.inflationPct || 3) / 100;
-  const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;
-  const drag   = Math.max(0, Number(window.spInputs.taxDragPct || 0.6)) / 100;
+  // Scenario Planner dials
+  const rNom   = Number(window.spInputs.returnPct || 6) / 100;       // expected return
+  const infl   = Number(window.spInputs.inflationPct || 3) / 100;    // used to inflate need
+  const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;     // withdrawal rate
+  const drag   = Math.max(0, Number(window.spInputs.taxDragPct || 0.6)) / 100; // tax drag on taxable
 
   const monthlyNeedToday = Number(window.spInputs.monthlyNeed || 0);
-  const autoInflate = (window.spInputs.autoInflate || 'yes') === 'yes';
-
-  // Use top toggles for display style (deflate?) and whether to model withdrawals at all
-  const inflationActive = document.getElementById('inflationToggle').checked;
-  const withdrawActive  = document.getElementById('withdrawToggle').checked;
 
   // Timeline
   const today = new Date();
@@ -713,71 +687,63 @@ function buildScenarioCharts() {
   const timeline = [];
   for (let y=currentYear; y<=endYear; y++) timeline.push(y);
 
-  // Inflows
-  const flowContribRet = timeline.map(y => (y < retireYear ? retireAnnual : 0));
-  const flowSS      = timeline.map(y => (ssStart && y >= ssStart.getFullYear() ? ssAmt : 0));
-  const flowPension = timeline.map(y =>
-    (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0
-  );
+  // Years to retirement (fractional) for inflating the monthly need
+  const yrsToRet = Math.max(0, yearsBetween(today, retireDate));
+  const monthlyNeedAtRet = monthlyNeedToday * Math.pow(1 + infl, yrsToRet);
 
-  function deflate(value, idx){
-    if (!inflationActive) return value;
-    return value / Math.pow(1 + infl, yearsFromToday(timeline[idx]));
-  }
-
-  // Dual-bucket with scenario drag and user-chosen wd rate
-  function simulateDual(rate){
+  // --- Compute balances at retirement (nominal) ---
+  function growToRetirement() {
     let balRet = retireNow;
     let balTax = taxableNow;
-    const totalBal = [];
-    const annualWithdrawals = [];
 
-    for (let i=0; i<timeline.length; i++){
-      const rRet = rate;
-      const rTax = Math.max(0, rate - drag);
+    // Walk year by year until retirement year
+    const startY = currentYear;
+    for (let y = startY; y <= retireYear; y++) {
+      // Growth during year
+      balRet *= (1 + rNom);
+      balTax *= (1 + Math.max(0, rNom - drag));
 
-      balRet *= (1 + rRet);
-      balTax *= (1 + rTax);
-
-      balRet += flowContribRet[i];
-
-      let withdrawal = 0;
-      if (withdrawActive && timeline[i] >= retireYear){
-        const combined = balRet + balTax;
-        const wdAmt = combined * wdRate;
-        const retShare = combined > 0 ? (balRet / combined) : 0.5;
-        const taxShare = 1 - retShare;
-        balRet -= wdAmt * retShare;
-        balTax -= wdAmt * taxShare;
-        withdrawal = wdAmt;
-      }
-
-      const sum = balRet + balTax;
-      totalBal.push(deflate(sum, i));
-      annualWithdrawals.push(deflate(withdrawal, i));
+      // Contribution at year-end to retirement bucket (only before retirement year)
+      if (y < retireYear) balRet += retireAnnual;
     }
-    return { totalBal, annualWithdrawals };
+    return { balRet, balTax };
   }
 
-  const sim = simulateDual(rNom);
+  const { balRet, balTax } = growToRetirement();
 
-  // Breakdown (stacked) — show 30 years from retirement
-  const startIdx = timeline.findIndex(y => y >= retireYear);
-  const endIdx   = Math.min(startIdx + 30, timeline.length);
-  const years    = timeline.slice(startIdx, endIdx);
+  // Monthly inflows at retirement year (SS/Pension fixed nominal if started)
+  const ssMonthly = (ssStart && ssStart.getFullYear() <= retireYear) ? (ssAmtAnnual / 12) : 0;
+  const penMonthly = (penStart && penStart.getFullYear() <= retireYear) ? (penAmtAnnual / 12) : 0;
+  const retWdMonthly = (wdRate * balRet) / 12;
+  const taxWdMonthly = (wdRate * balTax) / 12;
 
-  const seriesSS      = years.map((y, idx) => deflate(flowSS[startIdx + idx], startIdx + idx));
-  const seriesPension = years.map((y, idx) => deflate(flowPension[startIdx + idx], startIdx + idx));
-  const seriesWdrawal = sim.annualWithdrawals.slice(startIdx, endIdx);
+  const stackTotalMonthly = ssMonthly + penMonthly + retWdMonthly + taxWdMonthly;
+  const gap = monthlyNeedAtRet - stackTotalMonthly;
+  const gapText = gap > 0
+    ? `Gap: $${Highcharts.numberFormat(gap, 0)}/mo`
+    : `Surplus: $${Highcharts.numberFormat(-gap, 0)}/mo`;
 
+  // --- Build stacked single-bar chart ---
   Highcharts.chart('breakdownChart', {
     chart: { type: 'column', backgroundColor: '#fff', height: 320 },
     title: { text: null },
-    xAxis: { categories: years.map(y => String(y)) },
+    xAxis: { categories: ['Retirement Year'] },
     yAxis: {
       min: 0,
-      title: { text: 'Annual Retirement Income ($)' },
-      stackLabels: { enabled: true, formatter(){ return '$' + Highcharts.numberFormat(this.total, 0); } }
+      title: { text: 'Monthly Resources ($)' },
+      plotLines: [{
+        value: monthlyNeedAtRet,
+        color: '#000',
+        width: 3,
+        zIndex: 5,
+        label: {
+          text: `Need: $${Highcharts.numberFormat(monthlyNeedAtRet,0)}/mo`,
+          align: 'right',
+          x: -10,
+          y: -6,
+          style: { color: '#000', fontWeight: '700' }
+        }
+      }]
     },
     legend: { align:'center', verticalAlign:'top' },
     tooltip: {
@@ -785,26 +751,51 @@ function buildScenarioCharts() {
       formatter: function(){
         const total = this.points.reduce((s,p)=>s+p.y,0);
         const lines = this.points.map(p =>
-          `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`
+          `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`
         ).join('<br/>');
-        return `<b>${this.x}</b><br/>${lines}<br/><b>Total: $${Highcharts.numberFormat(total,0)}</b>`;
+        return `<b>${this.x}</b><br/>${lines}<br/><b>Total: $${Highcharts.numberFormat(total,0)}/mo</b>`;
       }
     },
-    plotOptions: { column: { stacking: 'normal' } },
+    plotOptions: { column: { stacking: 'normal', dataLabels: { enabled: true, formatter(){ return '$' + Highcharts.numberFormat(this.y,0); } } } },
     credits: { enabled:false },
     series: [
-      { name:'Social Security', data: seriesSS },
-      { name:'Pensions / DB', data: seriesPension },
-      { name:'Portfolio Withdrawals', data: seriesWdrawal }
-    ]
+      { name:'Social Security', data: [ssMonthly] },
+      { name:'Pensions / DB', data: [penMonthly] },
+      { name:'Retirement Acct Withdrawal', data: [retWdMonthly] },
+      { name:'Non-Retirement Withdrawal', data: [taxWdMonthly] }
+    ],
+    subtitle: { text: gapText, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' } }
   });
 
-  // Scenario line (single path; taxable uses rate - drag)
-  function filterForScenario(path){
-    const startYear = retireYear - 10;
-    return timeline
-      .map((y,i) => y >= startYear ? [Date.UTC(y,0,1), path[i]] : null)
-      .filter(Boolean);
+  // --- Build nominal portfolio line over time ---
+  function simulateLine() {
+    let r = retireNow;
+    let t = taxableNow;
+    const points = [];
+
+    for (let i=0; i<timeline.length; i++) {
+      const y = timeline[i];
+
+      // Growth
+      r *= (1 + rNom);
+      t *= (1 + Math.max(0, rNom - drag));
+
+      // Contributions before retirement
+      if (y < retireYear) r += retireAnnual;
+
+      // Withdraw after retirement
+      if (y >= retireYear) {
+        const total = r + t;
+        const wd = total * wdRate;
+        const shareR = total > 0 ? (r / total) : 0.5;
+        const shareT = 1 - shareR;
+        r -= wd * shareR;
+        t -= wd * shareT;
+      }
+
+      points.push([Date.UTC(y,0,1), Math.max(0, r + t)]);
+    }
+    return points;
   }
 
   Highcharts.chart('scenarioChart', {
@@ -812,24 +803,17 @@ function buildScenarioCharts() {
     title: { text: null },
     xAxis: { type: 'datetime' },
     yAxis: {
-      title: { text: 'Balance ($)' },
+      title: { text: 'Portfolio Balance ($)' },
       labels: { formatter(){ return "$" + Highcharts.numberFormat(this.value, 0); } }
     },
     legend: { enabled:false },
     tooltip: {
-      shared:true,
-      formatter: function () {
-        const x = (this.points && this.points[0]) ? this.points[0].x : this.x;
-        const year = Highcharts.dateFormat('%Y', x);
-        const lines = (this.points || [this.point]).map(p =>
-          `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y, 0)}</b>`
-        ).join('<br/>');
-        return `<b>${year}</b><br/>${lines}`;
-      }
+      pointFormat: '<b>${point.y:,.0f}</b>',
+      xDateFormat: '%Y'
     },
     credits: { enabled:false },
     series: [
-      { name:`Scenario @ ${Math.round(rNom*1000)/10}% (taxable drag applied)`, type:'line', lineWidth:2, data: filterForScenario(sim.totalBal) }
+      { name:`Nominal Balance`, type:'line', lineWidth:2, data: simulateLine() }
     ]
   });
 }
@@ -844,7 +828,6 @@ document.addEventListener('change', (e) => {
   if (!sp || sp.style.display === 'none') return;
 
   const ids = new Set([
-    'inflationToggle','withdrawToggle',
     'dob','retireDate','socsecAge','socsecAmt','pensiondate','pensions',
     'retiresavings','futureretiresavings','taxableNow'
   ]);
@@ -856,5 +839,3 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
-
-
