@@ -54,6 +54,15 @@
     }
     #runCalc:hover { background: #0f5ad2; }
 
+    /* 🔵 ADDED: shared button class so the new button matches your style */
+    .btn-primary {
+      background: #1a73e8; color: white; border: none;
+      font-size: 16px; padding: 14px 20px;
+      border-radius: 14px; font-weight: 600;
+      cursor: pointer; transition: 0.15s;
+    }
+    .btn-primary:hover { background: #0f5ad2; }
+
     /* Sticky Header */
     .site-header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
@@ -131,6 +140,25 @@
 
     /* Chart title/subtitle center */
     #chartTitle, #chartSubtitle { text-align: center; }
+
+    /* 🔵 ADDED: side-by-side graph + prompt */
+    .graph-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    #scenarioPrompt {
+      display: none; /* hidden until chart renders */
+      border: 1px solid #e5e9f2;
+      border-radius: 14px;
+      padding: 16px;
+      background: #f7f9ff;
+    }
+    #scenarioPrompt p { margin: 0 0 12px 0; line-height: 1.35; }
+    @media (max-width: 900px){
+      .graph-row { grid-template-columns: 1fr; }
+    }
   </style>
 
   <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -228,8 +256,25 @@
         Projected Retirement Savings
       </h2>
       <div id="chartSubtitle" style="margin-bottom:14px; font-size:14px; color:#4a5568;"></div>
-      <div id="chart" style="height:360px;"></div>
+
+      <!-- 🔵 ADDED: graph + prompt layout -->
+      <div class="graph-row">
+        <div id="chart" style="height:360px;"></div>
+
+        <!-- 🔵 ADDED: prompt appears after chart renders -->
+        <aside id="scenarioPrompt" aria-live="polite"></aside>
+      </div>
     </div>
+
+    <!-- 🔵 ADDED: Scenario Planner section anchor -->
+    <section id="scenario-planner" class="cb-card" style="scroll-margin-top: 80px;">
+      <h2 style="margin:0 0 8px 0;">Scenario Planner</h2>
+      <div class="cb-sub" style="margin:0 0 16px 0;">
+        Explore different retirement ages, returns, and spending to see what’s “enough.”
+      </div>
+      <!-- Put your Scenario Planner UI here -->
+      <p style="margin:0;">(Your scenario planner content will live here.)</p>
+    </section>
 
   </div>
 </div>
@@ -273,6 +318,26 @@ document.addEventListener("DOMContentLoaded", () => {
 <!-- Calculator + Highcharts -->
 <script>
 let hcChart = null;
+
+/* 🔵 ADDED: helper to show the right-side scenario prompt after chart renders */
+function showScenarioPrompt() {
+  const box = document.getElementById("scenarioPrompt");
+  if (!box || box.dataset.active === "1") return;
+
+  box.innerHTML = `
+    <p><strong>Want to see if this is enough to retire?</strong><br>
+    Let’s use the scenario planner to find out.</p>
+    <button id="scenarioBtn" class="btn-primary">Scenario Planner</button>
+  `;
+  box.style.display = "block";
+  box.dataset.active = "1";
+
+  const btn = document.getElementById("scenarioBtn");
+  btn.addEventListener("click", () => {
+    const target = document.getElementById("scenario-planner");
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
 
 document.getElementById("runCalc").addEventListener("click", function () {
   document.getElementById("postCalcOptions").style.display = "block";
@@ -406,6 +471,8 @@ document.getElementById("runCalc").addEventListener("click", function () {
     ]
   });
 
+  /* 🔵 ADDED: now that the chart exists, reveal the right-side prompt */
+  showScenarioPrompt();
 });
 </script>
 
