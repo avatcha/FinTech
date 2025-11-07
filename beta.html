@@ -299,7 +299,7 @@
         Set your assumptions and monthly need, then review the breakdown and long-term projection.
       </div>
 
-      <!-- Scenario Planner — Assumptions + Monthly Need (no tooltips for these dials) -->
+      <!-- Scenario Planner — Assumptions + Monthly Need -->
       <div class="cb-card" id="scenario-inputs" style="margin-bottom:16px;">
         <h3 style="margin:0 0 8px 0; font-size:18px;">Assumptions</h3>
         <div class="cb-row" style="grid-template-columns: repeat(4, 1fr);">
@@ -341,11 +341,11 @@
       <!-- Two equal charts side-by-side -->
       <div id="scenarioGrid">
         <div>
-          <h3 style="margin:0 0 8px 0; font-size:16px;">Monthly Resources @ Retirement (Stacked)</h3>
+          <h3 style="margin:0 0 8px 0; font-size:16px;">Monthly Retirement Estimate</h3>
           <div id="breakdownChart" style="height:320px;"></div>
         </div>
         <div>
-          <h3 style="margin:0 0 8px 0; font-size:16px;">Portfolio Projection (Nominal)</h3>
+          <h3 style="margin:0 0 8px 0; font-size:16px;">Annual Retirement Savings Projection</h3>
           <div id="scenarioChart" style="height:320px;"></div>
         </div>
       </div>
@@ -450,57 +450,44 @@ function bindNumber(id, key, min, max){
     const v = clamp(el.value || 0);
     el.value = v;
     window.spInputs[key] = v;
-    broadcastSP();
+    document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
   }
   el.addEventListener('input', update);
   el.addEventListener('change', update);
 }
-function broadcastSP(){
-  document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
-}
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Bind numeric fields
   bindNumber('spReturnPct','returnPct',0,100);
   bindNumber('spInflationPct','inflationPct',0,100);
   bindNumber('spWithdrawPct','withdrawPct',1,100);
   bindNumber('spTaxDragPct','taxDragPct',0,2);
   bindNumber('spMonthlyNeed','monthlyNeed',0,1000000);
 
-  // Initialize values
   document.getElementById('spReturnPct').value = window.spInputs.returnPct;
   document.getElementById('spInflationPct').value = window.spInputs.inflationPct;
   document.getElementById('spWithdrawPct').value = window.spInputs.withdrawPct;
   document.getElementById('spTaxDragPct').value = window.spInputs.taxDragPct;
-
-  // Fire initial for charts listening
-  broadcastSP();
 });
 
+/* MAIN chart run */
 document.getElementById("runCalc").addEventListener("click", function () {
-  // Reveal Section 2 (toggles + chart card)
   document.getElementById("postCalcOptions").style.display = "block";
   document.getElementById("chartSection").style.display = "block";
 
-  /* Subtitle (also disclose default tax drag for taxable assets) */
   function updateChartSubtitle() {
     const inf = document.getElementById('inflationToggle').checked;
     const wd  = document.getElementById('withdrawToggle').checked;
-
     const infText = inf
       ? "Projections include inflation adjustment (3%)."
       : "Projections do not account for inflation.";
-
     const wdText = wd
       ? "Projections include a 4% distribution."
       : "Projections do not include distributions.";
-
     const taxDragDisclosure = "Includes non-retirement assets with 0.6%/yr tax drag.";
     document.getElementById("chartSubtitle").textContent = `${infText} ${wdText} ${taxDragDisclosure}`;
   }
   updateChartSubtitle();
 
-  /* Inputs */
   const dobStr = document.getElementById("dob").value;
   const retireStr = document.getElementById("retireDate").value;
   if (!dobStr || !retireStr) return alert("Enter DOB and Retirement Date.");
@@ -519,8 +506,6 @@ document.getElementById("runCalc").addEventListener("click", function () {
 
   const retireNow = Number(document.getElementById("retiresavings").value || 0);
   const retireAnnual = Number(document.getElementById("futureretiresavings").value || 0);
-
-  // Taxable bucket (only initial amount in baseline)
   const taxableNow = Number(document.getElementById("taxableNow").value || 0);
 
   const inflationActive = document.getElementById('inflationToggle').checked;
@@ -529,61 +514,43 @@ document.getElementById("runCalc").addEventListener("click", function () {
   const INFL = 0.03;
   const WD   = 0.04;
 
-  /* Timeline */
   const today = new Date();
-  const currentYear = today.getFullYear() + 1; // avoid “free” growth this year
+  const currentYear = today.getFullYear() + 1;
   const endYear = dob.getFullYear() + 100;
   const timeline = [];
   for (let y = currentYear; y <= endYear; y++) timeline.push(y);
 
-  /* Inflows */
   const flowContribRet = timeline.map(y => (y < retireYear ? retireAnnual : 0));
   const flowSS = timeline.map(y => (ssStart && y >= ssStart.getFullYear() ? ssAmt : 0));
   const flowPension = timeline.map(y =>
     (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0
   );
 
-  /* Deflator for main chart only (if chosen) */
   function deflate(value, idx){
     if (!inflationActive) return value;
     return value / Math.pow(1 + INFL, yearsFromToday(timeline[idx]));
   }
 
-  /* Dual-bucket simulation for a given return rate:
-     - Retirement bucket grows at full 'rate'
-     - Taxable bucket grows at (rate - TAX_DRAG_DEFAULT)
-     - Proportional withdrawals after retirement (if enabled)
-  */
   function simulateDual(rate){
     let balRet = retireNow;
     let balTax = taxableNow;
-    const totalBal = [];
-
+    const out = [];
     for (let i=0; i<timeline.length; i++){
       const rRet = rate;
       const rTax = Math.max(0, rate - TAX_DRAG_DEFAULT);
-
-      // Grow
       balRet *= (1 + rRet);
       balTax *= (1 + rTax);
-
-      // Contributions to retirement bucket only
       balRet += flowContribRet[i];
-
-      // Withdrawals (if enabled) after retirement
       if (withdrawActive && timeline[i] >= retireYear){
         const combined = balRet + balTax;
         const wdAmt = combined * WD;
         const retShare = combined > 0 ? (balRet / combined) : 0.5;
-        const taxShare = 1 - retShare;
         balRet -= wdAmt * retShare;
-        balTax -= wdAmt * taxShare;
+        balTax -= wdAmt * (1 - retShare);
       }
-
-      const sum = balRet + balTax + flowSS[i] + flowPension[i]; // include contemporaneous income
-      totalBal.push(deflate(sum, i));
+      out.push(deflate(balRet + balTax + flowSS[i] + flowPension[i], i));
     }
-    return totalBal;
+    return out;
   }
 
   const p3 = simulateDual(0.03);
@@ -599,7 +566,6 @@ document.getElementById("runCalc").addEventListener("click", function () {
   }
 
   if (hcChart) hcChart.destroy();
-
   hcChart = Highcharts.chart("chart", {
     chart: { zooming:{type:"x"}, backgroundColor:"#fff", height:360 },
     title: { text:null },
@@ -629,21 +595,16 @@ document.getElementById("runCalc").addEventListener("click", function () {
     ]
   });
 
-  // Reveal the right-side prompt after main chart renders
   showScenarioPrompt();
 });
 
 /* Auto-update main chart when toggles change */
 (function(){
-  function rerun() {
-    const btn = document.getElementById("runCalc");
-    if (btn) btn.click();
-  }
+  function rerun() { const btn = document.getElementById("runCalc"); if (btn) btn.click(); }
   document.addEventListener("change", e => {
     if (["inflationToggle","withdrawToggle"].includes(e.target.id)) rerun();
   });
-  document
-    .querySelectorAll("#postCalcOptions .switch, #postCalcOptions .slider")
+  document.querySelectorAll("#postCalcOptions .switch, #postCalcOptions .slider")
     .forEach(el => el.addEventListener("click", rerun));
 })();
 </script>
@@ -651,7 +612,6 @@ document.getElementById("runCalc").addEventListener("click", function () {
 <!-- Scenario Planner charts (Nominal) -->
 <script>
 function buildScenarioCharts() {
-  // Core inputs
   const dobStr = document.getElementById("dob").value;
   const retireStr = document.getElementById("retireDate").value;
   if (!dobStr || !retireStr) return;
@@ -661,9 +621,9 @@ function buildScenarioCharts() {
   const retireYear = retireDate.getFullYear();
 
   const ssStr = document.getElementById("socsecAge").value;
-  const ssAmtAnnual = Number(document.getElementById("socsecAmt").value || 0); // nominal (fixed)
+  const ssAmtAnnual = Number(document.getElementById("socsecAmt").value || 0); // fixed nominal
   const penStr = document.getElementById("pensiondate").value;
-  const penAmtAnnual = Number(document.getElementById("pensions").value || 0); // nominal (fixed)
+  const penAmtAnnual = Number(document.getElementById("pensions").value || 0); // fixed nominal
 
   const ssStart = ssStr ? parseDate(ssStr) : null;
   const penStart = penStr ? parseDate(penStr) : null;
@@ -672,58 +632,48 @@ function buildScenarioCharts() {
   const retireAnnual = Number(document.getElementById("futureretiresavings").value || 0);
   const taxableNow = Number(document.getElementById("taxableNow").value || 0);
 
-  // Scenario Planner dials
-  const rNom   = Number(window.spInputs.returnPct || 6) / 100;       // expected return
-  const infl   = Number(window.spInputs.inflationPct || 3) / 100;    // used to inflate need
-  const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;     // withdrawal rate
-  const drag   = Math.max(0, Number(window.spInputs.taxDragPct || 0.6)) / 100; // tax drag on taxable
-
+  // Scenario dials
+  const rNom   = Number(window.spInputs.returnPct || 6) / 100;
+  const infl   = Number(window.spInputs.inflationPct || 3) / 100; // used to inflate need only
+  const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;
+  const drag   = Math.max(0, Number(window.spInputs.taxDragPct || 0.6)) / 100;
   const monthlyNeedToday = Number(window.spInputs.monthlyNeed || 0);
 
-  // Timeline
-  const today = new Date();
-  const currentYear = today.getFullYear() + 1;
+  // Timeline for projection (retirement year → age 100)
   const endYear = dob.getFullYear() + 100;
-  const timeline = [];
-  for (let y=currentYear; y<=endYear; y++) timeline.push(y);
+  const years = [];
+  for (let y = retireYear; y <= endYear; y++) years.push(y);
 
-  // Years to retirement (fractional) for inflating the monthly need
-  const yrsToRet = Math.max(0, yearsBetween(today, retireDate));
-  const monthlyNeedAtRet = monthlyNeedToday * Math.pow(1 + infl, yrsToRet);
-
-  // --- Compute balances at retirement (nominal) ---
+  // --- Balances at retirement (nominal) ---
   function growToRetirement() {
-    let balRet = retireNow;
-    let balTax = taxableNow;
-
-    // Walk year by year until retirement year
-    const startY = currentYear;
-    for (let y = startY; y <= retireYear; y++) {
-      // Growth during year
-      balRet *= (1 + rNom);
-      balTax *= (1 + Math.max(0, rNom - drag));
-
-      // Contribution at year-end to retirement bucket (only before retirement year)
-      if (y < retireYear) balRet += retireAnnual;
+    const today = new Date();
+    const currentYear = today.getFullYear() + 1;
+    let r = retireNow;
+    let t = taxableNow;
+    for (let y = currentYear; y <= retireYear; y++) {
+      r *= (1 + rNom);
+      t *= (1 + Math.max(0, rNom - drag));
+      if (y < retireYear) r += retireAnnual;
     }
-    return { balRet, balTax };
+    return { r, t };
   }
+  const { r: balRet0, t: balTax0 } = growToRetirement();
 
-  const { balRet, balTax } = growToRetirement();
-
-  // Monthly inflows at retirement year (SS/Pension fixed nominal if started)
+  // --- Left chart: Monthly Retirement Estimate (stacked) ---
   const ssMonthly = (ssStart && ssStart.getFullYear() <= retireYear) ? (ssAmtAnnual / 12) : 0;
   const penMonthly = (penStart && penStart.getFullYear() <= retireYear) ? (penAmtAnnual / 12) : 0;
-  const retWdMonthly = (wdRate * balRet) / 12;
-  const taxWdMonthly = (wdRate * balTax) / 12;
+  const retWdMonthly = (wdRate * balRet0) / 12;
+  const taxWdMonthly = (wdRate * balTax0) / 12;
 
-  const stackTotalMonthly = ssMonthly + penMonthly + retWdMonthly + taxWdMonthly;
-  const gap = monthlyNeedAtRet - stackTotalMonthly;
+  const yrsToRet = Math.max(0, yearsBetween(new Date(), retireDate));
+  const needMonthlyAtRet = monthlyNeedToday * Math.pow(1 + infl, yrsToRet);
+
+  const stackMonthly = ssMonthly + penMonthly + retWdMonthly + taxWdMonthly;
+  const gap = needMonthlyAtRet - stackMonthly;
   const gapText = gap > 0
     ? `Gap: $${Highcharts.numberFormat(gap, 0)}/mo`
     : `Surplus: $${Highcharts.numberFormat(-gap, 0)}/mo`;
 
-  // --- Build stacked single-bar chart ---
   Highcharts.chart('breakdownChart', {
     chart: { type: 'column', backgroundColor: '#fff', height: 320 },
     title: { text: null },
@@ -732,12 +682,12 @@ function buildScenarioCharts() {
       min: 0,
       title: { text: 'Monthly Resources ($)' },
       plotLines: [{
-        value: monthlyNeedAtRet,
+        value: needMonthlyAtRet,
         color: '#000',
         width: 3,
         zIndex: 5,
         label: {
-          text: `Need: $${Highcharts.numberFormat(monthlyNeedAtRet,0)}/mo`,
+          text: `Need: $${Highcharts.numberFormat(needMonthlyAtRet,0)}/mo`,
           align: 'right',
           x: -10,
           y: -6,
@@ -758,6 +708,7 @@ function buildScenarioCharts() {
     },
     plotOptions: { column: { stacking: 'normal', dataLabels: { enabled: true, formatter(){ return '$' + Highcharts.numberFormat(this.y,0); } } } },
     credits: { enabled:false },
+    // Order matters for stacking: first is bottom
     series: [
       { name:'Social Security', data: [ssMonthly] },
       { name:'Pensions / DB', data: [penMonthly] },
@@ -767,58 +718,108 @@ function buildScenarioCharts() {
     subtitle: { text: gapText, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' } }
   });
 
-  // --- Build nominal portfolio line over time ---
-  function simulateLine() {
-    let r = retireNow;
-    let t = taxableNow;
-    const points = [];
+  // --- Right chart: Annual Retirement Savings Projection (stacked bars + need line) ---
+  // Simulate balances from retirement onward, withdrawals each year = wdRate * (r + t)
+  const seriesSS = [];
+  const seriesPen = [];
+  const seriesRetWd = [];
+  const seriesTaxWd = [];
+  const needLine = [];
 
-    for (let i=0; i<timeline.length; i++) {
-      const y = timeline[i];
+  let r = balRet0;
+  let t = balTax0;
 
-      // Growth
-      r *= (1 + rNom);
-      t *= (1 + Math.max(0, rNom - drag));
+  for (let i = 0; i < years.length; i++) {
+    const y = years[i];
 
-      // Contributions before retirement
-      if (y < retireYear) r += retireAnnual;
+    // Inflate need (today's dollars) to year y
+    const yrsFromToday = Math.max(0, yearsBetween(new Date(), new Date(y, 0, 1)));
+    const needAnnual = monthlyNeedToday * 12 * Math.pow(1 + infl, yrsFromToday);
+    needLine.push([Date.UTC(y,0,1), needAnnual]);
 
-      // Withdraw after retirement
-      if (y >= retireYear) {
-        const total = r + t;
-        const wd = total * wdRate;
-        const shareR = total > 0 ? (r / total) : 0.5;
-        const shareT = 1 - shareR;
-        r -= wd * shareR;
-        t -= wd * shareT;
-      }
+    // Annual fixed SS / Pension if started by year y
+    const ssAnnual = (ssStart && ssStart.getFullYear() <= y) ? ssAmtAnnual : 0;
+    const penAnnual = (penStart && penStart.getFullYear() <= y) ? penAmtAnnual : 0;
 
-      points.push([Date.UTC(y,0,1), Math.max(0, r + t)]);
+    // Grow balances for the year
+    r *= (1 + rNom);
+    t *= (1 + Math.max(0, rNom - drag));
+
+    // Withdrawals this year
+    const total = r + t;
+    let wdAnnual = 0, wdRet = 0, wdTax = 0;
+    if (total > 0) {
+      wdAnnual = total * wdRate;
+      const shareR = r / total;
+      wdRet = wdAnnual * shareR;
+      wdTax = wdAnnual * (1 - shareR);
+      r -= wdRet;
+      t -= wdTax;
     }
-    return points;
+
+    seriesSS.push([Date.UTC(y,0,1), ssAnnual]);
+    seriesPen.push([Date.UTC(y,0,1), penAnnual]);
+    seriesRetWd.push([Date.UTC(y,0,1), wdRet]);
+    seriesTaxWd.push([Date.UTC(y,0,1), wdTax]);
   }
+
+  // Determine first shortfall year
+  let firstShortfall = null;
+  for (let i = 0; i < years.length; i++) {
+    const totalIncome = seriesSS[i][1] + seriesPen[i][1] + seriesRetWd[i][1] + seriesTaxWd[i][1];
+    const need = needLine[i][1];
+    if (totalIncome + 1e-6 < need) { firstShortfall = years[i]; break; }
+  }
+  const subtitle = firstShortfall
+    ? `First shortfall: ${firstShortfall}`
+    : `No shortfall through age 100`;
 
   Highcharts.chart('scenarioChart', {
     chart: { backgroundColor: '#fff', height: 320 },
     title: { text: null },
+    subtitle: { text: subtitle },
     xAxis: { type: 'datetime' },
     yAxis: {
-      title: { text: 'Portfolio Balance ($)' },
+      title: { text: 'Annual Amount ($)' },
       labels: { formatter(){ return "$" + Highcharts.numberFormat(this.value, 0); } }
     },
-    legend: { enabled:false },
+    legend: { align:'center', verticalAlign:'top' },
     tooltip: {
-      pointFormat: '<b>${point.y:,.0f}</b>',
-      xDateFormat: '%Y'
+      shared: true,
+      xDateFormat: '%Y',
+      formatter: function(){
+        // Stacked columns + line together
+        const year = Highcharts.dateFormat('%Y', this.x ?? (this.points && this.points[0]?.x));
+        const pts = this.points || [this.point];
+        const totalIncome = pts
+          .filter(p => p.series.type === 'column')
+          .reduce((s,p)=>s+p.y,0);
+        const needPt = pts.find(p => p.series.type === 'line');
+        const needVal = needPt ? needPt.y : null;
+        const lines = pts.map(p =>
+          `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`
+        ).join('<br/>');
+        return `<b>${year}</b><br/>${lines}<br/><b>Total income: $${Highcharts.numberFormat(totalIncome,0)}</b>` +
+               (needVal!=null ? `<br/><b>Need: $${Highcharts.numberFormat(needVal,0)}</b>` : '');
+      }
+    },
+    plotOptions: {
+      column: { stacking: 'normal' }
     },
     credits: { enabled:false },
     series: [
-      { name:`Nominal Balance`, type:'line', lineWidth:2, data: simulateLine() }
+      // Order = bottom to top
+      { name:'Social Security', type:'column', data: seriesSS },
+      { name:'Pensions / DB', type:'column', data: seriesPen },
+      { name:'Retirement Acct Withdrawal', type:'column', data: seriesRetWd },
+      { name:'Non-Retirement Withdrawal', type:'column', data: seriesTaxWd },
+      // Need line
+      { name:'Annual Need (inflated)', type:'line', data: needLine, color:'#000', lineWidth:3, marker:{ enabled:false } }
     ]
   });
 }
 
-// Rebuild Scenario charts when inputs change (and section is visible)
+// Rebuild Scenario charts when inputs or base fields change (and section is visible)
 document.addEventListener('scenario-inputs:change', () => {
   const sp = document.getElementById('scenario-planner');
   if (sp && sp.style.display !== 'none') buildScenarioCharts();
@@ -831,9 +832,7 @@ document.addEventListener('change', (e) => {
     'dob','retireDate','socsecAge','socsecAmt','pensiondate','pensions',
     'retiresavings','futureretiresavings','taxableNow'
   ]);
-  if (ids.has(e.target.id)) {
-    buildScenarioCharts();
-  }
+  if (ids.has(e.target.id)) buildScenarioCharts();
 });
 </script>
 
