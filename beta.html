@@ -74,9 +74,9 @@
     }
 
     /* Tooltip */
-    .tooltip-click-container { position:relative; display:inline-flex; align-items:center; gap:8px; }
+    .tooltip-click-container { position:relative; display:inline-flex; align-items:center; gap:8px; isolation:isolate; }
     .click-icon { width:20px; height:20px; border-radius:50%; background:var(--brand); color:white; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-    .tooltip-click-box { display:none; position:absolute; inset-block-start:26px; inset-inline-start:0; background:var(--card); padding:14px 16px; border-radius:12px; max-width:min(320px, 80vw); border:1px solid var(--stroke); box-shadow:0 8px 24px rgba(2,6,23,0.15); font-size:13px; z-index:9999; white-space: normal; overflow-wrap: anywhere; }
+    .tooltip-click-box { display:none; position:absolute; inset-block-start:26px; inset-inline-start:0; background:var(--card); padding:14px 16px; border-radius:12px; max-width:min(320px, 80vw); border:1px solid var(--stroke); box-shadow:0 8px 24px rgba(2,6,23,0.15); font-size:13px; z-index:9999; white-space: normal; overflow-wrap: anywhere; pointer-events:auto; }
 
     /* Chart + side panel */
     .graph-row { display:grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items:start; }
@@ -298,12 +298,28 @@ function setupTooltip(btnId, boxId) {
   const btn = document.getElementById(btnId);
   const box = document.getElementById(boxId);
   if (!btn || !box) return;
+  const container = btn.closest('.tooltip-click-container') || btn.parentElement;
+  let open = false;
+  const show = () => { box.style.display = 'block'; btn.setAttribute('aria-expanded','true'); open = true; };
+  const hide = () => { box.style.display = 'none'; btn.setAttribute('aria-expanded','false'); open = false; };
+  const toggle = () => (open ? hide() : show());
 
-  const toggle = (show) => { box.style.display = show ? 'block' : 'none'; btn.setAttribute('aria-expanded', show ? 'true' : 'false'); };
+  // Click / keyboard on the icon
+  btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); toggle(); });
+  btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); e.stopPropagation(); toggle(); } });
 
-  btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(box.style.display !== 'block'); });
-  btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(box.style.display !== 'block'); } });
-  document.addEventListener('click', () => toggle(false));
+  // Prevent clicks inside the tooltip from closing immediately
+  box.addEventListener('click', (e)=> e.stopPropagation());
+
+  // Optional: open on hover for desktop pointers
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    container.addEventListener('mouseenter', show);
+    container.addEventListener('mouseleave', hide);
+  }
+
+  // Close when clicking anywhere else or pressing Escape
+  document.addEventListener('click', hide);
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hide(); });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -633,4 +649,5 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
 
