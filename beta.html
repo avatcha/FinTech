@@ -135,7 +135,21 @@
     @media (prefers-reduced-motion: reduce){
       *{ scroll-behavior: auto !important; animation: none !important; transition: none !important; }
     }
-  </style>
+      /* Assumption grid responsive */
+    .assumption-grid{ grid-template-columns: repeat(4, 1fr) !important; }
+    @media (max-width: 1024px){ .assumption-grid{ grid-template-columns: repeat(2, 1fr) !important; } }
+    @media (max-width: 540px){ .assumption-grid{ grid-template-columns: 1fr !important; } }
+
+    /* Dial (range) styling for touch */
+    .dial input[type=range]{
+      width: 100%; height: 34px; margin-top: 6px; background: transparent; -webkit-appearance: none; appearance: none;
+    }
+    .dial input[type=range]::-webkit-slider-runnable-track{ height: 6px; background: var(--stroke); border-radius: 999px; }
+    .dial input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; appearance:none; width: 26px; height: 26px; border-radius:50%; background: var(--brand); margin-top: -10px; border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+    .dial input[type=range]::-moz-range-track{ height: 6px; background: var(--stroke); border-radius: 999px; }
+    .dial input[type=range]::-moz-range-thumb{ width: 26px; height: 26px; border-radius:50%; background: var(--brand); border:0; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+
+</style>
 
   <script src="https://code.highcharts.com/highcharts.js"></script>
 </head>
@@ -264,22 +278,26 @@
       <div id="sp-rest" style="display:none;">
         <div class="cb-card" id="scenario-inputs" style="margin-bottom:16px;">
           <h3 style="margin:0 0 8px 0; font-size:18px;">Assumptions</h3>
-          <div class="cb-row" style="grid-template-columns: repeat(4, 1fr);">
-            <div class="cb-field with-suffix" data-suffix="%/yr">
+          <div class="cb-row assumption-grid">
+            <div class="cb-field with-suffix dial" data-suffix="%/yr">
               <label for="spReturnPct">Expected Return</label>
               <input id="spReturnPct" type="number" step="0.1" min="0" max="100" value="6" inputmode="decimal" />
+              <input id="spReturnPct_range" type="range" min="0" max="15" step="0.1" value="6" aria-label="Expected Return slider" />
             </div>
-            <div class="cb-field with-suffix" data-suffix="%/yr">
+            <div class="cb-field with-suffix dial" data-suffix="%/yr">
               <label for="spInflationPct">Inflation Rate</label>
               <input id="spInflationPct" type="number" step="0.1" min="0" max="100" value="3" inputmode="decimal" />
+              <input id="spInflationPct_range" type="range" min="0" max="10" step="0.1" value="3" aria-label="Inflation Rate slider" />
             </div>
-            <div class="cb-field with-suffix" data-suffix="%/yr">
+            <div class="cb-field with-suffix dial" data-suffix="%/yr">
               <label for="spWithdrawPct">Withdrawal Rate</label>
               <input id="spWithdrawPct" type="number" step="0.1" min="1" max="100" value="4" inputmode="decimal" />
+              <input id="spWithdrawPct_range" type="range" min="1" max="10" step="0.1" value="4" aria-label="Withdrawal Rate slider" />
             </div>
-            <div class="cb-field with-suffix" data-suffix="%/yr">
+            <div class="cb-field with-suffix dial" data-suffix="%/yr">
               <label for="spTaxDragPct">Tax Drag on Non-Retirement Assets</label>
               <input id="spTaxDragPct" type="number" step="0.1" min="0" max="2" value="0.6" inputmode="decimal" />
+              <input id="spTaxDragPct_range" type="range" min="0" max="2" step="0.1" value="0.6" aria-label="Tax Drag slider" />
               <small style="color:var(--muted);">Reduces taxable-account growth to approximate ongoing taxes.</small>
             </div>
           </div>
@@ -340,54 +358,29 @@ function setupTooltip(btnId, boxId) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  setupTooltip('ssInfoBtn', 'ssInfoBox');
-  setupTooltip('taxableInfoBtn', 'taxableInfoBox');
-});
-</script>
+  // New: bind dial pairs (number <-> range)
+  function bindDial(numberId, rangeId, key, min, max){
+    const num = document.getElementById(numberId);
+    const rng = document.getElementById(rangeId);
+    if(!num || !rng) return;
 
-<!-- Mobile nav -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.querySelector('.nav-toggle');
-  const nav = document.getElementById('primary-nav');
-  if (!btn || !nav) return;
-  btn.addEventListener('click', () => {
-    const opened = nav.classList.toggle('open');
-    btn.setAttribute('aria-expanded', opened ? 'true' : 'false');
-  });
-});
-</script>
+    const clamp = v => Math.min(max, Math.max(min, Number(v)));
 
-<!-- Calculator + Highcharts (Main chart) -->
-<script>
-let hcChart = null;
-const TAX_DRAG_DEFAULT = 0.006; // default drag for main chart
-function parseDate(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y,(m||1)-1,d||1); }
-function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
-function yearsFromToday(targetYear){ const now=new Date(); const then=new Date(targetYear, now.getMonth(), now.getDate()); return (then - now) / (365.25*86400000); }
+    // number typing (do not clamp on each keystroke)
+    num.addEventListener('input', () => {
+      const v = Number(num.value);
+      if (isFinite(v)) { rng.value = v; window.spInputs[key] = v; document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }})); }
+    });
+    num.addEventListener('change', () => { const v = clamp(num.value || 0); num.value = v; rng.value = v; window.spInputs[key] = v; document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }})); });
 
-/* Scenario input state */
-window.spInputs = { returnPct: 6, inflationPct: 3, withdrawPct: 4, taxDragPct: 0.6, monthlyNeed: 0 };
-
-function bindNumber(id, key, min, max){
-  const el = document.getElementById(id);
-  if (!el) return;
-  const clamp = v => Math.min(max, Math.max(min, Number(v)));
-  function update(){
-    const v = clamp(el.value || 0);
-    el.value = v;
-    window.spInputs[key] = v;
-    document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
+    // range sliding
+    rng.addEventListener('input', () => { num.value = rng.value; window.spInputs[key] = Number(rng.value); document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }})); });
   }
-  el.addEventListener('input', update);
-  el.addEventListener('change', update);
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  bindNumber('spReturnPct','returnPct',0,100);
-  bindNumber('spInflationPct','inflationPct',0,100);
-  bindNumber('spWithdrawPct','withdrawPct',1,100);
-  bindNumber('spTaxDragPct','taxDragPct',0,2);
+  bindDial('spReturnPct','spReturnPct_range','returnPct',0,100);
+  bindDial('spInflationPct','spInflationPct_range','inflationPct',0,100);
+  bindDial('spWithdrawPct','spWithdrawPct_range','withdrawPct',1,100);
+  bindDial('spTaxDragPct','spTaxDragPct_range','taxDragPct',0,2);
 
   const needEl = document.getElementById('spMonthlyNeed');
   if (needEl){
