@@ -76,7 +76,24 @@
     /* Tooltip */
     .tooltip-click-container { position:relative; display:inline-flex; align-items:center; gap:8px; isolation:isolate; }
     .click-icon { width:20px; height:20px; border-radius:50%; background:var(--brand); color:white; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-    .tooltip-click-box { display:none; position:absolute; inset-block-start:26px; inset-inline-start:0; background:var(--card); padding:14px 16px; border-radius:12px; max-width:min(320px, 80vw); border:1px solid var(--stroke); box-shadow:0 8px 24px rgba(2,6,23,0.15); font-size:13px; z-index:9999; white-space: normal; overflow-wrap: anywhere; pointer-events:auto; }
+    .tooltip-click-box {
+      display:none;
+      position:absolute;
+      inset-block-start:-10px; /* move above icon */
+      inset-inline-start:0;
+      transform:translateY(-100%); /* fully above */
+      background:#ffffff; /* solid white */
+      padding:14px 16px;
+      border-radius:12px;
+      max-width:min(320px, 80vw);
+      border:1px solid var(--stroke);
+      box-shadow:0 8px 24px rgba(2,6,23,0.15);
+      font-size:13px;
+      z-index:99999; /* ensure on top */
+      white-space: normal;
+      overflow-wrap: anywhere;
+      pointer-events:auto;
+    }
 
     /* Chart + side panel */
     .graph-row { display:grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items:start; }
@@ -649,5 +666,6 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
 
 
