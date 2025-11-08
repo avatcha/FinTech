@@ -433,8 +433,8 @@ function showScenarioPrompt() {
   const box = document.getElementById('scenarioPrompt');
   if (!box || box.dataset.active === '1') return;
   box.innerHTML = `
-    <div style="font-weight:700; margin-bottom:6px;">Want to see if this is enough to retire?</div>
-    <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">Use the Scenario Planner to see monthly coverage and a year-by-year projection.</div>
+    <div style="font-weight:700; margin-bottom:6px;">What does this mean? Want to see if this is enough to retire?</div>
+    <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">Use the Scenario Planner to see monthly coverage (cash flows) and a year-by-year projection.</div>
     <button id="scenarioBtn" class="btn-primary" style="width:100%;">Open Scenario Planner</button>
   `;
   box.style.display = 'block';
