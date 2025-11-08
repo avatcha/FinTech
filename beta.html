@@ -137,6 +137,9 @@
     @media (prefers-reduced-motion: reduce){
       *{ scroll-behavior: auto !important; animation: none !important; transition: none !important; }
     }
+
+    /* small callout chip style (used in subtitle text) */
+    .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59; font-weight:700; font-size:12px; }
   </style>
 
   <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -367,6 +370,8 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 let hcChart = null;
 const TAX_DRAG_DEFAULT = 0.006; // default drag for main chart
+const SS_COLA = 0.02;           // 2% COLA for Social Security
+
 function parseDate(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y,(m||1)-1,d||1); }
 function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
 function yearsFromToday(targetYear){ const now=new Date(); const then=new Date(targetYear, now.getMonth(), now.getDate()); return (then - now) / (365.25*86400000); }
@@ -462,7 +467,8 @@ function runCalcHandler(){
     const infText = inf ? 'Main chart shows today’s dollars (3% deflator).' : 'Main chart is nominal.';
     const wdText = wd ? '4% distribution applied after retirement.' : 'No distributions in main chart.';
     const taxDragDisclosure = 'Includes non-retirement assets with 0.6%/yr tax drag.';
-    document.getElementById('chartSubtitle').textContent = `${infText} ${wdText} ${taxDragDisclosure}`;
+    const colaChip = '<span class="chip">SS includes 2% COLA</span>';
+    document.getElementById('chartSubtitle').innerHTML = `${infText} ${wdText} ${taxDragDisclosure} &nbsp; ${colaChip}`;
   }
 
   // Bind toggles for re-run
@@ -507,10 +513,17 @@ function runCalcHandler(){
   const timeline = [];
   for (let y = firstYear; y <= endYear; y++) timeline.push(y);
 
-  /* Inflows */
+  /* Inflows with COLA for SS from first payment year */
+  const ssStartYear = ssStart ? ssStart.getFullYear() : null;
   const flowContribRet = timeline.map(y => (y < retireYear ? retireAnnual : 0));
-  const flowSS = timeline.map(y => (ssStart && y >= ssStart.getFullYear() ? ssAmt : 0));
-  const flowPension = timeline.map(y => (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0);
+  const flowSS = timeline.map(y => {
+    if (!ssStartYear || y < ssStartYear) return 0;
+    const yearsSinceStart = y - ssStartYear;
+    return ssAmt * Math.pow(1 + SS_COLA, yearsSinceStart);
+  });
+  const flowPension = timeline.map(y =>
+    (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0
+  );
 
   /* Deflator (if chosen) */
   function deflate(value, idx){ if (!inflationActive) return value; return value / Math.pow(1 + INFL, yearsFromToday(timeline[idx])); }
@@ -519,10 +532,11 @@ function runCalcHandler(){
   function simulateDual(rate){
     let balRet = retireNow; let balTax = taxableNow; const totalBal = [];
     for (let i=0; i<timeline.length; i++){
+      const y = timeline[i];
       const rRet = rate; const rTax = Math.max(0, rate - TAX_DRAG_DEFAULT);
       balRet *= (1 + rRet); balTax *= (1 + rTax);
       balRet += flowContribRet[i];
-      if (withdrawActive && timeline[i] >= retireYear){
+      if (withdrawActive && y >= retireYear){
         const combined = balRet + balTax; const wdAmt = combined * WD; const retShare = combined > 0 ? (balRet / combined) : 0.5; const taxShare = 1 - retShare; balRet -= wdAmt * retShare; balTax -= wdAmt * taxShare; }
       const sum = balRet + balTax + flowSS[i] + flowPension[i]; totalBal.push(deflate(sum, i));
     }
@@ -542,8 +556,15 @@ function runCalcHandler(){
   if (hcChart) hcChart.destroy();
   hcChart = Highcharts.chart('chart', {
     chart: { zooming:{type:'x'}, backgroundColor:'transparent', height: 360, reflow: true },
-    title: { text:null }, xAxis: { type:'datetime' },
-    yAxis: { title:{ text:'Balance / Income ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
+    title: { text:null },
+    xAxis: {
+      type:'datetime',
+      labels: { format: '{value:%Y}' },
+      tickInterval: 365 * 24 * 3600 * 1000, /* 1 year */
+      min: Date.UTC(retireYear - 5, 0, 1),
+      max: Date.UTC(endYear, 0, 1)
+    },
+    yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
     legend:{ enabled:true, align:'center', verticalAlign:'top' },
     tooltip:{ shared:true, formatter(){ const x=(this.points&&this.points[0])?this.points[0].x:this.x; const year=Highcharts.dateFormat('%Y', x); const lines=(this.points||[this.point]).map(p=>`<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y, 0)}</b>`).join('<br/>'); return `<b>${year}</b><br/>${lines}`; } },
     credits:{ enabled:false },
@@ -588,9 +609,9 @@ function buildScenarioCharts() {
   const retireYear = retireDate.getFullYear();
 
   const ssStr = document.getElementById('socsecAge').value;
-  const ssAmtAnnual = Number(document.getElementById('socsecAmt').value || 0); // fixed nominal
+  const ssAmtAnnual = Number(document.getElementById('socsecAmt').value || 0); // user's first-year SS at start (future dollars)
   const penStr = document.getElementById('pensiondate').value;
-  const penAmtAnnual = Number(document.getElementById('pensions').value || 0); // fixed nominal
+  const penAmtAnnual = Number(document.getElementById('pensions').value || 0); // pension kept flat unless plan provides increases
 
   const ssStart = ssStr ? parseDate(ssStr) : null;
   const penStart = penStr ? parseDate(penStr) : null;
@@ -626,8 +647,11 @@ function buildScenarioCharts() {
   }
   const { r: balRet0, t: balTax0 } = growToRetirement();
 
-  // Left chart: Monthly Retirement Estimate
-  const ssMonthly = (ssStart && ssStart.getFullYear() <= retireYear) ? (ssAmtAnnual / 12) : 0;
+  // --- Left chart: Monthly Retirement Estimate ---
+  const ssStartYear = ssStart ? ssStart.getFullYear() : null;
+  const ssMonthly = (ssStartYear && ssStartYear <= retireYear)
+    ? (ssAmtAnnual * Math.pow(1 + SS_COLA, Math.max(0, retireYear - ssStartYear))) / 12
+    : 0;
   const penMonthly = (penStart && penStart.getFullYear() <= retireYear) ? (penAmtAnnual / 12) : 0;
   const retWdMonthly = (wdRate * balRet0) / 12;
   const taxWdMonthly = (wdRate * balTax0) / 12;
@@ -663,7 +687,7 @@ function buildScenarioCharts() {
     plotOptions: { column: { stacking: 'normal', dataLabels: { enabled: true, formatter(){ return '$' + Highcharts.numberFormat(this.y,0); } } } },
     credits: { enabled:false },
     series: [
-      { name:'Social Security', type:'column', data: [ssMonthly] },
+      { name:'Social Security (2% COLA)', type:'column', data: [ssMonthly] },
       { name:'Pensions / DB', type:'column', data: [penMonthly] },
       { name:'Retirement Acct Withdrawal', type:'column', data: [retWdMonthly] },
       { name:'Non-Retirement Withdrawal', type:'column', data: [taxWdMonthly] }
@@ -671,22 +695,27 @@ function buildScenarioCharts() {
     subtitle: { text: gapText, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' } }
   });
 
-  // Right chart: Annual Retirement Savings Projection
+  // --- Right chart: Annual Retirement Savings Projection ---
   const seriesSS = [], seriesPen = [], seriesRetWd = [], seriesTaxWd = [], needLine = [];
   let r = balRet0, t = balTax0;
   for (let i = 0; i < years.length; i++) {
     const y = years[i];
 
+    // Need line (inflated from today's dollars)
     const yrsFromToday = Math.max(0, yearsBetween(new Date(), new Date(y, 0, 1)));
     const needAnnual = monthlyNeedToday * 12 * Math.pow(1 + infl, yrsFromToday);
     needLine.push([Date.UTC(y,0,1), needAnnual]);
 
-    const ssAnnual = (ssStart && ssStart.getFullYear() <= y) ? ssAmtAnnual : 0;
+    // SS with COLA after start year
+    const ssAnnual = (ssStartYear && ssStartYear <= y)
+      ? ssAmtAnnual * Math.pow(1 + SS_COLA, Math.max(0, y - ssStartYear))
+      : 0;
+
     const penAnnual = (penStart && penStart.getFullYear() <= y) ? penAmtAnnual : 0;
 
+    // Grow balances and take proportional withdrawal
     r *= (1 + rNom);
     t *= (1 + Math.max(0, rNom - drag));
-
     const total = r + t; let wdAnnual = 0, wdRet = 0, wdTax = 0;
     if (total > 0) {
       wdAnnual = total * wdRate;
@@ -714,7 +743,7 @@ function buildScenarioCharts() {
     chart: { backgroundColor: 'transparent', height: 320, reflow: true },
     title: { text: null },
     subtitle: { text: subtitle },
-    xAxis: { type: 'datetime' },
+    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}' }, tickInterval: 365*24*3600*1000 },
     yAxis: {
       title: { text: 'Annual Amount ($)' },
       labels: { formatter(){ return '$' + Highcharts.numberFormat(this.value, 0); } }
@@ -736,7 +765,7 @@ function buildScenarioCharts() {
     plotOptions: { column: { stacking: 'normal' } },
     credits: { enabled:false },
     series: [
-      { name:'Social Security', type:'column', data: seriesSS },
+      { name:'Social Security (2% COLA)', type:'column', data: seriesSS },
       { name:'Pensions / DB', type:'column', data: seriesPen },
       { name:'Retirement Acct Withdrawal', type:'column', data: seriesRetWd },
       { name:'Non-Retirement Withdrawal', type:'column', data: seriesTaxWd },
@@ -759,4 +788,5 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
 
