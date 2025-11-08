@@ -559,14 +559,25 @@ function runCalcHandler(){
     title: { text:null },
     xAxis: {
       type:'datetime',
-      labels: { format: '{value:%Y}' },
+      labels: { format: '{value:%Y}', enabled: true },
+      dateTimeLabelFormats: { year: '%Y' },
       tickInterval: 365 * 24 * 3600 * 1000, /* 1 year */
+      tickPixelInterval: 80,
       min: Date.UTC(retireYear - 5, 0, 1),
-      max: Date.UTC(endYear, 0, 1)
+      max: Date.UTC(endYear, 0, 1),
+      startOnTick: true,
+      endOnTick: true,
+      showFirstLabel: true,
+      showLastLabel: true
     },
     yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
     legend:{ enabled:true, align:'center', verticalAlign:'top' },
-    tooltip:{ shared:true, formatter(){ const x=(this.points&&this.points[0])?this.points[0].x:this.x; const year=Highcharts.dateFormat('%Y', x); const lines=(this.points||[this.point]).map(p=>`<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y, 0)}</b>`).join('<br/>'); return `<b>${year}</b><br/>${lines}`; } },
+    tooltip:{ shared:true, formatter(){
+      const x=(this.points&&this.points[0])?this.points[0].x:this.x;
+      const year=Highcharts.dateFormat('%Y', x);
+      const lines=(this.points||[this.point]).map(p=>`<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y, 0)}</b>`).join('<br/>');
+      return `<b>${year}</b><br/>${lines}`;
+    }},
     credits:{ enabled:false },
     series:[
       { name:'3%', data:filter(p3), type:'line', lineWidth:2 },
@@ -692,7 +703,7 @@ function buildScenarioCharts() {
       { name:'Retirement Acct Withdrawal', type:'column', data: [retWdMonthly] },
       { name:'Non-Retirement Withdrawal', type:'column', data: [taxWdMonthly] }
     ],
-    subtitle: { text: gapText, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' } }
+    subtitle: { text: `Retirement year: ${retireYear} — ${gapText}`, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' } }
   });
 
   // --- Right chart: Annual Retirement Savings Projection ---
@@ -788,5 +799,6 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
 
 
