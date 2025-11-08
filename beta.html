@@ -33,7 +33,6 @@
     .cb-stack { display: flex; flex-direction: column; gap: 16px; }
     .cb-card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--stroke); }
 
-    /* Grid that gracefully collapses on phones */
     .cb-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
     @media (min-width:1100px){ .cb-row { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 640px){ .cb-row { grid-template-columns: 1fr; gap: 12px; } }
@@ -42,23 +41,20 @@
     label { font-size: 14px; font-weight: 600; }
 
     input[type="date"], input[type="number"], select, input[type="text"] {
-      font-size: 16px; /* iOS: prevents zoom */
+      font-size: 16px;
       padding: 12px 14px; border-radius: 14px; border: 1px solid var(--stroke); background: #fdfdfd;
       color: inherit; line-height:1.2; appearance: auto; -moz-appearance: textfield;
     }
 
-    /* remove number spinners EXCEPT inside scenario inputs (so those keep arrows) */
     .cb-card:not(#scenario-inputs) input[type=number]::-webkit-outer-spin-button,
     .cb-card:not(#scenario-inputs) input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
     input:focus, select:focus { border-color: #b8cdfd; outline: none; box-shadow: 0 0 0 4px rgba(0,82,255,0.12); }
 
-    /* Buttons */
     .btn, #runCalc, .btn-primary { background: var(--brand); color: white; border: none; font-size: 16px; padding: 14px 20px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: transform .06s ease, background .15s ease; touch-action: manipulation; }
     .btn:active, #runCalc:active { transform: translateY(1px) scale(.99); }
     #runCalc:hover, .btn-primary:hover { background: var(--brand-700); }
 
-    /* Sticky Header */
     .site-header { position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--stroke); }
     @media (prefers-color-scheme: dark){ .site-header{ background: rgba(10,15,28,.65); } }
     .header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 60px; }
@@ -75,35 +71,32 @@
       .nav-links a { display:block; padding:8px 10px; }
     }
 
-    /* Tooltip */
     .tooltip-click-container { position:relative; display:inline-flex; align-items:center; gap:8px; isolation:isolate; }
     .click-icon { width:20px; height:20px; border-radius:50%; background:var(--brand); color:white; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
     .tooltip-click-box {
       display:none;
       position:absolute;
-      inset-block-start:-10px; /* move above icon */
+      inset-block-start:-10px;
       inset-inline-start:0;
-      transform:translateY(-100%); /* fully above */
-      background:#ffffff; /* solid white */
+      transform:translateY(-100%);
+      background:#ffffff;
       padding:14px 16px;
       border-radius:12px;
       max-width:min(320px, 80vw);
       border:1px solid var(--stroke);
       box-shadow:0 8px 24px rgba(2,6,23,0.15);
       font-size:13px;
-      z-index:99999; /* ensure on top */
+      z-index:99999;
       white-space: normal;
       overflow-wrap: anywhere;
       pointer-events:auto;
     }
 
-    /* Chart + side panel */
     .graph-row { display:grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items:start; }
     @media (max-width: 900px){ .graph-row { grid-template-columns: 1fr; } }
     .side-panel { display:flex; flex-direction:column; gap:16px; }
     .mini-card { background: var(--soft); border: 1px solid var(--stroke); border-radius: 14px; padding: 14px; }
 
-    /* Toggle */
     .toggle-item { display:flex; justify-content:space-between; align-items:center; gap:12px; }
     .switch { position:relative; width:52px; height:28px; flex:0 0 auto; }
     .switch input { display:none; }
@@ -112,33 +105,27 @@
     input:checked + .slider { background:var(--brand); }
     input:checked + .slider:before { transform:translateX(24px); }
 
-    /* Scenario Planner */
     #scenario-planner.fade-in { animation: fadeIn 0.35s ease-out forwards; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
     #scenarioGrid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
     @media (max-width: 900px){ #scenarioGrid { grid-template-columns: 1fr; } }
 
-    /* Input suffix */
     .with-suffix { position: relative; }
     .with-suffix input[type="number"] { padding-right: 70px; }
     .with-suffix::after { content: attr(data-suffix); position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--muted); pointer-events: none; }
 
-    /* Sticky action bar (phones) */
     .action-bar { position: sticky; bottom: 0; inset-inline: 0; background: rgba(255,255,255,.9); backdrop-filter: blur(6px); border-top: 1px solid var(--stroke); display:none; padding: 10px var(--pad-x); z-index: 999; }
     .action-bar-inner{ max-width: var(--content-w); margin:0 auto; display:flex; gap:10px; align-items:center; }
     .action-bar .hint { font-size: 12px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     @media (max-width: 640px){ .action-bar{ display:block; } }
 
-    /* Chart heights responsive */
     #chart { height: clamp(300px, 45vh, 420px); }
     #breakdownChart, #scenarioChart { height: clamp(260px, 42vh, 360px); }
 
-    /* Reduce motion preference */
     @media (prefers-reduced-motion: reduce){
       *{ scroll-behavior: auto !important; animation: none !important; transition: none !important; }
     }
 
-    /* small callout chip style (used in subtitle text) */
     .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59; font-weight:700; font-size:12px; }
   </style>
 
@@ -146,7 +133,6 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="site-header">
   <div class="cb-wrap header-inner">
     <a class="brand" href="#">stackxAi</a>
@@ -158,17 +144,13 @@
   </div>
 </header>
 
-<!-- MAIN -->
 <div class="cb-wrap">
-
   <div class="cb-header" id="retirement">
     <h1 class="cb-title">Retirement Calculator</h1>
     <div class="cb-sub">Use the retirement calculator to understand your financial future, so you can achieve your goals.</div>
   </div>
 
   <div class="cb-stack">
-
-    <!-- Section 1: Inputs (visible on load) -->
     <div class="cb-card" id="input-card" aria-label="Inputs">
       <div class="cb-row">
         <div class="cb-field"><label for="dob">Date of Birth</label><input id="dob" type="date" autocomplete="bday" /></div>
@@ -196,7 +178,6 @@
         <div class="cb-field"><label for="pensiondate">Pension Start</label><input id="pensiondate" type="date" /></div>
         <div class="cb-field"><label for="pensions">Annual Pension Amount ($) Future Dollars</label><input id="pensions" type="number" inputmode="decimal" placeholder="e.g., 12000" /></div>
 
-        <!-- Non-retirement assets -->
         <div class="cb-field">
           <label class="tooltip-click-container" for="taxableNow">
             Non-Retirement Assets ($)
@@ -216,7 +197,6 @@
       </div>
     </div>
 
-    <!-- Section 2: Main chart + side toggles + prompt (hidden until run) -->
     <div id="chartSection" class="cb-card" style="display:none;">
       <h2 id="chartTitle" style="margin:0 0 6px 0; font-size:20px; font-weight:800; text-align:center;">Projected Retirement Savings</h2>
       <div id="chartSubtitle" style="margin-bottom:10px; font-size:13px; color:var(--muted); text-align:center;"></div>
@@ -250,7 +230,6 @@
       </div>
     </div>
 
-    <!-- Section 3: Scenario Planner (hidden) -->
     <section id="scenario-planner" class="cb-card" style="scroll-margin-top:80px; display:none;">
       <h2 style="margin:0 0 8px 0;">Scenario Planner</h2>
       <div class="cb-sub" style="margin:0 0 16px 0;">Start with your monthly need (today’s dollars). Then refine assumptions and review the projections.</div>
@@ -309,7 +288,6 @@
   </div>
 </div>
 
-<!-- Sticky action bar for phones -->
 <div class="action-bar" aria-hidden="false">
   <div class="action-bar-inner">
     <div class="hint">Fill a few fields, then run your projection</div>
@@ -317,7 +295,6 @@
   </div>
 </div>
 
-<!-- Tooltips (top section only) -->
 <script>
 function setupTooltip(btnId, boxId) {
   const btn = document.getElementById(btnId);
@@ -328,21 +305,13 @@ function setupTooltip(btnId, boxId) {
   const show = () => { box.style.display = 'block'; btn.setAttribute('aria-expanded','true'); open = true; };
   const hide = () => { box.style.display = 'none'; btn.setAttribute('aria-expanded','false'); open = false; };
   const toggle = () => (open ? hide() : show());
-
-  // Click / keyboard on the icon
   btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); toggle(); });
   btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); e.stopPropagation(); toggle(); } });
-
-  // Prevent clicks inside the tooltip from closing immediately
   box.addEventListener('click', (e)=> e.stopPropagation());
-
-  // Optional: open on hover for desktop pointers
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     container.addEventListener('mouseenter', show);
     container.addEventListener('mouseleave', hide);
   }
-
-  // Close when clicking anywhere else or pressing Escape
   document.addEventListener('click', hide);
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hide(); });
 }
@@ -353,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Mobile nav -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.querySelector('.nav-toggle');
@@ -366,20 +334,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- Calculator + Highcharts (Main chart) -->
 <script>
 let hcChart = null;
-const TAX_DRAG_DEFAULT = 0.006; // default drag for main chart
-const SS_COLA = 0.02;           // 2% COLA for Social Security
+const TAX_DRAG_DEFAULT = 0.006;
+const SS_COLA = 0.02;
 
 function parseDate(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y,(m||1)-1,d||1); }
 function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
 function yearsFromToday(targetYear){ const now=new Date(); const then=new Date(targetYear, now.getMonth(), now.getDate()); return (then - now) / (365.25*86400000); }
 
-/* Scenario input state */
 window.spInputs = { returnPct: 6, inflationPct: 3, withdrawPct: 4, taxDragPct: 0.6, monthlyNeed: 0 };
 
-/* Scenario binders: allow free typing; clamp only on blur (change) */
 function bindNumber(id, key, min, max){
   const el = document.getElementById(id);
   if (!el) return;
@@ -417,12 +382,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const rest = document.getElementById('sp-rest');
       if (rest) rest.style.display = 'block';
       buildScenarioCharts();
-      // Smoothly slide/scroll a bit so new content is clearly visible
       const target = document.getElementById('scenarioGrid') || rest;
       target.scrollIntoView({ behavior:'smooth', block:'start' });
     });
 
-    // After plan is built, editing the need will live-update charts
     needEl.addEventListener('change', () => {
       const rest = document.getElementById('sp-rest');
       if (rest && rest.style.display !== 'none') {
@@ -433,7 +396,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/* Right-side scenario prompt */
 function showScenarioPrompt() {
   const box = document.getElementById('scenarioPrompt');
   if (!box || box.dataset.active === '1') return;
@@ -452,26 +414,24 @@ function showScenarioPrompt() {
     target.style.display = 'block';
     target.classList.add('fade-in');
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    buildScenarioCharts(); // render on open
+    buildScenarioCharts();
   });
 }
 
 function runCalcHandler(){
-  // Reveal section + side toggles + prompt
   document.getElementById('chartSection').style.display = 'block';
   document.getElementById('postCalcOptions').style.display = 'block';
 
   function updateChartSubtitle() {
     const inf = document.getElementById('inflationToggle').checked;
     const wd  = document.getElementById('withdrawToggle').checked;
-    const infText = inf ? 'Main chart shows today’s dollars (3% deflator).' : 'Main chart is nominal.';
-    const wdText = wd ? '4% distribution applied after retirement.' : 'No distributions in main chart.';
+    const infText = inf ? 'Main chart shows today’s dollars (3%).' : 'Main chart is nominal.';
+    const wdText = wd ? '4% distribution after retirement.' : 'No distributions in main chart.';
     const taxDragDisclosure = 'Includes non-retirement assets with 0.6%/yr tax drag.';
     const colaChip = '<span class="chip">SS includes 2% COLA</span>';
     document.getElementById('chartSubtitle').innerHTML = `${infText} ${wdText} ${taxDragDisclosure} &nbsp; ${colaChip}`;
   }
 
-  // Bind toggles for re-run
   ['inflationToggle','withdrawToggle'].forEach(id=>{
     const el = document.getElementById(id);
     if (el && !el.dataset.bound){ el.addEventListener('change', runCalcHandler); el.dataset.bound = '1'; }
@@ -479,7 +439,6 @@ function runCalcHandler(){
 
   updateChartSubtitle();
 
-  /* Inputs */
   const dobStr = document.getElementById('dob').value;
   const retireStr = document.getElementById('retireDate').value;
   if (!dobStr || !retireStr) return alert('Enter DOB and Retirement Date.');
@@ -505,15 +464,13 @@ function runCalcHandler(){
 
   const INFL = 0.03; const WD = 0.04;
 
-  /* Timeline: ensure coverage from (retireYear - 5) to age 100 */
   const endYear = dob.getFullYear() + 100;
   const startNeeded = retireYear - 5;
-  const currentYear = new Date().getFullYear() + 1; // avoid free growth this year
-  const firstYear = Math.min(currentYear, startNeeded); // build from earliest needed
+  const currentYear = new Date().getFullYear() + 1;
+  const firstYear = Math.min(currentYear, startNeeded);
   const timeline = [];
   for (let y = firstYear; y <= endYear; y++) timeline.push(y);
 
-  /* Inflows with COLA for SS from first payment year */
   const ssStartYear = ssStart ? ssStart.getFullYear() : null;
   const flowContribRet = timeline.map(y => (y < retireYear ? retireAnnual : 0));
   const flowSS = timeline.map(y => {
@@ -525,10 +482,8 @@ function runCalcHandler(){
     (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0
   );
 
-  /* Deflator (if chosen) */
   function deflate(value, idx){ if (!inflationActive) return value; return value / Math.pow(1 + INFL, yearsFromToday(timeline[idx])); }
 
-  /* Dual-bucket simulation */
   function simulateDual(rate){
     let balRet = retireNow; let balTax = taxableNow; const totalBal = [];
     for (let i=0; i<timeline.length; i++){
@@ -537,15 +492,19 @@ function runCalcHandler(){
       balRet *= (1 + rRet); balTax *= (1 + rTax);
       balRet += flowContribRet[i];
       if (withdrawActive && y >= retireYear){
-        const combined = balRet + balTax; const wdAmt = combined * WD; const retShare = combined > 0 ? (balRet / combined) : 0.5; const taxShare = 1 - retShare; balRet -= wdAmt * retShare; balTax -= wdAmt * taxShare; }
-      const sum = balRet + balTax + flowSS[i] + flowPension[i]; totalBal.push(deflate(sum, i));
+        const combined = balRet + balTax; const wdAmt = combined * WD;
+        const retShare = combined > 0 ? (balRet / combined) : 0.5;
+        const taxShare = 1 - retShare;
+        balRet -= wdAmt * retShare; balTax -= wdAmt * taxShare;
+      }
+      const sum = balRet + balTax + flowSS[i] + flowPension[i];
+      totalBal.push(deflate(sum, i));
     }
     return totalBal;
   }
 
   const p3 = simulateDual(0.03), p5 = simulateDual(0.05), p7 = simulateDual(0.07), p9 = simulateDual(0.09);
 
-  /* Only display years from (retireYear - 5) onward */
   function filter(path){
     const startYear = retireYear - 5;
     return timeline
@@ -553,22 +512,20 @@ function runCalcHandler(){
       .filter(Boolean);
   }
 
+  // --- X-AXIS YEAR LABELS (robust): explicit yearly ticks ---
+  const tickPositions = [];
+  for (let y = retireYear - 5; y <= endYear; y++) tickPositions.push(Date.UTC(y,0,1));
+
   if (hcChart) hcChart.destroy();
   hcChart = Highcharts.chart('chart', {
     chart: { zooming:{type:'x'}, backgroundColor:'transparent', height: 360, reflow: true },
     title: { text:null },
     xAxis: {
       type:'datetime',
-      labels: { format: '{value:%Y}', enabled: true },
-      dateTimeLabelFormats: { year: '%Y' },
-      tickInterval: 365 * 24 * 3600 * 1000, /* 1 year */
-      tickPixelInterval: 80,
-      min: Date.UTC(retireYear - 5, 0, 1),
-      max: Date.UTC(endYear, 0, 1),
-      startOnTick: true,
-      endOnTick: true,
-      showFirstLabel: true,
-      showLastLabel: true
+      tickPositions,
+      labels: { enabled:true, formatter(){ return Highcharts.dateFormat('%Y', this.value); } },
+      min: tickPositions[0],
+      max: tickPositions[tickPositions.length - 1]
     },
     yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
     legend:{ enabled:true, align:'center', verticalAlign:'top' },
@@ -586,10 +543,8 @@ function runCalcHandler(){
       { name:'9%', data:filter(p9), type:'line', lineWidth:2 }
     ]
   });
-  // ensure proper sizing if container was hidden
-  setTimeout(()=>{ if(hcChart) hcChart.reflow(); }, 0);
 
-  // Right-panel prompt
+  setTimeout(()=>{ if(hcChart) hcChart.reflow(); }, 0);
   showScenarioPrompt();
 }
 
@@ -608,7 +563,6 @@ document.getElementById('clearAll').addEventListener('click', ()=>{
 });
 </script>
 
-<!-- Scenario Planner charts (Nominal) -->
 <script>
 function buildScenarioCharts() {
   const dobStr = document.getElementById('dob').value;
@@ -620,9 +574,9 @@ function buildScenarioCharts() {
   const retireYear = retireDate.getFullYear();
 
   const ssStr = document.getElementById('socsecAge').value;
-  const ssAmtAnnual = Number(document.getElementById('socsecAmt').value || 0); // user's first-year SS at start (future dollars)
+  const ssAmtAnnual = Number(document.getElementById('socsecAmt').value || 0);
   const penStr = document.getElementById('pensiondate').value;
-  const penAmtAnnual = Number(document.getElementById('pensions').value || 0); // pension kept flat unless plan provides increases
+  const penAmtAnnual = Number(document.getElementById('pensions').value || 0);
 
   const ssStart = ssStr ? parseDate(ssStr) : null;
   const penStart = penStr ? parseDate(penStr) : null;
@@ -631,21 +585,18 @@ function buildScenarioCharts() {
   const retireAnnual = Number(document.getElementById('futureretiresavings').value || 0);
   const taxableNow = Number(document.getElementById('taxableNow').value || 0);
 
-  // Scenario dials (numbers only)
   const rNom   = Number(window.spInputs.returnPct || 6) / 100;
-  const infl   = Number(window.spInputs.inflationPct || 3) / 100; // used to inflate need only
+  const infl   = Number(window.spInputs.inflationPct || 3) / 100;
   const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;
   const drag   = Math.max(0, Number(window.spInputs.taxDragPct || 0.6)) / 100;
   const monthlyNeedToday = Number(window.spInputs.monthlyNeed || 0);
 
   if (monthlyNeedToday <= 0) return;
 
-  // Timeline for projection (retirement year → age 100)
   const endYear = dob.getFullYear() + 100;
   const years = [];
   for (let y = retireYear; y <= endYear; y++) years.push(y);
 
-  // Balances at retirement (nominal)
   function growToRetirement() {
     const today = new Date(); const currentYear = today.getFullYear() + 1;
     let r = retireNow; let t = taxableNow;
@@ -658,7 +609,6 @@ function buildScenarioCharts() {
   }
   const { r: balRet0, t: balTax0 } = growToRetirement();
 
-  // --- Left chart: Monthly Retirement Estimate ---
   const ssStartYear = ssStart ? ssStart.getFullYear() : null;
   const ssMonthly = (ssStartYear && ssStartYear <= retireYear)
     ? (ssAmtAnnual * Math.pow(1 + SS_COLA, Math.max(0, retireYear - ssStartYear))) / 12
@@ -706,25 +656,21 @@ function buildScenarioCharts() {
     subtitle: { text: `Retirement year: ${retireYear} — ${gapText}`, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' } }
   });
 
-  // --- Right chart: Annual Retirement Savings Projection ---
   const seriesSS = [], seriesPen = [], seriesRetWd = [], seriesTaxWd = [], needLine = [];
   let r = balRet0, t = balTax0;
   for (let i = 0; i < years.length; i++) {
     const y = years[i];
 
-    // Need line (inflated from today's dollars)
     const yrsFromToday = Math.max(0, yearsBetween(new Date(), new Date(y, 0, 1)));
     const needAnnual = monthlyNeedToday * 12 * Math.pow(1 + infl, yrsFromToday);
     needLine.push([Date.UTC(y,0,1), needAnnual]);
 
-    // SS with COLA after start year
     const ssAnnual = (ssStartYear && ssStartYear <= y)
       ? ssAmtAnnual * Math.pow(1 + SS_COLA, Math.max(0, y - ssStartYear))
       : 0;
 
     const penAnnual = (penStart && penStart.getFullYear() <= y) ? penAmtAnnual : 0;
 
-    // Grow balances and take proportional withdrawal
     r *= (1 + rNom);
     t *= (1 + Math.max(0, rNom - drag));
     const total = r + t; let wdAnnual = 0, wdRet = 0, wdTax = 0;
@@ -799,6 +745,3 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
-
-
-
