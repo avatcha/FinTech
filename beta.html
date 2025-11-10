@@ -524,8 +524,9 @@ function runCalcHandler(){
       title: { text: 'Year' }
     },
     yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
-    legend:{ enabled:true, align:'center', verticalAlign:'top',
-      title: { text: 'Annual Interest Rate', style: { fontWeight:'700', width:'100%', textAlign:'center', display:'block' } }
+    legend:{ enabled:true, align:'center', verticalAlign:'top', layout:'horizontal',
+      title: { useHTML:true, text: '<div style="display:block;width:100%;text-align:center;font-weight:700;">Annual Interest Rate</div>' }
+    } }
     }
     },
     tooltip:{ shared:true, formatter(){
@@ -547,7 +548,10 @@ function runCalcHandler(){
   showScenarioPrompt();
 }
 
-(function(){ const btn = document.getElementById('runCalc'); if(btn){ btn.addEventListener('click', runCalcHandler); } })();
+document.addEventListener('DOMContentLoaded', ()=>{
+  const btn = document.getElementById('runCalc');
+  if (btn) btn.addEventListener('click', runCalcHandler);
+});
 
 document.getElementById('clearAll').addEventListener('click', ()=>{
   ['dob','retireDate','socsecAge','socsecAmt','pensiondate','pensions','retiresavings','futureretiresavings','taxableNow','spMonthlyNeed'].forEach(id=>{ const el = document.getElementById(id); if(el) el.value = ''; });
@@ -634,7 +638,7 @@ function buildScenarioCharts() {
       shared: true,
       formatter: function(){
         const total = this.points.reduce((s,p)=>s+p.y,0);
-        const lines = this.points.map(p => `<span style=\"color:${p.color}\">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`).join('<br/>');
+        const lines = this.points.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`).join('<br/>');
         return `<b>${this.x}</b><br/>${lines}<br/><b>Total: $${Highcharts.numberFormat(total,0)}/mo</b>`;
       }
     },
@@ -708,7 +712,7 @@ function buildScenarioCharts() {
         const totalIncome = pts.filter(p => p.series.type === 'column').reduce((s,p)=>s+p.y,0);
         const needPt = pts.find(p => p.series.type === 'line');
         const needVal = needPt ? needPt.y : null;
-        const lines = pts.map(p => `<span style=\"color:${p.color}\">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>');
+        const lines = pts.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>');
         return `<b>${year}</b><br/>${lines}<br/><b>Total income: $${Highcharts.numberFormat(totalIncome,0)}</b>` + (needVal!=null ? `<br/><b>Need: $${Highcharts.numberFormat(needVal,0)}</b>` : '');
       }
     },
@@ -738,4 +742,3 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
-
