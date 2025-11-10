@@ -184,7 +184,7 @@
               Taxable savings/stocks/cash not in retirement accounts. In projections we use an <strong>annual tax rate</strong> on returns (default 0.6%). You can adjust this in Scenario Planner.
             </div>
           </label>
-          <input id="taxableNow" type="number" inputmode="decimal" placeholder="e.g., 30000" type="number" inputmode="decimal" placeholder="e.g., 30000" />
+          <input id="taxableNow" type="number" inputmode="decimal" placeholder="e.g., 30000" /> type="number" inputmode="decimal" placeholder="e.g., 30000" />
         </div>
       </div>
 
@@ -547,7 +547,7 @@ function runCalcHandler(){
   showScenarioPrompt();
 }
 
-document.getElementById('runCalc').addEventListener('click', runCalcHandler);
+(function(){ const btn = document.getElementById('runCalc'); if(btn){ btn.addEventListener('click', runCalcHandler); } })();
 
 document.getElementById('clearAll').addEventListener('click', ()=>{
   ['dob','retireDate','socsecAge','socsecAmt','pensiondate','pensions','retiresavings','futureretiresavings','taxableNow','spMonthlyNeed'].forEach(id=>{ const el = document.getElementById(id); if(el) el.value = ''; });
@@ -738,3 +738,4 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
