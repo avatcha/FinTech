@@ -40,7 +40,7 @@
     .cb-field { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 14px; font-weight: 600; }
 
-    input[type="date"], input[type="number"], select, input[type="text"] {
+    input[type="month"], input[type="number"], select, input[type="text"] {
       font-size: 16px;
       padding: 12px 14px; border-radius: 14px; border: 1px solid var(--stroke); background: #fdfdfd;
       color: inherit; line-height:1.2; appearance: auto; -moz-appearance: textfield;
@@ -114,11 +114,6 @@
     .with-suffix input[type="number"] { padding-right: 70px; }
     .with-suffix::after { content: attr(data-suffix); position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--muted); pointer-events: none; }
 
-    .action-bar { position: sticky; bottom: 0; inset-inline: 0; background: rgba(255,255,255,.9); backdrop-filter: blur(6px); border-top: 1px solid var(--stroke); display:none; padding: 10px var(--pad-x); z-index: 999; }
-    .action-bar-inner{ max-width: var(--content-w); margin:0 auto; display:flex; gap:10px; align-items:center; }
-    .action-bar .hint { font-size: 12px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    @media (max-width: 640px){ .action-bar{ display:block; } }
-
     #chart { height: clamp(300px, 45vh, 420px); }
     #breakdownChart, #scenarioChart { height: clamp(260px, 42vh, 360px); }
 
@@ -153,12 +148,12 @@
   <div class="cb-stack">
     <div class="cb-card" id="input-card" aria-label="Inputs">
       <div class="cb-row">
-        <div class="cb-field"><label for="dob">Date of Birth</label><input id="dob" type="date" autocomplete="bday" /></div>
-        <div class="cb-field"><label for="retireDate">Retirement Date</label><input id="retireDate" type="date" /></div>
+        <div class="cb-field"><label for="dob">Date of Birth</label><input id="dob" type="month" autocomplete="bday" placeholder="YYYY-MM" /></div>
+        <div class="cb-field"><label for="retireDate">Retirement Date</label><input id="retireDate" type="month" placeholder="YYYY-MM" /></div>
         <div class="cb-field"><label for="retiresavings">Current Retirement Savings ($)</label><input id="retiresavings" type="number" inputmode="decimal" placeholder="e.g., 120000" /></div>
 
         <div class="cb-field"><label for="futureretiresavings">Annual Contributions ($)</label><input id="futureretiresavings" type="number" inputmode="decimal" placeholder="e.g., 18000" /></div>
-        <div class="cb-field"><label for="socsecAge">Social Security Start</label><input id="socsecAge" type="date" /></div>
+        <div class="cb-field"><label for="socsecAge">Social Security Start</label><input id="socsecAge" type="month" placeholder="YYYY-MM" /></div>
 
         <div class="cb-field">
           <label class="tooltip-click-container" for="socsecAmt">
@@ -175,7 +170,7 @@
           <input id="socsecAmt" type="number" inputmode="decimal" placeholder="e.g., 24000" />
         </div>
 
-        <div class="cb-field"><label for="pensiondate">Pension Start</label><input id="pensiondate" type="date" /></div>
+        <div class="cb-field"><label for="pensiondate">Pension Start</label><input id="pensiondate" type="month" placeholder="YYYY-MM" /></div>
         <div class="cb-field"><label for="pensions">Annual Pension Amount ($) Future Dollars</label><input id="pensions" type="number" inputmode="decimal" placeholder="e.g., 12000" /></div>
 
         <div class="cb-field">
@@ -288,13 +283,6 @@
   </div>
 </div>
 
-<div class="action-bar" aria-hidden="false">
-  <div class="action-bar-inner">
-    <div class="hint">Fill a few fields, then run your projection</div>
-    <button class="btn-primary" id="runCalcMobile" aria-label="Run calculation">Run</button>
-  </div>
-</div>
-
 <script>
 function setupTooltip(btnId, boxId) {
   const btn = document.getElementById(btnId);
@@ -339,7 +327,13 @@ let hcChart = null;
 const TAX_DRAG_DEFAULT = 0.006;
 const SS_COLA = 0.02;
 
-function parseDate(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y,(m||1)-1,d||1); }
+function parseDate(s){
+  // Accepts "YYYY-MM" (primary) and tolerates "YYYY-MM-DD"
+  if (!s) return null;
+  const parts = s.split('-').map(Number);
+  const y = parts[0], m = (parts[1] || 1) - 1, d = parts[2] || 1;
+  return new Date(y, m, d);
+}
 function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
 function yearsFromToday(targetYear){ const now=new Date(); const then=new Date(targetYear, now.getMonth(), now.getDate()); return (then - now) / (365.25*86400000); }
 
@@ -537,10 +531,10 @@ function runCalcHandler(){
     }},
     credits:{ enabled:false },
     series:[
-      { name:'3%', data:filter(p3), type:'line', lineWidth:2 },
-      { name:'5%', data:filter(p5), type:'line', lineWidth:2 },
-      { name:'7%', data:filter(p7), type:'line', lineWidth:2 },
-      { name:'9%', data:filter(p9), type:'line', lineWidth:2 }
+      { name:'3% interest', data:filter(p3), type:'line', lineWidth:2 },
+      { name:'5% interest', data:filter(p5), type:'line', lineWidth:2 },
+      { name:'7% interest', data:filter(p7), type:'line', lineWidth:2 },
+      { name:'9% interest', data:filter(p9), type:'line', lineWidth:2 }
     ]
   });
 
@@ -549,12 +543,6 @@ function runCalcHandler(){
 }
 
 document.getElementById('runCalc').addEventListener('click', runCalcHandler);
-const runMobile = document.getElementById('runCalcMobile');
-runMobile.addEventListener('click', ()=>{
-  const dob = document.getElementById('dob').value; const rd = document.getElementById('retireDate').value;
-  if(!dob || !rd){ document.getElementById('input-card').scrollIntoView({behavior:'smooth', block:'start'}); }
-  runCalcHandler();
-});
 
 document.getElementById('clearAll').addEventListener('click', ()=>{
   ['dob','retireDate','socsecAge','socsecAmt','pensiondate','pensions','retiresavings','futureretiresavings','taxableNow','spMonthlyNeed'].forEach(id=>{ const el = document.getElementById(id); if(el) el.value = ''; });
@@ -715,7 +703,7 @@ function buildScenarioCharts() {
         const totalIncome = pts.filter(p => p.series.type === 'column').reduce((s,p)=>s+p.y,0);
         const needPt = pts.find(p => p.series.type === 'line');
         const needVal = needPt ? needPt.y : null;
-        const lines = pts.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>');
+        const lines = pts.map(p => `<span style=\"color:${p.color}\">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>');
         return `<b>${year}</b><br/>${lines}<br/><b>Total income: $${Highcharts.numberFormat(totalIncome,0)}</b>` + (needVal!=null ? `<br/><b>Need: $${Highcharts.numberFormat(needVal,0)}</b>` : '');
       }
     },
