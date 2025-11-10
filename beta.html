@@ -153,11 +153,9 @@
         <div class="cb-field"><label for="retiresavings">Current Retirement Savings ($)</label><input id="retiresavings" type="number" inputmode="decimal" placeholder="e.g., 120000" /></div>
 
         <div class="cb-field"><label for="futureretiresavings">Annual Contributions ($)</label><input id="futureretiresavings" type="number" inputmode="decimal" placeholder="e.g., 18000" /></div>
-        <div class="cb-field"><label for="socsecAge">Social Security Start</label><input id="socsecAge" type="month" placeholder="YYYY-MM" /></div>
-
         <div class="cb-field">
-          <label class="tooltip-click-container" for="socsecAmt">
-            Estimated Annual Social Security ($) Future Dollars
+          <label for="socsecAge">Social Security Start</label>
+          <div class="tooltip-click-container" style="margin-left:6px;">
             <span class="click-icon" id="ssInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="ssInfoBox">?</span>
             <div class="tooltip-click-box" id="ssInfoBox">
               Unsure how much you'll get? Use these official tools:<br><br>
@@ -166,7 +164,12 @@
               • Quick benefit estimate calculator:<br>
               <a href="https://www.ssa.gov/OACT/quickcalc/" target="_blank" rel="noopener">SSA Quick Calculator</a>
             </div>
-          </label>
+          </div>
+          <input id="socsecAge" type="month" placeholder="YYYY-MM" />
+        </div>
+
+        <div class="cb-field">
+          <label for="socsecAmt">Estimated Annual Social Security ($) Future Dollars</label>
           <input id="socsecAmt" type="number" inputmode="decimal" placeholder="e.g., 24000" />
         </div>
 
@@ -174,14 +177,13 @@
         <div class="cb-field"><label for="pensions">Annual Pension Amount ($) Future Dollars</label><input id="pensions" type="number" inputmode="decimal" placeholder="e.g., 12000" /></div>
 
         <div class="cb-field">
-          <label class="tooltip-click-container" for="taxableNow">
-            Non-Retirement Assets ($)
+          <label for="taxableNow">Non-Retirement Assets ($)</label>
+          <div class="tooltip-click-container" style="margin-left:6px;">
             <span class="click-icon" id="taxableInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="taxableInfoBox">i</span>
             <div class="tooltip-click-box" id="taxableInfoBox">
-              Taxable savings/stocks/cash not in retirement accounts. We assume a small annual “tax drag”
-              on growth (default 0.6%) in the main projection. You can fine-tune this in Scenario Planner.
+              Taxable savings/stocks/cash not in retirement accounts. In projections we use an <strong>annual tax rate</strong> on returns (default 15%). You can adjust this in Scenario Planner.
             </div>
-          </label>
+          </div>
           <input id="taxableNow" type="number" inputmode="decimal" placeholder="e.g., 30000" />
         </div>
       </div>
@@ -259,10 +261,10 @@
               <label for="spWithdrawPct">Withdrawal Rate</label>
               <input id="spWithdrawPct" type="number" step="0.1" min="1" max="100" value="4" inputmode="decimal" />
             </div>
-            <div class="cb-field with-suffix" data-suffix="%/yr">
-              <label for="spTaxDragPct">Tax Drag on Non-Retirement Assets</label>
-              <input id="spTaxDragPct" type="number" step="0.1" min="0" max="2" value="0.6" inputmode="decimal" />
-              <small style="color:var(--muted);">Reduces taxable-account growth to approximate ongoing taxes.</small>
+            <div class="cb-field with-suffix" data-suffix="%">
+              <label for="spTaxRatePct">Tax Rate on Non-Retirement Returns</label>
+              <input id="spTaxRatePct" type="number" step="0.1" min="0" max="60" value="15" inputmode="decimal" />
+              <small style="color:var(--muted);">Approximate annual tax rate on taxable-account returns.</small>
             </div>
           </div>
         </div>
@@ -295,6 +297,7 @@ function setupTooltip(btnId, boxId) {
   const toggle = () => (open ? hide() : show());
   btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); toggle(); });
   btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); e.stopPropagation(); toggle(); } });
+  // Allow clicks inside tooltip to proceed (e.g., links)
   box.addEventListener('click', (e)=> e.stopPropagation());
   if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
     container.addEventListener('mouseenter', show);
@@ -324,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 let hcChart = null;
-const TAX_DRAG_DEFAULT = 0.006;
+const TAX_RATE_DEFAULT = 0.15; // 15% default tax rate on taxable returns
 const SS_COLA = 0.02;
 
 function parseDate(s){
@@ -337,7 +340,7 @@ function parseDate(s){
 function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
 function yearsFromToday(targetYear){ const now=new Date(); const then=new Date(targetYear, now.getMonth(), now.getDate()); return (then - now) / (365.25*86400000); }
 
-window.spInputs = { returnPct: 6, inflationPct: 3, withdrawPct: 4, taxDragPct: 0.6, monthlyNeed: 0 };
+window.spInputs = { returnPct: 6, inflationPct: 3, withdrawPct: 4, taxRatePct: 15, monthlyNeed: 0 };
 
 function bindNumber(id, key, min, max){
   const el = document.getElementById(id);
@@ -364,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindNumber('spReturnPct','returnPct',0,100);
   bindNumber('spInflationPct','inflationPct',0,100);
   bindNumber('spWithdrawPct','withdrawPct',1,100);
-  bindNumber('spTaxDragPct','taxDragPct',0,2);
+  bindNumber('spTaxRatePct','taxRatePct',0,60);
 
   const needEl = document.getElementById('spMonthlyNeed');
   const buildBtn = document.getElementById('spBuildBtn');
@@ -421,9 +424,9 @@ function runCalcHandler(){
     const wd  = document.getElementById('withdrawToggle').checked;
     const infText = inf ? 'Main chart shows today’s dollars (3%).' : 'Main chart is nominal.';
     const wdText = wd ? '4% distribution after retirement.' : 'No distributions in main chart.';
-    const taxDragDisclosure = 'Includes non-retirement assets with 0.6%/yr tax drag.';
+    const taxText = `Taxable-account returns modeled with a ${Math.round(TAX_RATE_DEFAULT*100)}% tax rate.`;
     const colaChip = '<span class="chip">SS includes 2% COLA</span>';
-    document.getElementById('chartSubtitle').innerHTML = `${infText} ${wdText} ${taxDragDisclosure} &nbsp; ${colaChip}`;
+    document.getElementById('chartSubtitle').innerHTML = `${infText} ${wdText} ${taxText} &nbsp; ${colaChip}`;
   }
 
   ['inflationToggle','withdrawToggle'].forEach(id=>{
@@ -482,7 +485,8 @@ function runCalcHandler(){
     let balRet = retireNow; let balTax = taxableNow; const totalBal = [];
     for (let i=0; i<timeline.length; i++){
       const y = timeline[i];
-      const rRet = rate; const rTax = Math.max(0, rate - TAX_DRAG_DEFAULT);
+      const rRet = rate; // retirement accounts grow pre-tax here
+      const rTax = Math.max(0, rate * (1 - TAX_RATE_DEFAULT)); // after-tax growth rate approximation
       balRet *= (1 + rRet); balTax *= (1 + rTax);
       balRet += flowContribRet[i];
       if (withdrawActive && y >= retireYear){
@@ -522,7 +526,7 @@ function runCalcHandler(){
       max: tickPositions[tickPositions.length - 1]
     },
     yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
-    legend:{ enabled:true, align:'center', verticalAlign:'top' },
+    legend:{ enabled:true, align:'center', verticalAlign:'top', title: { text: 'Annual Interest Rate' } },
     tooltip:{ shared:true, formatter(){
       const x=(this.points&&this.points[0])?this.points[0].x:this.x;
       const year=Highcharts.dateFormat('%Y', x);
@@ -576,7 +580,7 @@ function buildScenarioCharts() {
   const rNom   = Number(window.spInputs.returnPct || 6) / 100;
   const infl   = Number(window.spInputs.inflationPct || 3) / 100;
   const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;
-  const drag   = Math.max(0, Number(window.spInputs.taxDragPct || 0.6)) / 100;
+  const taxRate = Math.max(0, Math.min(0.6, Number(window.spInputs.taxRatePct || 15) / 100));
   const monthlyNeedToday = Number(window.spInputs.monthlyNeed || 0);
 
   if (monthlyNeedToday <= 0) return;
@@ -590,7 +594,7 @@ function buildScenarioCharts() {
     let r = retireNow; let t = taxableNow;
     for (let y = currentYear; y <= retireYear; y++) {
       r *= (1 + rNom);
-      t *= (1 + Math.max(0, rNom - drag));
+      t *= (1 + Math.max(0, rNom * (1 - taxRate)));
       if (y < retireYear) r += retireAnnual;
     }
     return { r, t };
@@ -629,7 +633,7 @@ function buildScenarioCharts() {
       shared: true,
       formatter: function(){
         const total = this.points.reduce((s,p)=>s+p.y,0);
-        const lines = this.points.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`).join('<br/>');
+        const lines = this.points.map(p => `<span style=\"color:${p.color}\">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`).join('<br/>');
         return `<b>${this.x}</b><br/>${lines}<br/><b>Total: $${Highcharts.numberFormat(total,0)}/mo</b>`;
       }
     },
@@ -660,7 +664,7 @@ function buildScenarioCharts() {
     const penAnnual = (penStart && penStart.getFullYear() <= y) ? penAmtAnnual : 0;
 
     r *= (1 + rNom);
-    t *= (1 + Math.max(0, rNom - drag));
+    t *= (1 + Math.max(0, rNom * (1 - taxRate)));
     const total = r + t; let wdAnnual = 0, wdRet = 0, wdTax = 0;
     if (total > 0) {
       wdAnnual = total * wdRate;
