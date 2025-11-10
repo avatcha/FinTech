@@ -189,7 +189,7 @@
       </div>
 
       <div class="cb-actions" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-        <button id="runCalc" class="btn-primary">Run Calculation</button>
+        <button id="runCalc" type="button" class="btn-primary">Run Calculation</button>
         <button id="clearAll" class="btn" style="background:#eef2ff; color:#1f2a59;">Clear</button>
       </div>
     </div>
@@ -551,6 +551,11 @@ function runCalcHandler(){
 document.addEventListener('DOMContentLoaded', ()=>{
   const btn = document.getElementById('runCalc');
   if (btn) btn.addEventListener('click', runCalcHandler);
+});
+// Extra safety: delegate clicks in case the button is re-rendered
+document.addEventListener('click', (e)=>{
+  const btn = e.target && e.target.closest && e.target.closest('#runCalc');
+  if (btn) { e.preventDefault(); runCalcHandler(); }
 });
 
 document.getElementById('clearAll').addEventListener('click', ()=>{
