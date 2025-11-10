@@ -122,6 +122,7 @@
     }
 
     .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59; font-weight:700; font-size:12px; }
+  .center-title{ text-align:center; }
   </style>
 
   <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -153,9 +154,13 @@
         <div class="cb-field"><label for="retiresavings">Current Retirement Savings ($)</label><input id="retiresavings" type="number" inputmode="decimal" placeholder="e.g., 120000" /></div>
 
         <div class="cb-field"><label for="futureretiresavings">Annual Contributions ($)</label><input id="futureretiresavings" type="number" inputmode="decimal" placeholder="e.g., 18000" /></div>
+        <div class="cb-field"><label for="socsecAge">Social Security Start</label>
+          <input id="socsecAge" type="month" placeholder="YYYY-MM" />
+        </div>
+
         <div class="cb-field">
-          <label class="tooltip-click-container" for="socsecAge">
-            Social Security Start
+          <label class="tooltip-click-container" for="socsecAmt">
+            Estimated Annual Social Security ($) Future Dollars
             <span class="click-icon" id="ssInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="ssInfoBox">?</span>
             <div class="tooltip-click-box" id="ssInfoBox">
               Unsure how much you'll get? Use these official tools:<br><br>
@@ -165,11 +170,6 @@
               <a href="https://www.ssa.gov/OACT/quickcalc/" target="_blank" rel="noopener">SSA Quick Calculator</a>
             </div>
           </label>
-          <input id="socsecAge" type="month" placeholder="YYYY-MM" />
-        </div>
-
-        <div class="cb-field">
-          <label for="socsecAmt">Estimated Annual Social Security ($) Future Dollars</label>
           <input id="socsecAmt" type="number" inputmode="decimal" placeholder="e.g., 24000" />
         </div>
 
@@ -181,10 +181,10 @@
             Non-Retirement Assets ($)
             <span class="click-icon" id="taxableInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="taxableInfoBox">i</span>
             <div class="tooltip-click-box" id="taxableInfoBox">
-              Taxable savings/stocks/cash not in retirement accounts. In projections we use an <strong>annual tax rate</strong> on returns (default 15%). You can adjust this in Scenario Planner.
+              Taxable savings/stocks/cash not in retirement accounts. In projections we use an <strong>annual tax rate</strong> on returns (default 0.6%). You can adjust this in Scenario Planner.
             </div>
           </label>
-          <input id="taxableNow" type="number" inputmode="decimal" placeholder="e.g., 30000" />
+          <input id="taxableNow" type="number" inputmode="decimal" placeholder="e.g., 30000" type="number" inputmode="decimal" placeholder="e.g., 30000" />
         </div>
       </div>
 
@@ -263,7 +263,7 @@
             </div>
             <div class="cb-field with-suffix" data-suffix="%">
               <label for="spTaxRatePct">Tax Rate on Non-Retirement Returns</label>
-              <input id="spTaxRatePct" type="number" step="0.1" min="0" max="60" value="15" inputmode="decimal" />
+              <input id="spTaxRatePct" type="number" step="0.1" min="0" max="60" value="0.6" inputmode="decimal" />
               <small style="color:var(--muted);">Approximate annual tax rate on taxable-account returns.</small>
             </div>
           </div>
@@ -299,10 +299,7 @@ function setupTooltip(btnId, boxId) {
   btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); e.stopPropagation(); toggle(); } });
   // Allow clicks inside tooltip to proceed (e.g., links)
   box.addEventListener('click', (e)=> e.stopPropagation());
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    container.addEventListener('mouseenter', show);
-    container.addEventListener('mouseleave', hide);
-  }
+  
   document.addEventListener('click', hide);
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hide(); });
 }
@@ -327,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 let hcChart = null;
-const TAX_RATE_DEFAULT = 0.15; // 15% default tax rate on taxable returns
+const TAX_RATE_DEFAULT = 0.006; // 0.6% default tax rate on taxable returns
 const SS_COLA = 0.02;
 
 function parseDate(s){
@@ -340,7 +337,7 @@ function parseDate(s){
 function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
 function yearsFromToday(targetYear){ const now=new Date(); const then=new Date(targetYear, now.getMonth(), now.getDate()); return (then - now) / (365.25*86400000); }
 
-window.spInputs = { returnPct: 6, inflationPct: 3, withdrawPct: 4, taxRatePct: 15, monthlyNeed: 0 };
+window.spInputs = { returnPct: 6, inflationPct: 3, withdrawPct: 4, taxRatePct: 0.6, monthlyNeed: 0 };
 
 function bindNumber(id, key, min, max){
   const el = document.getElementById(id);
@@ -424,7 +421,7 @@ function runCalcHandler(){
     const wd  = document.getElementById('withdrawToggle').checked;
     const infText = inf ? 'Main chart shows today’s dollars (3%).' : 'Main chart is nominal.';
     const wdText = wd ? '4% distribution after retirement.' : 'No distributions in main chart.';
-    const taxText = `Taxable-account returns modeled with a ${Math.round(TAX_RATE_DEFAULT*100)}% tax rate.`;
+    const taxText = `Taxable-account returns modeled with a ${(TAX_RATE_DEFAULT*100).toFixed(1)}% tax rate.`;
     const colaChip = '<span class="chip">SS includes 2% COLA</span>';
     document.getElementById('chartSubtitle').innerHTML = `${infText} ${wdText} ${taxText} &nbsp; ${colaChip}`;
   }
@@ -523,11 +520,13 @@ function runCalcHandler(){
       tickPositions,
       labels: { enabled:true, formatter(){ return Highcharts.dateFormat('%Y', this.value); } },
       min: tickPositions[0],
-      max: tickPositions[tickPositions.length - 1]
+      max: tickPositions[tickPositions.length - 1],
+      title: { text: 'Year' }
     },
     yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
     legend:{ enabled:true, align:'center', verticalAlign:'top',
-      title: { useHTML:true, text: '<div style="text-align:center;width:100%">Annual Interest Rate</div>' }
+      title: { text: 'Annual Interest Rate', style: { fontWeight:'700', width:'100%', textAlign:'center', display:'block' } }
+    }
     },
     tooltip:{ shared:true, formatter(){
       const x=(this.points&&this.points[0])?this.points[0].x:this.x;
@@ -621,7 +620,7 @@ function buildScenarioCharts() {
   Highcharts.chart('breakdownChart', {
     chart: { type: 'column', backgroundColor: 'transparent', height: 320, reflow: true },
     title: { text: null },
-    xAxis: { categories: ['Retirement Year'] },
+    xAxis: { categories: ['Retirement Year'], title: { text: 'Year' } },
     yAxis: {
       min: 0,
       title: { text: 'Monthly Resources ($)' },
@@ -694,7 +693,7 @@ function buildScenarioCharts() {
     chart: { backgroundColor: 'transparent', height: 320, reflow: true },
     title: { text: null },
     subtitle: { text: subtitle },
-    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}' }, tickInterval: 365*24*3600*1000 },
+    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}' }, tickInterval: 365*24*3600*1000, title: { text: 'Year' } },
     yAxis: {
       title: { text: 'Annual Amount ($)' },
       labels: { formatter(){ return '$' + Highcharts.numberFormat(this.value, 0); } }
@@ -739,4 +738,3 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
-
