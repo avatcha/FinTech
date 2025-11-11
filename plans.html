@@ -1,1 +1,446 @@
-Placeholder
+import React, { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { CheckCircle, Stethoscope, Pill, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+
+// --- Types (the contract you will keep stable when you later wire real data) ---
+
+type CoverageUniverse = "ACA" | "Medicare" | "OffExchange";
+
+type DrugInput = {
+  name: string; // free text from user
+  rxcui?: string; // normalized id
+  strength?: string;
+  monthlyQty: number; // number of 30-day fills per month (e.g., 1)
+};
+
+type PharmacyPref = "preferred" | "standard" | "mail";
+
+type Plan = {
+  id: string;
+  issuer: string;
+  name: string;
+  coverageUniverse: CoverageUniverse;
+  metal?: "Bronze" | "Silver" | "Gold" | "Platinum"; // ACA
+  premiumMonthly: number;
+  deductibleDrug: number; // amount that applies to Rx before copays kick in
+  oopMax?: number; // ACA-only for this mock
+  pharmacyNetwork: PharmacyPref[]; // which networks exist
+  tiers: Array<{
+    tier: 1 | 2 | 3 | 4 | 5;
+    // Simple mock cost-sharing. In real life, these are phase/CSR/contract dependent.
+    copayPreferred?: number; // flat copay at preferred retail
+    copayStandard?: number; // flat copay at standard retail
+    copayMail?: number; // 90-day mail copay (per 30-day equivalent)
+    coinsurance?: number; // percentage 0..1 (if present, use against negotiated price)
+    subjectToDeductible?: boolean;
+  }>;
+  notes?: string[];
+};
+
+type DrugOnPlan = {
+  rxcui: string;
+  tier: 1 | 2 | 3 | 4 | 5;
+  pa?: boolean; // prior auth
+  st?: boolean; // step therapy
+  ql?: boolean; // quantity limit
+  // negotiated price is not publicly available generally; mock an estimate so the math has something sane
+  estNegotiatedPrice30: number; // per 30-day supply
+};
+
+type PlanResult = {
+  plan: Plan;
+  coversAllMeds: boolean;
+  uncoveredDrugs: DrugInput[];
+  annualDrugCost: number; // member share for drugs
+  annualPremium: number;
+  totalAnnual: number;
+  why: string[]; // human-friendly bullets
+  perDrugBreakdown: Array<{
+    drug: DrugInput;
+    tier?: number;
+    perFill: number;
+    fillsPerYear: number;
+    annual: number;
+    details: string[];
+  }>;
+};
+
+// --- Mock Data (replace with your real ETL later) ---
+
+const MOCK_RXNORM: Record<string, { rxcui: string; strength?: string }> = {
+  atorvastatin: { rxcui: "83367", strength: "20 mg" },
+  metformin: { rxcui: "860975", strength: "500 mg" },
+  ozempic: { rxcui: "1991311", strength: "2 mg/1.5 mL" },
+};
+
+const MOCK_PLANS: Plan[] = [
+  {
+    id: "aca-1",
+    issuer: "Acme Health",
+    name: "Acme Silver 2000",
+    coverageUniverse: "ACA",
+    metal: "Silver",
+    premiumMonthly: 485,
+    deductibleDrug: 0,
+    oopMax: 9100,
+    pharmacyNetwork: ["preferred", "standard", "mail"],
+    tiers: [
+      { tier: 1, copayPreferred: 5, copayStandard: 12, copayMail: 12, subjectToDeductible: false },
+      { tier: 2, copayPreferred: 25, copayStandard: 40, copayMail: 35, subjectToDeductible: false },
+      { tier: 3, coinsurance: 0.35, subjectToDeductible: true },
+      { tier: 4, coinsurance: 0.5, subjectToDeductible: true },
+      { tier: 5, coinsurance: 0.6, subjectToDeductible: true },
+    ],
+    notes: ["Good Tier 1/2 copays", "Mail-order savings on Tier 2"],
+  },
+  {
+    id: "aca-2",
+    issuer: "Beacon",
+    name: "Beacon Bronze HSA 6000",
+    coverageUniverse: "ACA",
+    metal: "Bronze",
+    premiumMonthly: 355,
+    deductibleDrug: 6000,
+    oopMax: 9100,
+    pharmacyNetwork: ["preferred", "mail"],
+    tiers: [
+      { tier: 1, coinsurance: 0.2, subjectToDeductible: true },
+      { tier: 2, coinsurance: 0.4, subjectToDeductible: true },
+      { tier: 3, coinsurance: 0.5, subjectToDeductible: true },
+      { tier: 4, coinsurance: 0.5, subjectToDeductible: true },
+      { tier: 5, coinsurance: 0.6, subjectToDeductible: true },
+    ],
+    notes: ["Lower premiums, HSA eligible"],
+  },
+  {
+    id: "medd-1",
+    issuer: "Sunrise Rx",
+    name: "Sunrise Part D Value",
+    coverageUniverse: "Medicare",
+    premiumMonthly: 25,
+    deductibleDrug: 545, // mock Part D deductible
+    pharmacyNetwork: ["preferred", "standard", "mail"],
+    tiers: [
+      { tier: 1, copayPreferred: 0, copayStandard: 5, copayMail: 0, subjectToDeductible: false },
+      { tier: 2, copayPreferred: 8, copayStandard: 15, copayMail: 8, subjectToDeductible: false },
+      { tier: 3, coinsurance: 0.25, subjectToDeductible: true },
+      { tier: 4, coinsurance: 0.5, subjectToDeductible: true },
+      { tier: 5, coinsurance: 0.33, subjectToDeductible: true },
+    ],
+    notes: ["$0 Tier 1 at preferred pharmacies"],
+  },
+];
+
+const MOCK_FORMULARIES: Record<string, DrugOnPlan[]> = {
+  "aca-1": [
+    { rxcui: "83367", tier: 1, estNegotiatedPrice30: 8 }, // atorvastatin
+    { rxcui: "860975", tier: 1, estNegotiatedPrice30: 6 }, // metformin
+    { rxcui: "1991311", tier: 3, estNegotiatedPrice30: 900, pa: true }, // ozempic
+  ],
+  "aca-2": [
+    { rxcui: "83367", tier: 2, estNegotiatedPrice30: 12 },
+    { rxcui: "860975", tier: 2, estNegotiatedPrice30: 10 },
+  ],
+  "medd-1": [
+    { rxcui: "83367", tier: 1, estNegotiatedPrice30: 5 },
+    { rxcui: "860975", tier: 1, estNegotiatedPrice30: 5 },
+    { rxcui: "1991311", tier: 3, estNegotiatedPrice30: 850, pa: true, ql: true },
+  ],
+};
+
+// --- Mock service layer (swap this with real HTTP calls later) ---
+
+const api = {
+  normalizeDrug: async (freeText: string): Promise<{ rxcui: string; name: string; strength?: string } | null> => {
+    await delay(200);
+    const key = freeText.trim().toLowerCase();
+    if (MOCK_RXNORM[key]) return { rxcui: MOCK_RXNORM[key].rxcui, name: freeText, strength: MOCK_RXNORM[key].strength };
+    // fallback pseudo-id
+    return { rxcui: `rx-${key}`.slice(0, 12), name: freeText };
+  },
+  listPlans: async (universe: CoverageUniverse): Promise<Plan[]> => {
+    await delay(250);
+    return MOCK_PLANS.filter((p) => p.coverageUniverse === universe);
+  },
+  getFormularyForPlan: async (planId: string): Promise<DrugOnPlan[]> => {
+    await delay(150);
+    return MOCK_FORMULARIES[planId] || [];
+  },
+};
+
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+// --- Cost engine (mock, but follows the real shape so you can replace internals later) ---
+
+function estimateAnnualCosts(
+  plan: Plan,
+  drugs: DrugInput[],
+  pharmacyPref: PharmacyPref
+): PlanResult {
+  let deductibleRemaining = plan.deductibleDrug;
+  const perDrugBreakdown: PlanResult["perDrugBreakdown"] = [];
+  const formulary = (MOCK_FORMULARIES[plan.id] || []) as DrugOnPlan[];
+  const why: string[] = [];
+
+  let coversAll = true;
+  let annualDrugCost = 0;
+
+  for (const d of drugs) {
+    const f = d.rxcui ? formulary.find((x) => x.rxcui === d.rxcui) : undefined;
+    if (!f) {
+      coversAll = false;
+      perDrugBreakdown.push({ drug: d, perFill: 0, fillsPerYear: d.monthlyQty * 12, annual: 0, details: ["Not on formulary"] });
+      continue;
+    }
+
+    const tierInfo = plan.tiers.find((t) => t.tier === f.tier);
+    if (!tierInfo) continue;
+
+    const perFillQty = Math.max(1, d.monthlyQty); // number of 30-day fills per month
+    const fillsPerYear = perFillQty * 12;
+
+    let perFill = 0;
+    const details: string[] = [];
+
+    // Deductible step (simplified)
+    if (tierInfo.subjectToDeductible && deductibleRemaining > 0) {
+      const spend = Math.min(deductibleRemaining, f.estNegotiatedPrice30);
+      perFill += spend;
+      deductibleRemaining -= spend;
+      details.push(`Deductible applies: $${spend.toFixed(2)} this fill`);
+    }
+
+    // Post-deductible cost-sharing
+    if (tierInfo.coinsurance != null) {
+      const coins = (tierInfo.coinsurance || 0) * f.estNegotiatedPrice30;
+      perFill += coins;
+      details.push(`Coinsurance ${(tierInfo.coinsurance * 100).toFixed(0)}% on $${f.estNegotiatedPrice30.toFixed(2)}`);
+    } else {
+      const copay = pharmacyPref === "preferred" ? tierInfo.copayPreferred ?? tierInfo.copayStandard ?? 0
+        : pharmacyPref === "standard" ? tierInfo.copayStandard ?? tierInfo.copayPreferred ?? 0
+        : tierInfo.copayMail ?? tierInfo.copayPreferred ?? 0;
+      perFill += copay || 0;
+      details.push(`Copay ${pharmacyPref}: $${(copay || 0).toFixed(2)}`);
+    }
+
+    const annual = perFill * fillsPerYear;
+    annualDrugCost += annual;
+
+    const guardrails = [f.pa ? "PA" : null, f.st ? "ST" : null, f.ql ? "QL" : null].filter(Boolean) as string[];
+    if (guardrails.length) details.push(`Utilization mgmt: ${guardrails.join(", ")}`);
+
+    perDrugBreakdown.push({ drug: d, tier: f.tier, perFill, fillsPerYear, annual, details });
+  }
+
+  const annualPremium = plan.premiumMonthly * 12;
+  const totalAnnual = annualPremium + annualDrugCost;
+
+  if (plan.notes) why.push(...plan.notes);
+  if (coversAll) why.push("Covers all listed medications");
+
+  return {
+    plan,
+    coversAllMeds: coversAll,
+    uncoveredDrugs: coversAll ? [] : drugs.filter((d) => !(MOCK_FORMULARIES[plan.id] || []).some((f) => f.rxcui === d.rxcui)),
+    annualDrugCost,
+    annualPremium,
+    totalAnnual,
+    why,
+    perDrugBreakdown,
+  };
+}
+
+// --- UI ---
+
+export default function HealthPlanFinderMock() {
+  const [universe, setUniverse] = useState<CoverageUniverse>("ACA");
+  const [zip, setZip] = useState("");
+  const [pharmacy, setPharmacy] = useState<PharmacyPref>("preferred");
+  const [drugs, setDrugs] = useState<DrugInput[]>([]);
+  const [newDrug, setNewDrug] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<PlanResult[] | null>(null);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const addDrug = async () => {
+    if (!newDrug.trim()) return;
+    const norm = await api.normalizeDrug(newDrug);
+    setDrugs((prev) => [
+      ...prev,
+      { name: newDrug.trim(), rxcui: norm?.rxcui, strength: norm?.strength, monthlyQty: 1 },
+    ]);
+    setNewDrug("");
+  };
+
+  const removeDrug = (idx: number) => setDrugs((d) => d.filter((_, i) => i !== idx));
+
+  const run = async () => {
+    setLoading(true);
+    try {
+      const plans = await api.listPlans(universe);
+      const normalized = await Promise.all(
+        drugs.map(async (d) => (d.rxcui ? d : { ...(await api.normalizeDrug(d.name)), name: d.name, monthlyQty: d.monthlyQty }))
+      );
+      const drugInputs: DrugInput[] = normalized.map((n) => ({ name: n?.name || "Drug", rxcui: n?.rxcui, strength: (n as any)?.strength, monthlyQty: (n as any)?.monthlyQty || 1 }));
+
+      const scored: PlanResult[] = plans.map((p) => estimateAnnualCosts(p, drugInputs, pharmacy));
+      scored.sort((a, b) => a.totalAnnual - b.totalAnnual);
+      setResults(scored);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const headerNote = useMemo(() => {
+    switch (universe) {
+      case "ACA":
+        return "Mock ACA-style cost sharing (deductible + copay/coinsurance).";
+      case "Medicare":
+        return "Mock Part D logic (simplified deductible + copay/coinsurance).";
+      default:
+        return "Generic off-exchange mock plan math.";
+    }
+  }, [universe]);
+
+  return (
+    <div className="p-6 max-w-5xl mx-auto">
+      <motion.h1 className="text-3xl font-semibold flex items-center gap-2" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>
+        <Stethoscope className="w-8 h-8" /> Plan Finder (Mocked)
+      </motion.h1>
+
+      <p className="text-sm text-gray-600 mt-1">Contract‑first prototype. Swap the service layer later. {headerNote}</p>
+
+      <div className="grid md:grid-cols-3 gap-4 mt-6">
+        <div className="col-span-2 space-y-3">
+          <div className="bg-white rounded-2xl shadow p-4">
+            <h2 className="font-medium mb-2">Basics</h2>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <div>
+                <label className="text-sm text-gray-600">Coverage</label>
+                <select value={universe} onChange={(e) => setUniverse(e.target.value as CoverageUniverse)} className="w-full mt-1 border rounded-xl p-2">
+                  <option value="ACA">ACA / Exchange</option>
+                  <option value="Medicare">Medicare (Part D)</option>
+                  <option value="OffExchange">Off‑Exchange</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">ZIP</label>
+                <input value={zip} onChange={(e) => setZip(e.target.value)} placeholder="12345" className="w-full mt-1 border rounded-xl p-2" />
+              </div>
+              <div>
+                <label className="text-sm text-gray-600">Pharmacy</label>
+                <select value={pharmacy} onChange={(e) => setPharmacy(e.target.value as PharmacyPref)} className="w-full mt-1 border rounded-xl p-2">
+                  <option value="preferred">Preferred retail</option>
+                  <option value="standard">Standard retail</option>
+                  <option value="mail">Mail order</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow p-4">
+            <h2 className="font-medium mb-2 flex items-center gap-2"><Pill className="w-5 h-5"/> Medications</h2>
+            <div className="flex gap-2 mt-2">
+              <input value={newDrug} onChange={(e) => setNewDrug(e.target.value)} placeholder="e.g., atorvastatin 20 mg" className="flex-1 border rounded-xl p-2" />
+              <button onClick={addDrug} className="px-3 py-2 rounded-xl bg-black text-white">Add</button>
+            </div>
+            {drugs.length > 0 && (
+              <ul className="mt-3 space-y-2">
+                {drugs.map((d, i) => (
+                  <li key={i} className="flex items-center justify-between border rounded-xl p-2">
+                    <div className="text-sm">
+                      <span className="font-medium">{d.name}</span>
+                      {d.strength && <span className="text-gray-500"> • {d.strength}</span>}
+                      <span className="ml-2 text-gray-600">Qty/mo: </span>
+                      <input type="number" min={1} value={d.monthlyQty} onChange={(e) => setDrugs((arr) => arr.map((x, idx) => idx === i ? { ...x, monthlyQty: parseInt(e.target.value || "1", 10) } : x))} className="w-16 ml-1 border rounded-lg p-1"/>
+                    </div>
+                    <button onClick={() => removeDrug(i)} className="text-red-600 text-sm">Remove</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button onClick={run} disabled={loading} className="px-4 py-3 rounded-2xl bg-indigo-600 text-white shadow">{loading ? "Calculating…" : "Get suggestions"}</button>
+            <span className="text-gray-500 text-sm">This is a mock; costs are illustrative only.</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow p-4 md:sticky md:top-6 h-fit">
+          <h3 className="font-medium mb-2 flex items-center gap-2"><Sparkles className="w-5 h-5"/> What makes this useful?</h3>
+          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+            <li>Contract‑first API boundary (easy to swap data sources).</li>
+            <li>Explains the math for each plan and drug.</li>
+            <li>Flags PA/ST/QL when applicable.</li>
+            <li>Supports preferred vs. standard vs. mail pharmacy.</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Results */}
+      {results && (
+        <div className="mt-8 space-y-4">
+          {results.map((r) => (
+            <motion.div key={r.plan.id} className="bg-white rounded-2xl shadow p-4" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm text-gray-500">{r.plan.issuer}</div>
+                  <h3 className="text-lg font-semibold">{r.plan.name}</h3>
+                  <div className="text-sm text-gray-600 mt-1 flex flex-wrap gap-2">
+                    {r.plan.metal && <span className="px-2 py-0.5 rounded-full bg-gray-100">{r.plan.metal}</span>}
+                    <span className="px-2 py-0.5 rounded-full bg-gray-100">${r.plan.premiumMonthly.toFixed(0)}/mo premium</span>
+                    <span className="px-2 py-0.5 rounded-full bg-gray-100">Rx deductible ${r.plan.deductibleDrug}</span>
+                    {r.coversAllMeds ? (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 flex items-center gap-1"><CheckCircle className="w-4 h-4"/>Covers all meds</span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800">Some meds not covered</span>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-gray-500">Estimated annual</div>
+                  <div className="text-2xl font-bold">${r.totalAnnual.toFixed(0)}</div>
+                  <div className="text-xs text-gray-500">Premium ${r.annualPremium.toFixed(0)} + Drugs ${r.annualDrugCost.toFixed(0)}</div>
+                </div>
+              </div>
+
+              {r.why.length > 0 && (
+                <ul className="mt-2 text-sm text-gray-700 flex flex-wrap gap-2">
+                  {r.why.map((w, idx) => (
+                    <li key={idx} className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">{w}</li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="mt-3">
+                <button onClick={() => setExpanded((e) => ({ ...e, [r.plan.id]: !e[r.plan.id] }))} className="text-sm text-indigo-700 flex items-center gap-1">
+                  {expanded[r.plan.id] ? <ChevronUp className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>}
+                  Explain the math
+                </button>
+                {expanded[r.plan.id] && (
+                  <div className="mt-2 border rounded-xl p-3">
+                    {r.perDrugBreakdown.map((bd, i) => (
+                      <div key={i} className="text-sm border-b last:border-b-0 py-2">
+                        <div className="font-medium">{bd.drug.name} {bd.tier ? <span className="text-gray-500">(Tier {bd.tier})</span> : null}</div>
+                        <div className="text-gray-700">Per fill: ${bd.perFill.toFixed(2)} × {bd.fillsPerYear} fills/year = <span className="font-medium">${bd.annual.toFixed(0)}</span></div>
+                        <ul className="text-gray-600 ml-4 list-disc list-outside">
+                          {bd.details.map((d, j) => <li key={j}>{d}</li>)}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      <footer className="text-xs text-gray-500 mt-8">
+        This demo is educational and for research. Costs are illustrative, not quotes. Replace mocks with CMS/QHP data when ready.
+      </footer>
+    </div>
+  );
+}
+
