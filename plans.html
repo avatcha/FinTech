@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Healthcare Plans (Mock)</title>
+  <title>Healthcare Plan Finder (Mock)</title>
 
   <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,53 +19,49 @@
     @media (prefers-color-scheme: dark){
       :root{ --bg:#0b1220; --text:#e7ecf6; --muted:#a5b1cc; --card:#0e172a; --stroke:#1e293b; --soft:#0f1b33; --shadow:none; }
     }
-    html, body { height:100%; }
     body { font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); margin:0; padding-top:64px; color:var(--text); }
 
     .cb-wrap { max-width: var(--content-w); margin: 0 auto; padding: 0 var(--pad-x); }
     .site-header { position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--stroke); }
     @media (prefers-color-scheme: dark){ .site-header{ background: rgba(10,15,28,.65); } }
     .header-inner { display:flex; justify-content:space-between; align-items:center; min-height:60px; }
-    .brand { font-weight:800; font-size:20px; text-decoration:none; color:var(--text); letter-spacing:.2px; }
+    .brand { font-weight:800; font-size:20px; text-decoration:none; color:var(--text); }
     .nav-links { display:flex; gap:20px; }
     .nav-links a { color:inherit; font-weight:600; text-decoration:none; font-size:14px; }
     .nav-links a:hover { text-decoration: underline; }
 
     .cb-header { margin: 20px 0; }
-    .cb-title { font-size: clamp(24px, 3.6vw, 40px); font-weight: 700; margin: 0; line-height:1.1; }
+    .cb-title { font-size: clamp(24px, 3.6vw, 40px); font-weight: 700; margin: 0; }
     .cb-sub { font-size: 15px; color: var(--muted); margin-top: 6px; }
 
-    .cb-card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--stroke); overflow:hidden; }
+    .cb-card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--stroke); margin-bottom:20px; }
     .cb-stack { display:flex; flex-direction:column; gap:16px; }
     .cb-row { display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; }
     @media (max-width: 740px){ .cb-row { grid-template-columns: 1fr; } }
 
     label { font-size:14px; font-weight:600; display:block; }
-    input[type="text"], input[type="number"], select, button {
-      font-size:16px; padding:12px 14px; border-radius:14px; border:1px solid var(--stroke); background:#fdfdfd; width:100%;
+    input, select, button {
+      font-size:16px; padding:12px 14px; border-radius:14px; border:1px solid var(--stroke); background:#fff; width:100%;
     }
     button { background:var(--brand); color:#fff; font-weight:700; cursor:pointer; }
     button:hover { background:var(--brand-700); }
     .btn-secondary { background:#eef2ff; color:#1f2a59; border:1px solid var(--stroke); }
-    .pill { display:inline-block; background:#eef2ff; color:#1f2a59; border-radius:999px; padding:4px 10px; font-weight:700; font-size:12px; }
 
-    .flex { display:flex; gap:10px; align-items:center; }
-    .drug-chip { display:flex; align-items:center; gap:8px; background:var(--soft); border:1px solid var(--stroke); padding:8px 10px; border-radius:999px; }
+    .drug-chip { display:flex; gap:10px; align-items:center; background:var(--soft); border:1px solid var(--stroke); padding:8px 12px; border-radius:999px; margin-top:8px; }
     .small { font-size:12px; color:var(--muted); }
-    .plan-row { display:grid; grid-template-columns: 2fr 1fr; gap:12px; align-items:start; }
-    @media (max-width: 900px){ .plan-row { grid-template-columns: 1fr; } }
-    .muted { color:var(--muted); }
-    details > summary { cursor:pointer; font-weight:700; margin-top:8px; }
-    table { width:100%; border-collapse: collapse; }
-    th, td { padding:8px 10px; border-bottom:1px solid var(--stroke); text-align:left; }
-    th { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); }
+    details > summary { cursor:pointer; font-weight:700; }
+    table { width:100%; border-collapse: collapse; margin-top:8px; }
+    th, td { padding:8px; border-bottom:1px solid var(--stroke); text-align:left; }
+    th { font-size:12px; color:var(--muted); }
   </style>
 </head>
+
 <body>
 
 <header class="site-header">
   <div class="cb-wrap header-inner">
     <a class="brand" href="index.html">stakxAi</a>
+
     <nav id="primary-nav" class="nav-links">
       <a href="index.html#retirement">Retirement Planner</a>
       <a href="budget/easy.html">Budget Tool</a>
@@ -76,74 +72,64 @@
 
 <main class="cb-wrap">
   <div class="cb-header">
-    <h1 class="cb-title">Plan Finder (Mocked)</h1>
-    <div class="cb-sub">Contract-first prototype. Swap the service layer later. <span class="pill" id="universeNote">ACA mock</span></div>
+    <h1 class="cb-title">Healthcare Plan Finder (Mock)</h1>
+    <div class="cb-sub">This is a simplified prototype. Replace mock data later.</div>
   </div>
 
-  <div class="cb-stack">
-    <section class="cb-card">
-      <div class="cb-row">
-        <div>
-          <label for="universe">Coverage</label>
-          <select id="universe">
-            <option value="ACA" selected>ACA / Exchange</option>
-            <option value="Medicare">Medicare (Part D)</option>
-            <option value="OffExchange">Off-Exchange</option>
-          </select>
-        </div>
-        <div>
-          <label for="zip">ZIP</label>
-          <input id="zip" type="text" placeholder="12345" />
-        </div>
-        <div>
-          <label for="pharmacy">Pharmacy</label>
-          <select id="pharmacy">
-            <option value="preferred" selected>Preferred retail</option>
-            <option value="standard">Standard retail</option>
-            <option value="mail">Mail (90-day)</option>
-          </select>
-        </div>
-        <div>
-          <label for="drugInput">Medications</label>
-          <div class="flex">
-            <input id="drugInput" type="text" placeholder="e.g., atorvastatin 20 mg" />
-            <button id="addDrugBtn" style="width:auto; white-space:nowrap;">Add</button>
-          </div>
-          <div id="drugList" class="flex" style="flex-wrap:wrap; margin-top:10px;"></div>
-          <div class="small" style="margin-top:6px;">Example meds: atorvastatin, metformin, ozempic</div>
-        </div>
+  <!-- USER INPUTS -->
+  <div class="cb-card">
+    <div class="cb-row">
+      <div>
+        <label>Coverage</label>
+        <select id="universe">
+          <option value="ACA">ACA / Exchange</option>
+          <option value="Medicare">Medicare</option>
+          <option value="OffExchange">Off Exchange</option>
+        </select>
       </div>
-      <div class="flex" style="margin-top:12px; flex-wrap:wrap;">
-        <button id="runBtn">Get suggestions</button>
-        <button id="clearBtn" class="btn-secondary">Clear</button>
-        <span class="small muted">This is a mock; costs are illustrative only.</span>
-      </div>
-    </section>
 
-    <section id="resultsCard" class="cb-card" style="display:none;">
-      <div class="plan-row">
-        <div>
-          <h2 style="margin:0 0 8px 0;">Suggested plans</h2>
-          <div id="results"></div>
-        </div>
-        <aside>
-          <h3 style="margin:0 0 8px 0; font-size:16px;">What makes this useful?</h3>
-          <ul class="small">
-            <li>Contract-first API boundary (easy to swap data sources)</li>
-            <li>Explains the math for each plan and drug</li>
-            <li>Flags PA/ST/QL when applicable</li>
-            <li>Supports preferred vs. standard vs. mail pharmacy</li>
-          </ul>
-        </aside>
+      <div>
+        <label>ZIP</label>
+        <input id="zip" placeholder="12345" />
       </div>
-      <p class="small muted" style="margin-top:10px;">This demo is educational and for research. Costs are illustrative, not quotes. Replace mocks with CMS/QHP data when ready.</p>
-    </section>
+
+      <div>
+        <label>Pharmacy</label>
+        <select id="pharmacy">
+          <option value="preferred">Preferred retail</option>
+          <option value="standard">Standard retail</option>
+          <option value="mail">Mail order</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Medications</label>
+        <div style="display:flex; gap:8px;">
+          <input id="drugInput" placeholder="atorvastatin" />
+          <button id="addDrugBtn" style="width:auto;">Add</button>
+        </div>
+        <div id="drugList"></div>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+      <button id="runBtn">Get suggestions</button>
+      <button id="clearBtn" class="btn-secondary">Clear</button>
+      <span class="small">Mock data — not real pricing.</span>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="resultsCard" class="cb-card" style="display:none;">
+    <h2>Plan suggestions</h2>
+    <div id="results"></div>
+    <p class="small">This tool is a prototype. Replace with real QHP / Medicare data.</p>
   </div>
 </main>
 
-<script>
-/* ---------------- Mock data & helpers (ported from the React version) ---------------- */
 
+<script>
+/* ---------------- MOCK DATA ---------------- */
 const MOCK_RXNORM = {
   atorvastatin: { rxcui: "83367", strength: "20 mg" },
   metformin:    { rxcui: "860975", strength: "500 mg" },
@@ -151,270 +137,195 @@ const MOCK_RXNORM = {
 };
 
 const MOCK_PLANS = [
-  { id: "aca-1", issuer: "Acme Health", name: "Acme Silver 2000", coverageUniverse: "ACA",
-    metal: "Silver", premiumMonthly: 485, deductibleDrug: 0, oopMax: 9100,
+  {
+    id: "aca-1",
+    issuer: "Acme Health",
+    name: "Acme Silver 2000",
+    coverageUniverse: "ACA",
+    metal: "Silver",
+    premiumMonthly: 485,
+    deductibleDrug: 0,
     pharmacyNetwork: ["preferred","standard","mail"],
     tiers: [
-      { tier: 1, copayPreferred: 5,  copayStandard: 12, copayMail: 12, subjectToDeductible: false },
-      { tier: 2, copayPreferred: 25, copayStandard: 40, copayMail: 35, subjectToDeductible: false },
-      { tier: 3, coinsurance: 0.35, subjectToDeductible: true },
-      { tier: 4, coinsurance: 0.50, subjectToDeductible: true },
-      { tier: 5, coinsurance: 0.60, subjectToDeductible: true },
+      { tier: 1, copayPreferred: 5,  copayStandard: 12, copayMail: 12 },
+      { tier: 2, copayPreferred: 25, copayStandard: 40, copayMail: 35 },
+      { tier: 3, coinsurance: 0.35 },
     ],
-    notes: ["Good Tier 1/2 copays","Mail-order savings on Tier 2"],
+    notes: ["Good Tier 1/2 copays"],
   },
-  { id: "aca-2", issuer: "Beacon", name: "Beacon Bronze HSA 6000", coverageUniverse: "ACA",
-    metal: "Bronze", premiumMonthly: 355, deductibleDrug: 6000, oopMax: 9100,
-    pharmacyNetwork: ["preferred","mail"],
-    tiers: [
-      { tier: 1, coinsurance: 0.20, subjectToDeductible: true },
-      { tier: 2, coinsurance: 0.40, subjectToDeductible: true },
-      { tier: 3, coinsurance: 0.50, subjectToDeductible: true },
-      { tier: 4, coinsurance: 0.50, subjectToDeductible: true },
-      { tier: 5, coinsurance: 0.60, subjectToDeductible: true },
-    ],
-    notes: ["Lower premiums, HSA eligible"],
-  },
-  { id: "medd-1", issuer: "Sunrise Rx", name: "Sunrise Part D Value", coverageUniverse: "Medicare",
-    premiumMonthly: 25, deductibleDrug: 545,
+
+  {
+    id: "medd-1",
+    issuer: "Sunrise Rx",
+    name: "Sunrise Part D Value",
+    coverageUniverse: "Medicare",
+    premiumMonthly: 25,
+    deductibleDrug: 545,
     pharmacyNetwork: ["preferred","standard","mail"],
     tiers: [
-      { tier: 1, copayPreferred: 0, copayStandard: 5,  copayMail: 0, subjectToDeductible: false },
-      { tier: 2, copayPreferred: 8, copayStandard: 15, copayMail: 8, subjectToDeductible: false },
-      { tier: 3, coinsurance: 0.25, subjectToDeductible: true },
-      { tier: 4, coinsurance: 0.50, subjectToDeductible: true },
-      { tier: 5, coinsurance: 0.33, subjectToDeductible: true },
+      { tier: 1, copayPreferred: 0, copayStandard: 5, copayMail: 0 },
+      { tier: 2, copayPreferred: 8, copayStandard: 15, copayMail: 8 },
+      { tier: 3, coinsurance: 0.25 },
     ],
-    notes: ["$0 Tier 1 at preferred pharmacies"],
-  },
+  }
 ];
 
 const MOCK_FORMULARIES = {
   "aca-1": [
-    { rxcui: "83367",  tier: 1, estNegotiatedPrice30: 8 },
+    { rxcui: "83367", tier: 1, estNegotiatedPrice30: 8 },
     { rxcui: "860975", tier: 1, estNegotiatedPrice30: 6 },
-    { rxcui: "1991311", tier: 3, estNegotiatedPrice30: 900, pa: true },
-  ],
-  "aca-2": [
-    { rxcui: "83367",  tier: 2, estNegotiatedPrice30: 12 },
-    { rxcui: "860975", tier: 2, estNegotiatedPrice30: 10 },
   ],
   "medd-1": [
-    { rxcui: "83367",  tier: 1, estNegotiatedPrice30: 5 },
+    { rxcui: "83367", tier: 1, estNegotiatedPrice30: 5 },
     { rxcui: "860975", tier: 1, estNegotiatedPrice30: 5 },
-    { rxcui: "1991311", tier: 3, estNegotiatedPrice30: 850, pa: true, ql: true },
-  ],
+  ]
 };
 
-const delay = (ms) => new Promise(res => setTimeout(res, ms));
+/* ---------------- UTILS ---------------- */
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
 const api = {
-  normalizeDrug: async (freeText) => {
-    await delay(120);
-    const key = freeText.trim().toLowerCase();
-    if (MOCK_RXNORM[key]) {
-      return { rxcui: MOCK_RXNORM[key].rxcui, name: freeText.trim(), strength: MOCK_RXNORM[key].strength };
-    }
-    return { rxcui: ("rx-" + key).slice(0,12), name: freeText.trim() };
-  },
-  listPlans: async (universe) => {
-    await delay(160);
-    return MOCK_PLANS.filter(p => p.coverageUniverse === universe);
-  },
-  getFormularyForPlan: async (planId) => {
+  normalizeDrug: async txt => {
     await delay(80);
-    return MOCK_FORMULARIES[planId] || [];
+    let key = txt.trim().toLowerCase();
+    return MOCK_RXNORM[key] ?
+      { rxcui: MOCK_RXNORM[key].rxcui, name: txt, strength: MOCK_RXNORM[key].strength } :
+      { rxcui: "rx-" + key, name: txt };
+  },
+  listPlans: async universe => {
+    await delay(100);
+    return MOCK_PLANS.filter(p => p.coverageUniverse === universe);
   },
 };
 
-function estimateAnnualCosts(plan, drugs, pharmacyPref) {
-  let deductibleRemaining = plan.deductibleDrug || 0;
-  const perDrugBreakdown = [];
-  const formulary = (MOCK_FORMULARIES[plan.id] || []);
-  const why = [];
-  let coversAll = true;
-  let annualDrugCost = 0;
+function estimateAnnual(plan, drugs, pharmacy) {
+  let annualDrugs = 0;
+  const breakdown =[];
 
-  for (const d of drugs) {
-    const f = d.rxcui ? formulary.find(x => x.rxcui === d.rxcui) : undefined;
-    if (!f) {
-      coversAll = false;
-      perDrugBreakdown.push({ drug: d, perFill: 0, fillsPerYear: (d.monthlyQty||1) * 12, annual: 0, details: ["Not on formulary"] });
-      continue;
-    }
-    const tierInfo = plan.tiers.find(t => t.tier === f.tier);
-    if (!tierInfo) continue;
+  const formulary = MOCK_FORMULARIES[plan.id] || [];
 
-    const perFillQty = Math.max(1, d.monthlyQty || 1);
-    const fillsPerYear = perFillQty * 12;
-    let perFill = 0;
-    const details = [];
-
-    if (tierInfo.subjectToDeductible && deductibleRemaining > 0) {
-      const spend = Math.min(deductibleRemaining, f.estNegotiatedPrice30);
-      perFill += spend;
-      deductibleRemaining -= spend;
-      details.push(`Deductible applies: $${spend.toFixed(2)} this fill`);
+  drugs.forEach(d=>{
+    const fd = formulary.find(f => f.rxcui === d.rxcui);
+    if (!fd) {
+      breakdown.push({ drug:d.name, tier:"-", fill:0, annual:0, note:"Not covered" });
+      return;
     }
 
-    if (typeof tierInfo.coinsurance === "number") {
-      const coins = tierInfo.coinsurance * f.estNegotiatedPrice30;
-      perFill += coins;
-      details.push(`Coinsurance ${(tierInfo.coinsurance*100).toFixed(0)}% on $${f.estNegotiatedPrice30.toFixed(2)}`);
+    const tier = plan.tiers.find(t=>t.tier===fd.tier);
+    let cost = 0;
+
+    if (tier.coinsurance) {
+      cost = fd.estNegotiatedPrice30 * tier.coinsurance;
     } else {
-      let copay = 0;
-      if (pharmacyPref === "preferred") copay = tierInfo.copayPreferred ?? tierInfo.copayStandard ?? 0;
-      else if (pharmacyPref === "standard") copay = tierInfo.copayStandard ?? tierInfo.copayPreferred ?? 0;
-      else copay = tierInfo.copayMail ?? tierInfo.copayPreferred ?? 0;
-      perFill += copay || 0;
-      details.push(`Copay ${pharmacyPref}: $${(copay||0).toFixed(2)}`);
+      cost = tier.copayPreferred ?? 0;
     }
 
-    const annual = perFill * fillsPerYear;
-    annualDrugCost += annual;
+    const annual = cost * 12;
+    annualDrugs += annual;
 
-    const guards = [f.pa ? "PA" : null, f.st ? "ST" : null, f.ql ? "QL" : null].filter(Boolean);
-    if (guards.length) details.push(`Utilization mgmt: ${guards.join(", ")}`);
+    breakdown.push({
+      drug: d.name,
+      tier: fd.tier,
+      fill: cost.toFixed(2),
+      annual: annual.toFixed(0),
+      note: ""
+    });
+  });
 
-    perDrugBreakdown.push({ drug: d, tier: f.tier, perFill, fillsPerYear, annual, details });
-  }
+  const annualPremium = plan.premiumMonthly * 12;
+  const total = annualPremium + annualDrugs;
 
-  const annualPremium = (plan.premiumMonthly || 0) * 12;
-  const totalAnnual = annualPremium + annualDrugCost;
-  if (Array.isArray(plan.notes)) why.push(...plan.notes);
-  if (coversAll) why.push("Covers all listed medications");
-
-  return { plan, coversAllMeds: coversAll, annualDrugCost, annualPremium, totalAnnual, why, perDrugBreakdown };
+  return { plan, annualDrugs, annualPremium, total, breakdown };
 }
 
-/* ---------------- UI wiring ---------------- */
-
-const universeEl = document.getElementById('universe');
-const pharmacyEl = document.getElementById('pharmacy');
-const drugInputEl = document.getElementById('drugInput');
-const addDrugBtn = document.getElementById('addDrugBtn');
-const drugListEl = document.getElementById('drugList');
-const runBtn = document.getElementById('runBtn');
-const clearBtn = document.getElementById('clearBtn');
-const resultsCard = document.getElementById('resultsCard');
-const resultsEl = document.getElementById('results');
-const universeNote = document.getElementById('universeNote');
-
+/* ---------------- UI LOGIC ---------------- */
 let drugs = [];
 
+const drugInput = document.getElementById("drugInput");
+const drugList  = document.getElementById("drugList");
+
+document.getElementById("addDrugBtn").onclick = async () => {
+  if (!drugInput.value.trim()) return;
+
+  const norm = await api.normalizeDrug(drugInput.value.trim());
+  drugs.push({ name: norm.name, rxcui: norm.rxcui, monthlyQty:1 });
+
+  renderDrugs();
+  drugInput.value = "";
+};
+
 function renderDrugs() {
-  drugListEl.innerHTML = '';
-  drugs.forEach((d, i) => {
-    const chip = document.createElement('div');
-    chip.className = 'drug-chip';
-    chip.innerHTML = `
-      <span><strong>${d.name}</strong>${d.strength ? ` • ${d.strength}` : ''}</span>
-      <span class="small">Qty/mo:</span>
-      <input type="number" min="1" value="${d.monthlyQty || 1}" style="width:70px; padding:6px 8px; border-radius:10px; border:1px solid var(--stroke); background:#fff;">
-      <button class="btn-secondary" style="width:auto; padding:6px 10px;">Remove</button>
+  drugList.innerHTML = "";
+  drugs.forEach((d,i)=>{
+    let el = document.createElement("div");
+    el.className="drug-chip";
+    el.innerHTML = `
+      <span>${d.name}</span>
+      <button class="btn-secondary" style="width:auto;">Remove</button>
     `;
-    const qtyInput = chip.querySelector('input');
-    qtyInput.addEventListener('change', () => {
-      const v = Math.max(1, parseInt(qtyInput.value || '1', 10));
-      drugs[i].monthlyQty = v;
-      qtyInput.value = String(v);
-    });
-    chip.querySelector('button').addEventListener('click', () => {
-      drugs = drugs.filter((_, idx) => idx !== i);
+    el.querySelector("button").onclick = () => {
+      drugs = drugs.filter((_,idx)=>idx!==i);
       renderDrugs();
-    });
-    drugListEl.appendChild(chip);
+    };
+    drugList.appendChild(el);
   });
 }
 
-addDrugBtn.addEventListener('click', async () => {
-  const text = (drugInputEl.value || '').trim();
-  if (!text) return;
-  const norm = await api.normalizeDrug(text);
-  drugs.push({ name: text, rxcui: norm?.rxcui, strength: norm?.strength, monthlyQty: 1 });
-  drugInputEl.value = '';
+document.getElementById("clearBtn").onclick = ()=>{
+  drugs=[];
   renderDrugs();
-});
+  document.getElementById("resultsCard").style.display="none";
+};
 
-clearBtn.addEventListener('click', () => {
-  drugs = [];
-  renderDrugs();
-  resultsCard.style.display = 'none';
-  resultsEl.innerHTML = '';
-});
+document.getElementById("runBtn").onclick = async () => {
+  const universe = document.getElementById("universe").value;
+  const pharmacy = document.getElementById("pharmacy").value;
 
-universeEl.addEventListener('change', () => {
-  const u = universeEl.value;
-  universeNote.textContent = u === 'ACA' ? 'ACA mock' : (u === 'Medicare' ? 'Medicare mock' : 'Off-exchange mock');
-});
-
-runBtn.addEventListener('click', async () => {
-  const universe = universeEl.value;
-  const pharmacy = pharmacyEl.value;
   const plans = await api.listPlans(universe);
 
-  // Ensure each drug has normalization (in case user typed fast then clicked run)
-  const normalized = await Promise.all(
-    drugs.map(async d => d.rxcui ? d : { ...(await api.normalizeDrug(d.name)), name: d.name, monthlyQty: d.monthlyQty || 1 })
-  );
-  const inputs = normalized.map(n => ({ name: n.name, rxcui: n.rxcui, strength: n.strength, monthlyQty: n.monthlyQty || 1 }));
-
-  const scored = plans.map(p => estimateAnnualCosts(p, inputs, pharmacy));
-  scored.sort((a,b) => a.totalAnnual - b.totalAnnual);
+  const scored = plans.map(p => estimateAnnual(p, drugs, pharmacy));
+  scored.sort((a,b)=>a.total - b.total);
 
   renderResults(scored);
-});
+};
 
 function renderResults(scored){
-  resultsEl.innerHTML = '';
-  resultsCard.style.display = 'block';
+  const out = document.getElementById("results");
+  const card = document.getElementById("resultsCard");
 
-  scored.forEach(r => {
-    const block = document.createElement('div');
-    block.className = 'cb-card';
-    block.style.marginBottom = '12px';
-    block.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:start; gap:10px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:800; font-size:16px;">${r.plan.issuer}</div>
-          <div style="font-weight:700;">${r.plan.name} ${r.plan.metal ? `• ${r.plan.metal}` : ''}</div>
-          <div class="small muted">Premium $${(r.annualPremium/12).toFixed(0)}/mo • Rx deductible $${(r.plan.deductibleDrug||0)}</div>
-          <div class="small" style="margin-top:4px;">${r.coversAllMeds ? '✅ Covers all meds' : '⚠️ Some meds not covered'}</div>
-        </div>
-        <div style="text-align:right;">
-          <div class="small muted">Estimated annual</div>
-          <div style="font-weight:800; font-size:22px;">$${r.totalAnnual.toFixed(0)}</div>
-          <div class="small muted">Premium $${r.annualPremium.toFixed(0)} + Drugs $${r.annualDrugCost.toFixed(0)}</div>
-        </div>
-      </div>
+  out.innerHTML = "";
+  card.style.display="block";
 
-      ${r.why && r.why.length ? `
-        <ul class="small" style="margin:10px 0 0 16px;">
-          ${r.why.map(w => `<li>${w}</li>`).join('')}
-        </ul>` : ''}
+  scored.forEach(r=>{
+    let div=document.createElement("div");
+    div.className="cb-card";
+    div.innerHTML = `
+      <h3>${r.plan.issuer} — ${r.plan.name}</h3>
+      <p class="small">Premium: $${(r.annualPremium/12).toFixed(0)}/mo</p>
+      <p><strong>Total Estimated Annual Cost: $${r.total.toFixed(0)}</strong></p>
 
       <details>
         <summary>Explain the math</summary>
-        <table style="margin-top:8px;">
+        <table>
           <thead>
-            <tr><th>Drug</th><th>Tier</th><th>Per fill</th><th>Fills/yr</th><th>Annual</th><th>Notes</th></tr>
+            <tr><th>Drug</th><th>Tier</th><th>Per Fill</th><th>Annual</th><th>Notes</th></tr>
           </thead>
           <tbody>
-            ${r.perDrugBreakdown.map(bd => `
-              <tr>
-                <td>${bd.drug.name}</td>
-                <td>${bd.tier ?? '-'}</td>
-                <td>$${bd.perFill.toFixed(2)}</td>
-                <td>${bd.fillsPerYear}</td>
-                <td>$${bd.annual.toFixed(0)}</td>
-                <td class="small">${bd.details.join('; ')}</td>
-              </tr>
-            `).join('')}
+            ${r.breakdown
+              .map(b=>`
+                <tr>
+                  <td>${b.drug}</td>
+                  <td>${b.tier}</td>
+                  <td>$${b.fill}</td>
+                  <td>$${b.annual}</td>
+                  <td>${b.note}</td>
+                </tr>
+              `).join("")}
           </tbody>
         </table>
       </details>
     `;
-    resultsEl.appendChild(block);
+    out.appendChild(div);
   });
 }
 </script>
