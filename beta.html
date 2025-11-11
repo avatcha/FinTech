@@ -38,7 +38,7 @@
     @media (max-width: 640px){ .cb-row { grid-template-columns: 1fr; gap: 12px; } }
 
     .cb-field { display: flex; flex-direction: column; gap: 6px; }
-    label { font-size: 14px; font-weight: 600; }
+    label { font-size: 14px; font-weight: 600; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 
     input[type="month"], input[type="number"], select, input[type="text"] {
       font-size: 16px;
@@ -74,22 +74,10 @@
     .tooltip-click-container { position:relative; display:inline-flex; align-items:center; gap:8px; isolation:isolate; white-space:nowrap; }
     .click-icon { width:20px; height:20px; border-radius:50%; background:var(--brand); color:white; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
     .tooltip-click-box {
-      display:none;
-      position:absolute;
-      inset-block-start:-10px;
-      inset-inline-start:0;
-      transform:translateY(-100%);
-      background:#ffffff;
-      padding:14px 16px;
-      border-radius:12px;
-      max-width:min(320px, 80vw);
-      border:1px solid var(--stroke);
-      box-shadow:0 8px 24px rgba(2,6,23,0.15);
-      font-size:13px;
-      z-index:99999;
-      white-space: normal;
-      overflow-wrap: anywhere;
-      pointer-events:auto;
+      display:none; position:absolute; inset-block-start:-10px; inset-inline-start:0; transform:translateY(-100%);
+      background:#ffffff; padding:14px 16px; border-radius:12px; max-width:min(320px, 80vw);
+      border:1px solid var(--stroke); box-shadow:0 8px 24px rgba(2,6,23,0.15); font-size:13px; z-index:99999;
+      white-space: normal; overflow-wrap: anywhere; pointer-events:auto;
     }
 
     .graph-row { display:grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items:start; }
@@ -122,7 +110,7 @@
     }
 
     .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59; font-weight:700; font-size:12px; }
-  .center-title{ text-align:center; }
+    .center-title{ text-align:center; }
   </style>
 
   <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -149,17 +137,31 @@
   <div class="cb-stack">
     <div class="cb-card" id="input-card" aria-label="Inputs">
       <div class="cb-row">
-        <div class="cb-field"><label for="dob">Date of Birth</label><input id="dob" type="month" autocomplete="bday" placeholder="YYYY-MM" /></div>
-        <div class="cb-field"><label for="retireDate">Retirement Date</label><input id="retireDate" type="month" placeholder="YYYY-MM" /></div>
-        <div class="cb-field"><label for="retiresavings">Current Retirement Savings ($)</label><input id="retiresavings" type="number" inputmode="decimal" placeholder="e.g., 120000" /></div>
+        <div class="cb-field">
+          <label for="dob">Date of Birth</label>
+          <input id="dob" type="month" autocomplete="bday" placeholder="YYYY-MM" />
+        </div>
+        <div class="cb-field">
+          <label for="retireDate">Retirement Date</label>
+          <input id="retireDate" type="month" placeholder="YYYY-MM" />
+        </div>
+        <div class="cb-field">
+          <label for="retiresavings">Current Retirement Savings ($)</label>
+          <input id="retiresavings" type="number" inputmode="decimal" placeholder="e.g., 120000" />
+        </div>
 
-        <div class="cb-field"><label for="futureretiresavings">Annual Contributions ($)</label><input id="futureretiresavings" type="number" inputmode="decimal" placeholder="e.g., 18000" /></div>
-        <div class="cb-field"><label for="socsecAge">Social Security Start</label>
+        <div class="cb-field">
+          <label for="futureretiresavings">Annual Contributions ($)</label>
+          <input id="futureretiresavings" type="number" inputmode="decimal" placeholder="e.g., 18000" />
+        </div>
+
+        <div class="cb-field">
+          <label for="socsecAge">Social Security Start</label>
           <input id="socsecAge" type="month" placeholder="YYYY-MM" />
         </div>
 
         <div class="cb-field">
-          <label class="tooltip-click-container" for="socsecAmt">
+          <label for="socsecAmt" class="tooltip-click-container">
             Estimated Annual Social Security ($) Future Dollars
             <span class="click-icon" id="ssInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="ssInfoBox">?</span>
             <div class="tooltip-click-box" id="ssInfoBox">
@@ -173,24 +175,30 @@
           <input id="socsecAmt" type="number" inputmode="decimal" placeholder="e.g., 24000" />
         </div>
 
-        <div class="cb-field"><label for="pensiondate">Pension Start</label><input id="pensiondate" type="month" placeholder="YYYY-MM" /></div>
-        <div class="cb-field"><label for="pensions">Annual Pension Amount ($) Future Dollars</label><input id="pensions" type="number" inputmode="decimal" placeholder="e.g., 12000" /></div>
+        <div class="cb-field">
+          <label for="pensiondate">Pension Start</label>
+          <input id="pensiondate" type="month" placeholder="YYYY-MM" />
+        </div>
+        <div class="cb-field">
+          <label for="pensions">Annual Pension Amount ($) Future Dollars</label>
+          <input id="pensions" type="number" inputmode="decimal" placeholder="e.g., 12000" />
+        </div>
 
         <div class="cb-field">
-          <label class="tooltip-click-container" for="taxableNow">
+          <label for="taxableNow" class="tooltip-click-container">
             Non-Retirement Assets ($)
             <span class="click-icon" id="taxableInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="taxableInfoBox">i</span>
             <div class="tooltip-click-box" id="taxableInfoBox">
               Taxable savings/stocks/cash not in retirement accounts. In projections we use an <strong>annual tax rate</strong> on returns (default 0.6%). You can adjust this in Scenario Planner.
             </div>
           </label>
-          <input id="taxableNow" type="number" inputmode="decimal" placeholder="e.g., 30000" /> type="number" inputmode="decimal" placeholder="e.g., 30000" />
+          <input id="taxableNow" type="number" inputmode="decimal" placeholder="e.g., 30000" />
         </div>
       </div>
 
       <div class="cb-actions" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
         <button id="runCalc" type="button" class="btn-primary">Run Calculation</button>
-        <button id="clearAll" class="btn" style="background:#eef2ff; color:#1f2a59;">Clear</button>
+        <button id="clearAll" type="button" class="btn" style="background:#eef2ff; color:#1f2a59;">Clear</button>
       </div>
     </div>
 
@@ -232,7 +240,7 @@
       <div class="cb-sub" style="margin:0 0 16px 0;">Start with your monthly need (today’s dollars). Then refine assumptions and review the projections.</div>
 
       <div class="cb-card" id="sp-need-wrap" style="margin-bottom:16px;">
-        <h3 style="margin:0 0 8px 0; font-size:18px;">Monthly Need</h3>
+        <h3 style="margin:0 0 8px 0; font-size:18px;" class="center-title">Monthly Need</h3>
         <div class="cb-row" style="grid-template-columns: 1fr;">
           <div class="cb-field">
             <label for="spMonthlyNeed">Monthly spending needed in retirement (today’s dollars)</label>
@@ -241,13 +249,13 @@
           </div>
         </div>
         <div style="margin-top:10px;">
-          <button id="spBuildBtn" class="btn-primary">Create scenario</button>
+          <button id="spBuildBtn" type="button" class="btn-primary">Create scenario</button>
         </div>
       </div>
 
       <div id="sp-rest" style="display:none;">
         <div class="cb-card" id="scenario-inputs" style="margin-bottom:16px;">
-          <h3 style="margin:0 0 8px 0; font-size:18px;">Assumptions</h3>
+          <h3 style="margin:0 0 8px 0; font-size:18px;" class="center-title">Assumptions</h3>
           <div class="cb-row" style="grid-template-columns: repeat(4, 1fr);">
             <div class="cb-field with-suffix" data-suffix="%/yr">
               <label for="spReturnPct">Expected Return</label>
@@ -286,20 +294,18 @@
 </div>
 
 <script>
+// --- Tooltips that stay open while interacting with links ---
 function setupTooltip(btnId, boxId) {
   const btn = document.getElementById(btnId);
   const box = document.getElementById(boxId);
   if (!btn || !box) return;
-  const container = btn.closest('.tooltip-click-container') || btn.parentElement;
   let open = false;
   const show = () => { box.style.display = 'block'; btn.setAttribute('aria-expanded','true'); open = true; };
   const hide = () => { box.style.display = 'none'; btn.setAttribute('aria-expanded','false'); open = false; };
   const toggle = () => (open ? hide() : show());
   btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); toggle(); });
   btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); e.stopPropagation(); toggle(); } });
-  // Allow clicks inside tooltip to proceed (e.g., links)
-  box.addEventListener('click', (e)=> e.stopPropagation());
-  
+  box.addEventListener('click', (e)=> e.stopPropagation()); // allow clicking inside
   document.addEventListener('click', hide);
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hide(); });
 }
@@ -324,16 +330,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 let hcChart = null;
-const TAX_RATE_DEFAULT = 0.006; // 0.6% default tax rate on taxable returns
+const TAX_RATE_DEFAULT = 0.006; // 0.6% default tax rate
 const SS_COLA = 0.02;
 
-function parseDate(s){
-  // Accepts "YYYY-MM" (primary) and tolerates "YYYY-MM-DD"
-  if (!s) return null;
-  const parts = s.split('-').map(Number);
-  const y = parts[0], m = (parts[1] || 1) - 1, d = parts[2] || 1;
-  return new Date(y, m, d);
-}
+function parseDate(s){ if(!s) return null; const [y,m] = s.split('-').map(Number); return new Date(y,(m||1)-1,1); }
 function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
 function yearsFromToday(targetYear){ const now=new Date(); const then=new Date(targetYear, now.getMonth(), now.getDate()); return (then - now) / (365.25*86400000); }
 
@@ -343,19 +343,8 @@ function bindNumber(id, key, min, max){
   const el = document.getElementById(id);
   if (!el) return;
   const clamp = v => Math.min(max, Math.max(min, Number(v)));
-  function onInput(){
-    const v = Number(el.value);
-    if (isFinite(v)) {
-      window.spInputs[key] = v;
-      document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
-    }
-  }
-  function onChange(){
-    const v = clamp(el.value || 0);
-    el.value = v;
-    window.spInputs[key] = v;
-    document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
-  }
+  function onInput(){ const v = Number(el.value); if (isFinite(v)) { window.spInputs[key] = v; document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }})); } }
+  function onChange(){ const v = clamp(el.value || 0); el.value = v; window.spInputs[key] = v; document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }})); }
   el.addEventListener('input', onInput);
   el.addEventListener('change', onChange);
 }
@@ -373,19 +362,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const v = Number(needEl.value || 0);
       if (v <= 0) { alert('Please enter your monthly need (today’s dollars).'); needEl.focus(); return; }
       window.spInputs.monthlyNeed = v;
-      const rest = document.getElementById('sp-rest');
-      if (rest) rest.style.display = 'block';
+      const rest = document.getElementById('sp-rest'); if (rest) rest.style.display = 'block';
       buildScenarioCharts();
       const target = document.getElementById('scenarioGrid') || rest;
       target.scrollIntoView({ behavior:'smooth', block:'start' });
     });
-
     needEl.addEventListener('change', () => {
       const rest = document.getElementById('sp-rest');
-      if (rest && rest.style.display !== 'none') {
-        window.spInputs.monthlyNeed = Number(needEl.value || 0);
-        buildScenarioCharts();
-      }
+      if (rest && rest.style.display !== 'none') { window.spInputs.monthlyNeed = Number(needEl.value || 0); buildScenarioCharts(); }
     });
   }
 });
@@ -413,8 +397,10 @@ function showScenarioPrompt() {
 }
 
 function runCalcHandler(){
-  document.getElementById('chartSection').style.display = 'block';
-  document.getElementById('postCalcOptions').style.display = 'block';
+  const chartSection = document.getElementById('chartSection');
+  const optionsCard = document.getElementById('postCalcOptions');
+  if (chartSection) chartSection.style.display = 'block';
+  if (optionsCard) optionsCard.style.display = 'block';
 
   function updateChartSubtitle() {
     const inf = document.getElementById('inflationToggle').checked;
@@ -435,7 +421,7 @@ function runCalcHandler(){
 
   const dobStr = document.getElementById('dob').value;
   const retireStr = document.getElementById('retireDate').value;
-  if (!dobStr || !retireStr) return alert('Enter DOB and Retirement Date.');
+  if (!dobStr || !retireStr) { alert('Enter DOB and Retirement Date.'); return; }
 
   const dob = parseDate(dobStr);
   const retireDate = parseDate(retireStr);
@@ -462,8 +448,7 @@ function runCalcHandler(){
   const startNeeded = retireYear - 5;
   const currentYear = new Date().getFullYear() + 1;
   const firstYear = Math.min(currentYear, startNeeded);
-  const timeline = [];
-  for (let y = firstYear; y <= endYear; y++) timeline.push(y);
+  const timeline = []; for (let y = firstYear; y <= endYear; y++) timeline.push(y);
 
   const ssStartYear = ssStart ? ssStart.getFullYear() : null;
   const flowContribRet = timeline.map(y => (y < retireYear ? retireAnnual : 0));
@@ -472,9 +457,7 @@ function runCalcHandler(){
     const yearsSinceStart = y - ssStartYear;
     return ssAmt * Math.pow(1 + SS_COLA, yearsSinceStart);
   });
-  const flowPension = timeline.map(y =>
-    (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0
-  );
+  const flowPension = timeline.map(y => (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0);
 
   function deflate(value, idx){ if (!inflationActive) return value; return value / Math.pow(1 + INFL, yearsFromToday(timeline[idx])); }
 
@@ -483,7 +466,7 @@ function runCalcHandler(){
     for (let i=0; i<timeline.length; i++){
       const y = timeline[i];
       const rRet = rate; // retirement accounts grow pre-tax here
-      const rTax = Math.max(0, rate * (1 - TAX_RATE_DEFAULT)); // after-tax growth rate approximation
+      const rTax = Math.max(0, rate * (1 - TAX_RATE_DEFAULT)); // after-tax growth approx
       balRet *= (1 + rRet); balTax *= (1 + rTax);
       balRet += flowContribRet[i];
       if (withdrawActive && y >= retireYear){
@@ -500,41 +483,18 @@ function runCalcHandler(){
 
   const p3 = simulateDual(0.03), p5 = simulateDual(0.05), p7 = simulateDual(0.07), p9 = simulateDual(0.09);
 
-  function filter(path){
-    const startYear = retireYear - 5;
-    return timeline
-      .map((y,i)=> y >= startYear ? [Date.UTC(y,0,1), path[i]] : null)
-      .filter(Boolean);
-  }
+  function filter(path){ const startYear = retireYear - 5; return timeline.map((y,i)=> y >= startYear ? [Date.UTC(y,0,1), path[i]] : null).filter(Boolean); }
 
-  // --- X-AXIS YEAR LABELS (robust): explicit yearly ticks ---
-  const tickPositions = [];
-  for (let y = retireYear - 5; y <= endYear; y++) tickPositions.push(Date.UTC(y,0,1));
+  const tickPositions = []; for (let y = retireYear - 5; y <= endYear; y++) tickPositions.push(Date.UTC(y,0,1));
 
   if (hcChart) hcChart.destroy();
   hcChart = Highcharts.chart('chart', {
     chart: { zooming:{type:'x'}, backgroundColor:'transparent', height: 360, reflow: true },
     title: { text:null },
-    xAxis: {
-      type:'datetime',
-      tickPositions,
-      labels: { enabled:true, formatter(){ return Highcharts.dateFormat('%Y', this.value); } },
-      min: tickPositions[0],
-      max: tickPositions[tickPositions.length - 1],
-      title: { text: 'Year' }
-    },
+    xAxis: { type:'datetime', tickPositions, labels:{ formatter(){ return Highcharts.dateFormat('%Y', this.value); } }, min: tickPositions[0], max: tickPositions[tickPositions.length - 1], title:{ text:'Year' } },
     yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
-    legend:{ enabled:true, align:'center', verticalAlign:'top', layout:'horizontal',
-      title: { useHTML:true, text: '<div style="display:block;width:100%;text-align:center;font-weight:700;">Annual Interest Rate</div>' }
-    } }
-    }
-    },
-    tooltip:{ shared:true, formatter(){
-      const x=(this.points&&this.points[0])?this.points[0].x:this.x;
-      const year=Highcharts.dateFormat('%Y', x);
-      const lines=(this.points||[this.point]).map(p=>`<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y, 0)}</b>`).join('<br/>');
-      return `<b>${year}</b><br/>${lines}`;
-    }},
+    legend:{ enabled:true, align:'center', verticalAlign:'top', layout:'horizontal', title: { useHTML:true, text: '<div style="display:block;width:100%;text-align:center;font-weight:700;">Annual Interest Rate</div>' } },
+    tooltip:{ shared:true, formatter(){ const x=(this.points&&this.points[0])?this.points[0].x:this.x; const year=Highcharts.dateFormat('%Y', x); const lines=(this.points||[this.point]).map(p=>`<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y, 0)}</b>`).join('<br/>'); return `<b>${year}</b><br/>${lines}`; }},
     credits:{ enabled:false },
     series:[
       { name:'3% interest', data:filter(p3), type:'line', lineWidth:2 },
@@ -552,7 +512,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const btn = document.getElementById('runCalc');
   if (btn) btn.addEventListener('click', runCalcHandler);
 });
-// Extra safety: delegate clicks in case the button is re-rendered
+// Fallback: delegate in case of dynamic DOM changes
 document.addEventListener('click', (e)=>{
   const btn = e.target && e.target.closest && e.target.closest('#runCalc');
   if (btn) { e.preventDefault(); runCalcHandler(); }
@@ -590,14 +550,13 @@ function buildScenarioCharts() {
   const rNom   = Number(window.spInputs.returnPct || 6) / 100;
   const infl   = Number(window.spInputs.inflationPct || 3) / 100;
   const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;
-  const taxRate = Math.max(0, Math.min(0.6, Number(window.spInputs.taxRatePct || 15) / 100));
+  const taxRate = Math.max(0, Math.min(0.6, Number(window.spInputs.taxRatePct || 0.6) / 100));
   const monthlyNeedToday = Number(window.spInputs.monthlyNeed || 0);
 
   if (monthlyNeedToday <= 0) return;
 
   const endYear = dob.getFullYear() + 100;
-  const years = [];
-  for (let y = retireYear; y <= endYear; y++) years.push(y);
+  const years = []; for (let y = retireYear; y <= endYear; y++) years.push(y);
 
   function growToRetirement() {
     const today = new Date(); const currentYear = today.getFullYear() + 1;
@@ -629,24 +588,12 @@ function buildScenarioCharts() {
   Highcharts.chart('breakdownChart', {
     chart: { type: 'column', backgroundColor: 'transparent', height: 320, reflow: true },
     title: { text: null },
-    xAxis: { categories: ['Retirement Year'], title: { text: 'Year' } },
-    yAxis: {
-      min: 0,
-      title: { text: 'Monthly Resources ($)' },
-      plotLines: [{
-        value: needMonthlyAtRet, color: '#000', width: 3, zIndex: 5,
-        label: { text: `Need: $${Highcharts.numberFormat(needMonthlyAtRet,0)}/mo`, align: 'right', x: -10, y: -6, style: { color: '#000', fontWeight: '700' } }
-      }]
-    },
+    xAxis: { categories: ['Retirement Year'], title:{ text:'Year' } },
+    yAxis: { min: 0, title: { text: 'Monthly Resources ($)' },
+      plotLines: [{ value: needMonthlyAtRet, color: '#000', width: 3, zIndex: 5,
+        label: { text: `Need: $${Highcharts.numberFormat(needMonthlyAtRet,0)}/mo`, align: 'right', x: -10, y: -6, style: { color: '#000', fontWeight: '700' } } }] },
     legend: { align:'center', verticalAlign:'top' },
-    tooltip: {
-      shared: true,
-      formatter: function(){
-        const total = this.points.reduce((s,p)=>s+p.y,0);
-        const lines = this.points.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`).join('<br/>');
-        return `<b>${this.x}</b><br/>${lines}<br/><b>Total: $${Highcharts.numberFormat(total,0)}/mo</b>`;
-      }
-    },
+    tooltip: { shared: true, formatter: function(){ const total = this.points.reduce((s,p)=>s+p.y,0); const lines = this.points.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`).join('<br/>'); return `<b>${this.x}</b><br/>${lines}<br/><b>Total: $${Highcharts.numberFormat(total,0)}/mo</b>`; } },
     plotOptions: { column: { stacking: 'normal', dataLabels: { enabled: true, formatter(){ return '$' + Highcharts.numberFormat(this.y,0); } } } },
     credits: { enabled:false },
     series: [
@@ -655,34 +602,24 @@ function buildScenarioCharts() {
       { name:'Retirement Acct Withdrawal', type:'column', data: [retWdMonthly] },
       { name:'Non-Retirement Withdrawal', type:'column', data: [taxWdMonthly] }
     ],
-    subtitle: { text: `Retirement year: ${retireYear} — ${gapText}`, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' } }
+    subtitle: { text: `Retirement year: ${retireYear} — ${gapText}`, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' }, align:'center' }
   });
 
   const seriesSS = [], seriesPen = [], seriesRetWd = [], seriesTaxWd = [], needLine = [];
   let r = balRet0, t = balTax0;
   for (let i = 0; i < years.length; i++) {
     const y = years[i];
-
     const yrsFromToday = Math.max(0, yearsBetween(new Date(), new Date(y, 0, 1)));
     const needAnnual = monthlyNeedToday * 12 * Math.pow(1 + infl, yrsFromToday);
     needLine.push([Date.UTC(y,0,1), needAnnual]);
 
-    const ssAnnual = (ssStartYear && ssStartYear <= y)
-      ? ssAmtAnnual * Math.pow(1 + SS_COLA, Math.max(0, y - ssStartYear))
-      : 0;
-
+    const ssAnnual = (ssStartYear && ssStartYear <= y) ? ssAmtAnnual * Math.pow(1 + SS_COLA, Math.max(0, y - ssStartYear)) : 0;
     const penAnnual = (penStart && penStart.getFullYear() <= y) ? penAmtAnnual : 0;
 
     r *= (1 + rNom);
     t *= (1 + Math.max(0, rNom * (1 - taxRate)));
     const total = r + t; let wdAnnual = 0, wdRet = 0, wdTax = 0;
-    if (total > 0) {
-      wdAnnual = total * wdRate;
-      const shareR = r / total;
-      wdRet = wdAnnual * shareR;
-      wdTax = wdAnnual * (1 - shareR);
-      r -= wdRet; t -= wdTax;
-    }
+    if (total > 0) { wdAnnual = total * wdRate; const shareR = r / total; wdRet = wdAnnual * shareR; wdTax = wdAnnual * (1 - shareR); r -= wdRet; t -= wdTax; }
 
     seriesSS.push([Date.UTC(y,0,1), ssAnnual]);
     seriesPen.push([Date.UTC(y,0,1), penAnnual]);
@@ -701,26 +638,11 @@ function buildScenarioCharts() {
   Highcharts.chart('scenarioChart', {
     chart: { backgroundColor: 'transparent', height: 320, reflow: true },
     title: { text: null },
-    subtitle: { text: subtitle },
-    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}' }, tickInterval: 365*24*3600*1000, title: { text: 'Year' } },
-    yAxis: {
-      title: { text: 'Annual Amount ($)' },
-      labels: { formatter(){ return '$' + Highcharts.numberFormat(this.value, 0); } }
-    },
+    subtitle: { text: subtitle, align:'center' },
+    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}' }, tickInterval: 365*24*3600*1000, title:{ text:'Year' } },
+    yAxis: { title: { text: 'Annual Amount ($)' }, labels: { formatter(){ return '$' + Highcharts.numberFormat(this.value, 0); } } },
     legend: { align:'center', verticalAlign:'top' },
-    tooltip: {
-      shared: true,
-      xDateFormat: '%Y',
-      formatter: function(){
-        const year = Highcharts.dateFormat('%Y', this.x ?? (this.points && this.points[0]?.x));
-        const pts = this.points || [this.point];
-        const totalIncome = pts.filter(p => p.series.type === 'column').reduce((s,p)=>s+p.y,0);
-        const needPt = pts.find(p => p.series.type === 'line');
-        const needVal = needPt ? needPt.y : null;
-        const lines = pts.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>');
-        return `<b>${year}</b><br/>${lines}<br/><b>Total income: $${Highcharts.numberFormat(totalIncome,0)}</b>` + (needVal!=null ? `<br/><b>Need: $${Highcharts.numberFormat(needVal,0)}</b>` : '');
-      }
-    },
+    tooltip: { shared: true, xDateFormat: '%Y', formatter: function(){ const year = Highcharts.dateFormat('%Y', this.x ?? (this.points && this.points[0]?.x)); const pts = this.points || [this.point]; const totalIncome = pts.filter(p => p.series.type === 'column').reduce((s,p)=>s+p.y,0); const needPt = pts.find(p => p.series.type === 'line'); const needVal = needPt ? needPt.y : null; const lines = pts.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>'); return `<b>${year}</b><br/>${lines}<br/><b>Total income: $${Highcharts.numberFormat(totalIncome,0)}</b>` + (needVal!=null ? `<br/><b>Need: $${Highcharts.numberFormat(needVal,0)}</b>` : ''); } },
     plotOptions: { column: { stacking: 'normal' } },
     credits: { enabled:false },
     series: [
@@ -747,3 +669,4 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
