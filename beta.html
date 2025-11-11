@@ -31,7 +31,7 @@
     .cb-sub { font-size: 15px; color: var(--muted); margin-top: 6px; }
 
     .cb-stack { display: flex; flex-direction: column; gap: 16px; }
-    .cb-card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--stroke); }
+    .cb-card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--stroke); overflow:hidden; }
 
     .cb-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
     @media (min-width:1100px){ .cb-row { grid-template-columns: repeat(3, 1fr); } }
@@ -44,6 +44,7 @@
       font-size: 16px;
       padding: 12px 14px; border-radius: 14px; border: 1px solid var(--stroke); background: #fdfdfd;
       color: inherit; line-height:1.2; appearance: auto; -moz-appearance: textfield;
+      width:100%; max-width:100%;
     }
 
     .cb-card:not(#scenario-inputs) input[type=number]::-webkit-outer-spin-button,
@@ -110,6 +111,9 @@
     }
 
     .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59; font-weight:700; font-size:12px; }
+    .center-title{ text-align:center; }
+    *,*::before,*::after{ box-sizing:border-box; }
+    .legend-title-center{ display:block; width:100%; text-align:center; font-weight:700; margin-bottom:4px; }
     .center-title{ text-align:center; }
   </style>
 
@@ -491,9 +495,11 @@ function runCalcHandler(){
   hcChart = Highcharts.chart('chart', {
     chart: { zooming:{type:'x'}, backgroundColor:'transparent', height: 360, reflow: true },
     title: { text:null },
-    xAxis: { type:'datetime', tickPositions, labels:{ formatter(){ return Highcharts.dateFormat('%Y', this.value); } }, min: tickPositions[0], max: tickPositions[tickPositions.length - 1], title:{ text:'Year' } },
+    xAxis: { type:'datetime', tickPositions, labels:{ style:{fontSize:'10px'}, formatter(){ return Highcharts.dateFormat('%Y', this.value); } }, min: tickPositions[0], max: tickPositions[tickPositions.length - 1], title:{ text:'Year' } },
     yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
-    legend:{ enabled:true, align:'center', verticalAlign:'top', layout:'horizontal', title: { useHTML:true, text: '<div style="display:block;width:100%;text-align:center;font-weight:700;">Annual Interest Rate</div>' } },
+    legend:{ enabled:true, align:'center', verticalAlign:'top', layout:'horizontal',
+      title: { useHTML:true, text: '<div class="legend-title-center">Annual Interest Rate</div>' }
+    } },
     tooltip:{ shared:true, formatter(){ const x=(this.points&&this.points[0])?this.points[0].x:this.x; const year=Highcharts.dateFormat('%Y', x); const lines=(this.points||[this.point]).map(p=>`<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y, 0)}</b>`).join('<br/>'); return `<b>${year}</b><br/>${lines}`; }},
     credits:{ enabled:false },
     series:[
@@ -639,7 +645,7 @@ function buildScenarioCharts() {
     chart: { backgroundColor: 'transparent', height: 320, reflow: true },
     title: { text: null },
     subtitle: { text: subtitle, align:'center' },
-    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}' }, tickInterval: 365*24*3600*1000, title:{ text:'Year' } },
+    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}', style:{fontSize:'10px'} }, tickInterval: 365*24*3600*1000, title:{ text:'Year' } },
     yAxis: { title: { text: 'Annual Amount ($)' }, labels: { formatter(){ return '$' + Highcharts.numberFormat(this.value, 0); } } },
     legend: { align:'center', verticalAlign:'top' },
     tooltip: { shared: true, xDateFormat: '%Y', formatter: function(){ const year = Highcharts.dateFormat('%Y', this.x ?? (this.points && this.points[0]?.x)); const pts = this.points || [this.point]; const totalIncome = pts.filter(p => p.series.type === 'column').reduce((s,p)=>s+p.y,0); const needPt = pts.find(p => p.series.type === 'line'); const needVal = needPt ? needPt.y : null; const lines = pts.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>'); return `<b>${year}</b><br/>${lines}<br/><b>Total income: $${Highcharts.numberFormat(totalIncome,0)}</b>` + (needVal!=null ? `<br/><b>Need: $${Highcharts.numberFormat(needVal,0)}</b>` : ''); } },
@@ -669,4 +675,5 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
 
