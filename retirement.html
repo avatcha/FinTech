@@ -56,7 +56,13 @@
     .btn:active, #runCalc:active { transform: translateY(1px) scale(.99); }
     #runCalc:hover, .btn-primary:hover { background: var(--brand-700); }
 
-    .site-header { position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--stroke); }
+   .site-header{
+  position: fixed; top:0; left:0; right:0;
+  z-index:1000;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--stroke);
+}
     @media (prefers-color-scheme: dark){ .site-header{ background: rgba(10,15,28,.65); } }
     .header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 60px; }
     .brand { font-weight: 800; font-size: 20px; text-decoration: none; color: var(--text); letter-spacing:.2px; }
@@ -129,7 +135,7 @@
 </header>
 
 <!-- Top kicker + info strip -->
-<div class="cb-wrap" style="padding-top:12px;">
+<div class="cb-wrap">
   <div class="kicker">Rack your Stakx.</div>
   <div class="strip" role="status" aria-live="polite">
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></svg>
