@@ -244,22 +244,15 @@
   </div>
 </div>
 
-<script>
-document.getElementById('featureForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const form = e.target;
-  fetch(form.action, {
-    method: form.method,
-    body: new FormData(form),
-    headers: { 'Accept': 'application/json' }
-  }).then(() => {
-    form.reset();
-    document.getElementById('featureHint').textContent = '✅ Thanks for your feedback!';
-  }).catch(() => {
-    document.getElementById('featureHint').textContent = '⚠️ Something went wrong. Please try again.';
-  });
-});
-</script>
+<form action="https://formspree.io/f/mrbrbbeb" method="POST">
+  <label for="topic">Topic</label>
+  <input id="topic" name="topic" required>
+
+  <label for="message">What should we build next?</label>
+  <textarea id="message" name="message" required></textarea>
+
+  <button type="submit">Send Feedback</button>
+</form>
 
 <script>
   // Basic nav toggle
