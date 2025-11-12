@@ -160,7 +160,6 @@
     }
 
     h2 { margin-top:0; }
-
 </style>
 </head>
 
@@ -210,30 +209,12 @@
             <div class="acc-header">2. Housing & Transport <span>+</span></div>
             <div class="acc-body">
                 <div class="cb-row">
-                    <div>
-                        <label>Monthly Rent / Mortgage</label>
-                        <input type="number" id="rent" />
-                    </div>
-                    <div>
-                        <label>Monthly Utilities</label>
-                        <input type="number" id="utilities" />
-                    </div>
-                    <div>
-                        <label>Monthly Internet</label>
-                        <input type="number" id="internet" />
-                    </div>
-                    <div>
-                        <label>Monthly Car Payment</label>
-                        <input type="number" id="carPayment" />
-                    </div>
-                    <div>
-                        <label>Monthly Car Insurance</label>
-                        <input type="number" id="carInsurance" />
-                    </div>
-                    <div>
-                        <label>Monthly Gas / Transit</label>
-                        <input type="number" id="gas" />
-                    </div>
+                    <div><label>Monthly Rent / Mortgage</label><input type="number" id="rent" /></div>
+                    <div><label>Monthly Utilities</label><input type="number" id="utilities" /></div>
+                    <div><label>Monthly Internet</label><input type="number" id="internet" /></div>
+                    <div><label>Monthly Car Payment</label><input type="number" id="carPayment" /></div>
+                    <div><label>Monthly Car Insurance</label><input type="number" id="carInsurance" /></div>
+                    <div><label>Monthly Gas / Transit</label><input type="number" id="gas" /></div>
                 </div>
             </div>
         </div>
@@ -243,30 +224,12 @@
             <div class="acc-header">3. Living Costs <span>+</span></div>
             <div class="acc-body">
                 <div class="cb-row">
-                    <div>
-                        <label>Monthly Groceries</label>
-                        <input type="number" id="groceries" />
-                    </div>
-                    <div>
-                        <label>Monthly Dining / Coffee</label>
-                        <input type="number" id="dining" />
-                    </div>
-                    <div>
-                        <label>Monthly Entertainment</label>
-                        <input type="number" id="entertainment" />
-                    </div>
-                    <div>
-                        <label>Monthly Shopping</label>
-                        <input type="number" id="shopping" />
-                    </div>
-                    <div>
-                        <label>Monthly Phone Bill</label>
-                        <input type="number" id="phone" />
-                    </div>
-                    <div>
-                        <label>Monthly Miscellaneous</label>
-                        <input type="number" id="misc" />
-                    </div>
+                    <div><label>Monthly Groceries</label><input type="number" id="groceries" /></div>
+                    <div><label>Monthly Dining / Coffee</label><input type="number" id="dining" /></div>
+                    <div><label>Monthly Entertainment</label><input type="number" id="entertainment" /></div>
+                    <div><label>Monthly Shopping</label><input type="number" id="shopping" /></div>
+                    <div><label>Monthly Phone Bill</label><input type="number" id="phone" /></div>
+                    <div><label>Monthly Miscellaneous</label><input type="number" id="misc" /></div>
                 </div>
             </div>
         </div>
@@ -284,6 +247,18 @@
                         <label>Monthly Loan Payments</label>
                         <input type="number" id="loans" />
                     </div>
+
+                    <!-- ✅ Total Credit Card Debt -->
+                    <div style="grid-column:1 / -1;">
+                        <label>Total Credit Card Debt ($)</label>
+                        <input type="number" id="ccTotal" />
+                    </div>
+
+                    <!-- ✅ Total Other Debt -->
+                    <div style="grid-column:1 / -1;">
+                        <label>Total Other Debt ($)</label>
+                        <input type="number" id="otherDebt" />
+                    </div>
                 </div>
             </div>
         </div>
@@ -292,60 +267,36 @@
         <div class="acc-item">
             <div class="acc-header">5. Savings <span>+</span></div>
             <div class="acc-body">
-                <!-- Monthly + Total layout -->
+
                 <h3>Traditional Retirement</h3>
                 <div class="cb-row">
-                    <div>
-                        <label>Monthly Contribution</label>
-                        <input type="number" id="trad_month" />
-                    </div>
-                    <div>
-                        <label>Total Balance</label>
-                        <input type="number" id="trad_total" />
-                    </div>
+                    <div><label>Monthly Contribution</label><input type="number" id="trad_month" /></div>
+                    <div><label>Total Balance</label><input type="number" id="trad_total" /></div>
                 </div>
 
                 <h3>Roth Retirement</h3>
                 <div class="cb-row">
-                    <div>
-                        <label>Monthly Contribution</label>
-                        <input type="number" id="roth_month" />
-                    </div>
-                    <div>
-                        <label>Total Balance</label>
-                        <input type="number" id="roth_total" />
-                    </div>
+                    <div><label>Monthly Contribution</label><input type="number" id="roth_month" /></div>
+                    <div><label>Total Balance</label><input type="number" id="roth_total" /></div>
                 </div>
 
                 <h3>Savings Accounts</h3>
                 <div class="cb-row">
-                    <div>
-                        <label>Monthly Contribution</label>
-                        <input type="number" id="save_month" />
-                    </div>
-                    <div>
-                        <label>Total Balance</label>
-                        <input type="number" id="save_total" />
-                    </div>
+                    <div><label>Monthly Contribution</label><input type="number" id="save_month" /></div>
+                    <div><label>Total Balance</label><input type="number" id="save_total" /></div>
                 </div>
 
                 <h3>Bonds / Securities / Crypto</h3>
                 <div class="cb-row">
-                    <div>
-                        <label>Monthly Contribution</label>
-                        <input type="number" id="inv_month" />
-                    </div>
-                    <div>
-                        <label>Total Balance</label>
-                        <input type="number" id="inv_total" />
-                    </div>
+                    <div><label>Monthly Contribution</label><input type="number" id="inv_month" /></div>
+                    <div><label>Total Balance</label><input type="number" id="inv_total" /></div>
                 </div>
+
             </div>
         </div>
 
     </div>
 
-    <!-- CALCULATE -->
     <button class="calculate-btn" id="calculateBtn">Calculate Budget</button>
 
     <!-- RESULTS -->
@@ -364,7 +315,7 @@
 </div>
 
 <script>
-/* ------------- Accordion Behavior ------------- */
+/* Accordion */
 document.querySelectorAll('.acc-header').forEach(header=>{
     header.addEventListener('click', ()=>{
         const item = header.parentElement;
@@ -373,7 +324,7 @@ document.querySelectorAll('.acc-header').forEach(header=>{
     });
 });
 
-/* ------------- Net Income Auto Calculation ------------- */
+/* Auto-calc net income */
 const grossEl = document.getElementById("grossIncome");
 const taxEl = document.getElementById("taxes");
 const netEl = document.getElementById("netIncome");
@@ -383,16 +334,15 @@ function updateNet() {
     const taxes = Number(taxEl.value||0);
     netEl.value = Math.max(0, gross - taxes);
 }
-
 grossEl.addEventListener("input", updateNet);
 taxEl.addEventListener("input", updateNet);
 
-/* ------------- Calculate Everything ------------- */
+/* Main Calculate */
 document.getElementById("calculateBtn").addEventListener("click", ()=>{
 
     const income = Number(netEl.value||0);
 
-    // Collect expenses
+    /* Expenses */
     const expenses = {
         Rent: Number(rent.value||0),
         Utilities: Number(utilities.value||0),
@@ -412,7 +362,7 @@ document.getElementById("calculateBtn").addEventListener("click", ()=>{
 
     const totalExpenses = Object.values(expenses).reduce((a,b)=>a+b,0);
 
-    /* ----------- CHART: Income vs Expenses ----------- */
+    /* Charts */
     Highcharts.chart("incomeVsExpenses", {
         chart:{ type:"column", backgroundColor:"transparent" },
         title:{ text:"Income vs Expenses" },
@@ -425,7 +375,6 @@ document.getElementById("calculateBtn").addEventListener("click", ()=>{
         credits:{ enabled:false }
     });
 
-    /* ----------- CHART: Category Breakdown ----------- */
     const donutData = Object.entries(expenses)
         .filter(([k,v])=>v>0)
         .map(([k,v])=>({ name:k, y:v }));
@@ -438,40 +387,53 @@ document.getElementById("calculateBtn").addEventListener("click", ()=>{
         credits:{ enabled:false }
     });
 
-    /* ----------- Insights ----------- */
-    const age = Number(document.getElementById("age").value||0);
+    /* Insights */
     const insights = [];
+    const age = Number(document.getElementById("age").value||0);
 
-    // Peer comparison (super simple mock ranges)
-    if (age > 0) {
-        if (totalExpenses > income) {
-            insights.push("⚠️ You are spending more than you earn. This is unsustainable and should be fixed immediately.");
-        }
-        if (income - totalExpenses > income*0.25) {
-            insights.push("✅ Your savings rate is strong. You're ahead of most people your age.");
-        }
-        if (income - totalExpenses < income*0.10) {
-            insights.push("⚠️ Your savings rate is low. Consider reducing discretionary spending.");
-        }
-    }
+    /* Debt + Assets */
+    const totalDebt =
+        Number(document.getElementById("ccTotal").value||0) +
+        Number(document.getElementById("otherDebt").value||0);
 
-    // Category flags
-    if (expenses.Dining > income*0.10) {
-        insights.push("🍽 Dining/coffee spending appears high relative to income.");
-    }
-    if (expenses.Shopping > income*0.10) {
-        insights.push("🛍 Shopping looks unusually high — consider reducing discretionary purchases.");
-    }
-    if (expenses.Rent > income*0.35) {
-        insights.push("🏠 Housing costs exceed 35% of income. This is above recommended guidelines.");
+    const totalAssets =
+        Number(trad_total.value||0) +
+        Number(roth_total.value||0) +
+        Number(save_total.value||0) +
+        Number(inv_total.value||0);
+
+    if (totalAssets > 0 || totalDebt > 0) {
+        const ratio = totalAssets > 0 ? Math.round((totalDebt / totalAssets) * 100) : null;
+        insights.push(
+            `📊 Total assets $${totalAssets.toLocaleString()} vs total debt $${totalDebt.toLocaleString()}${
+                ratio !== null ? ` (debt-to-asset ${ratio}%)` : ""
+            }.`
+        );
     }
 
-    // If no insights yet:
+    /* Basic income checks */
+    if (totalExpenses > income) {
+        insights.push("⚠️ You are spending more than you earn. This is unsustainable.");
+    }
+    if (income - totalExpenses > income*0.25) {
+        insights.push("✅ Strong savings rate — you're ahead of most peers.");
+    }
+    if (income - totalExpenses < income*0.10) {
+        insights.push("⚠️ Savings rate is low. Consider trimming discretionary expenses.");
+    }
+
+    /* Category warnings */
+    if (expenses.Dining > income*0.10) insights.push("🍽 Dining/coffee appears high.");
+    if (expenses.Shopping > income*0.10) insights.push("🛍 Shopping looks unusually high.");
+    if (expenses.Rent > income*0.35) insights.push("🏠 Housing exceeds 35% of income.");
+
+    /* Fallback */
     if (insights.length === 0) {
-        insights.push("✅ Your spending profile appears balanced with no major red flags.");
+        insights.push("✅ Your spending profile looks well-balanced.");
     }
 
-    document.getElementById("insights").innerHTML = insights.map(i=>`<p>${i}</p>`).join("");
+    document.getElementById("insights").innerHTML =
+        insights.map(i=>`<p>${i}</p>`).join("");
 
     document.getElementById("results").style.display = "block";
 });
@@ -479,4 +441,3 @@ document.getElementById("calculateBtn").addEventListener("click", ()=>{
 
 </body>
 </html>
-
