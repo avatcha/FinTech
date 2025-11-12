@@ -2,460 +2,287 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Snap Budget</title>
+
+  <!-- Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Highcharts -->
   <script src="https://code.highcharts.com/highcharts.js"></script>
+
   <style>
     :root{
       --bg:#f7f9fc; --text:#0a0f2c; --muted:#4a5568; --brand:#1a73e8; --brand-700:#0f5ad2;
       --card:#fff; --stroke:#e5e9f2; --soft:#f7f9ff; --shadow:0 10px 30px rgba(2,6,23,0.07);
-      --radius:18px; --pad-x:28px; --content-w:1000px;
+      --radius:18px; --pad-x:28px; --content-w:1200px;
     }
     @media (prefers-color-scheme: dark){
       :root{ --bg:#0b1220; --text:#e7ecf6; --muted:#a5b1cc; --card:#0e172a; --stroke:#1e293b; --soft:#0f1b33; --shadow:none; }
     }
-    html, body { height:100%; }
-    body { font-family:'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); margin:0; color:var(--text); padding-top:64px; }
-    .wrap { max-width: var(--content-w); margin: 0 auto; padding: 0 var(--pad-x) 80px; }
-    .card { background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius); box-shadow:var(--shadow); }
 
-    /* Header */
-    .site-header { position: sticky; top: 0; z-index: 1000; background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--stroke); }
-    @media (prefers-color-scheme: dark){ .site-header{ background: rgba(10,15,28,.65); } }
-    .header-inner { display:flex; justify-content:space-between; align-items:center; min-height:60px; padding:0 var(--pad-x); max-width:var(--content-w); margin:0 auto; }
-    .brand { font-weight:800; font-size:20px; text-decoration:none; color:var(--text); }
-    .nav a { color:inherit; font-weight:600; font-size:14px; text-decoration:none; margin-left:16px; }
+    body {
+      font-family:'Inter', sans-serif;
+      background:var(--bg); margin:0; padding-top:70px; color:var(--text);
+    }
 
-    /* Title */
-    .hero { margin: 8px 0 16px; }
-    .title { font-size: clamp(24px, 3.6vw, 40px); margin: 0; font-weight:800; }
-    .sub { color:var(--muted); font-size:14px; margin-top:6px; }
+    .cb-wrap { max-width: var(--content-w); margin: 0 auto; padding: 0 var(--pad-x); }
+    .cb-card { background:var(--card); padding:20px; border-radius:var(--radius); border:1px solid var(--stroke); box-shadow:var(--shadow); margin-bottom:20px; }
+    .cb-row { display:grid; gap:16px; grid-template-columns:1fr 1fr; }
+    @media(max-width:700px){ .cb-row{ grid-template-columns:1fr; } }
 
-    /* Stepper */
-    .stepper { display:flex; gap:10px; margin: 16px 0; flex-wrap:wrap; }
-    .step { display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:12px; border:1px solid var(--stroke); background:var(--soft); font-weight:700; font-size:13px; cursor:pointer; }
-    .step.active{ background:#eaf1ff; border-color:#c9d9ff; color:#0a2a7a; }
-
-    /* Forms */
-    .section { padding:18px; }
-    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
-    @media (max-width:820px){ .grid { grid-template-columns: 1fr; } }
-    .field { display:flex; flex-direction:column; gap:6px; }
     label { font-size:14px; font-weight:600; }
-    input[type="number"], select { font-size:16px; padding:12px 14px; border-radius:14px; border:1px solid var(--stroke); background:#fdfdfd; }
-    input:focus, select:focus { border-color:#b8cdfd; outline:none; box-shadow:0 0 0 4px rgba(0,82,255,0.12); }
+    input[type=number], input[type=text] {
+      padding:12px; font-size:15px; border-radius:14px;
+      border:1px solid var(--stroke); width:100%;
+    }
 
-    .actions { display:flex; gap:10px; justify-content:space-between; padding:14px; border-top:1px solid var(--stroke); }
-    .btn { background:var(--brand); color:#fff; border:0; padding:12px 16px; border-radius:12px; font-weight:800; cursor:pointer; }
-    .btn.secondary { background:#eef2ff; color:#1f2a59; }
+    .btn-primary {
+      background:var(--brand); color:white; border:0; padding:14px 20px; font-size:16px;
+      border-radius:14px; font-weight:700; cursor:pointer;
+    }
 
-    /* Review + Results */
-    .review { padding:18px; }
-    .review table { width:100%; border-collapse:collapse; }
-    .review th, .review td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--stroke); }
-    .summary-cards { display:grid; grid-template-columns: repeat(4, 1fr); gap:14px; margin-top:12px; }
-    @media (max-width:980px){ .summary-cards{ grid-template-columns: repeat(2, 1fr);} }
-    @media (max-width:560px){ .summary-cards{ grid-template-columns: 1fr;} }
-    .mini { padding:14px; border:1px solid var(--stroke); border-radius:14px; background:var(--soft); }
-    .kpi { font-size:24px; font-weight:800; }
-    #charts { display:grid; grid-template-columns: 1.2fr 1fr; gap:16px; margin-top:16px; }
-    @media (max-width:980px){ #charts { grid-template-columns: 1fr; } }
-    #spendChart, #incomeChart { height: 360px; }
+    .section-title {
+      font-size:20px; font-weight:700; margin-bottom:10px;
+    }
 
-    .note { color:var(--muted); font-size:12px; margin-top:6px; }
+    .chart-box { height:300px; margin-top:20px; }
+    .summary-box { background:var(--soft); padding:16px; border-radius:14px; font-size:15px; }
   </style>
 </head>
+
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="brand" href="../index.html">stackxAi</a>
-    <nav class="nav">
-      <a href="../index.html#retirement">Retirement Planner</a>
-      <a href="./index.html">Budget Home</a>
+
+<header class="site-header" style="position:fixed; top:0; left:0; right:0; background:rgba(255,255,255,.85); backdrop-filter:blur(8px); border-bottom:1px solid var(--stroke); z-index:999;">
+  <div class="cb-wrap" style="display:flex; justify-content:space-between; align-items:center; height:60px;">
+    <a class="brand" href="../index.html" style="font-weight:800; font-size:20px; color:var(--text); text-decoration:none;">stakxAi</a>
+    <nav class="nav-links" style="display:flex; gap:20px;">
+      <a href="../index.html#retirement" style="text-decoration:none; font-weight:600; color:var(--text);">Retirement Planner</a>
+      <a href="easy.html" style="text-decoration:none; font-weight:600; color:var(--text);">Budget Tool</a>
     </nav>
   </div>
 </header>
 
-<main class="wrap">
-  <section class="hero">
-    <h1 class="title">Snap Budget</h1>
-    <p class="sub">Fast, simple budget in a few sections. <strong>We don’t store your data</strong>. Close this tab and it’s gone.</p>
-  </section>
+<div class="cb-wrap">
+  <h1 class="cb-title" style="font-size:32px; font-weight:700;">Snap Budget</h1>
+  <p style="color:var(--muted); margin-top:-8px;">A quick financial snapshot to understand where your money is going.</p>
 
-  <!-- Stepper -->
-  <div class="card stepper" id="stepper"></div>
-
-  <!-- Form Card -->
-  <div class="card" id="formCard">
-    <!-- Dynamic sections mount here -->
-  </div>
-
-  <!-- Review Card (hidden until step 5) -->
-  <div class="card" id="reviewCard" style="display:none; margin-top:14px;">
-    <div class="review">
-      <h2 style="margin:0 0 6px 0;">Review & Calculate</h2>
-      <p class="note">Edit any value below, then click <strong>Calculate</strong>.</p>
-      <div id="reviewTable"></div>
-    </div>
-    <div class="actions">
-      <button class="btn secondary" id="backFromReview">Back</button>
-      <div style="display:flex; gap:8px;">
-        <button class="btn secondary" id="clearAll">Clear All</button>
-        <button class="btn" id="calculateBtn">Calculate</button>
+  <!-- ------------------- INPUTS ------------------- -->
+  <div class="cb-card">
+    <div class="section-title">1. Your Info</div>
+    <div class="cb-row">
+      <div>
+        <label>Current Age</label>
+        <input id="age" type="number" placeholder="e.g., 32">
+      </div>
+      <div>
+        <label>Monthly Net Income ($)</label>
+        <input id="netIncome" type="number" placeholder="e.g., 4800">
       </div>
     </div>
   </div>
 
-  <!-- Results Card -->
-  <div class="card" id="resultsCard" style="display:none; margin-top:14px;">
-    <div class="review">
-      <h2 style="margin:0 0 6px 0;">Your Budget Summary</h2>
-      <div class="summary-cards">
-        <div class="mini"><div class="note">Monthly Income</div><div class="kpi" id="kpiIncome">$0</div></div>
-        <div class="mini"><div class="note">Monthly Expenses</div><div class="kpi" id="kpiExpenses">$0</div></div>
-        <div class="mini"><div class="note">Savings</div><div class="kpi" id="kpiSavings">$0</div></div>
-        <div class="mini"><div class="note">Savings Rate</div><div class="kpi" id="kpiRate">0%</div></div>
+  <div class="cb-card">
+    <div class="section-title">2. Housing & Transport</div>
+    <div class="cb-row">
+      <div>
+        <label>Rent/Mortgage ($)</label>
+        <input id="rent" type="number">
       </div>
-
-      <div id="charts">
-        <div>
-          <h3 style="margin:12px 0 6px;">Spending by Category</h3>
-          <div id="spendChart"></div>
-        </div>
-        <div>
-          <h3 style="margin:12px 0 6px;">Income vs. Expenses</h3>
-          <div id="incomeChart"></div>
-        </div>
+      <div>
+        <label>Utilities ($)</label>
+        <input id="utilities" type="number">
       </div>
-
-      <div style="margin-top:8px;">
-        <h3 style="margin:12px 0 6px;">Suggestions</h3>
-        <ul id="suggestions" style="margin:6px 0 0 18px; line-height:1.5;"></ul>
-        <p class="note">Want deeper analysis with real transactions? Mega Budget (upload) is on the way.</p>
+      <div>
+        <label>Internet ($)</label>
+        <input id="internet" type="number">
       </div>
-    </div>
-    <div class="actions">
-      <button class="btn secondary" id="editAgain">Edit</button>
-      <button class="btn secondary" id="startOver">Start Over</button>
+      <div>
+        <label>Car Payment ($)</label>
+        <input id="car" type="number">
+      </div>
+      <div>
+        <label>Car Insurance ($)</label>
+        <input id="carIns" type="number">
+      </div>
+      <div>
+        <label>Gas/Transit ($)</label>
+        <input id="transport" type="number">
+      </div>
     </div>
   </div>
-</main>
+
+  <div class="cb-card">
+    <div class="section-title">3. Living Costs</div>
+    <div class="cb-row">
+      <div>
+        <label>Groceries ($)</label>
+        <input id="groceries" type="number">
+      </div>
+      <div>
+        <label>Dining & Coffee ($)</label>
+        <input id="dining" type="number">
+      </div>
+      <div>
+        <label>Entertainment ($)</label>
+        <input id="entertainment" type="number">
+      </div>
+      <div>
+        <label>Shopping & Misc ($)</label>
+        <input id="shopping" type="number">
+      </div>
+      <div>
+        <label>Subscriptions ($)</label>
+        <input id="subs" type="number">
+      </div>
+      <div>
+        <label>Healthcare (insurance, meds, visits) ($)</label>
+        <input id="health" type="number">
+      </div>
+    </div>
+  </div>
+
+  <div class="cb-card">
+    <div class="section-title">4. Debts</div>
+    <div class="cb-row">
+      <div>
+        <label>Credit Card Minimums ($)</label>
+        <input id="cc" type="number">
+      </div>
+      <div>
+        <label>Student/Personal Loan Payments ($)</label>
+        <input id="loans" type="number">
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:right; margin-bottom:20px;">
+    <button id="calcBtn" class="btn-primary">Calculate Budget</button>
+  </div>
+
+  <!-- ------------------- RESULTS ------------------- -->
+  <div id="results" style="display:none;">
+
+    <div class="cb-card">
+      <div class="section-title">Income vs Spending</div>
+      <div id="incomeVsSpending" class="chart-box"></div>
+    </div>
+
+    <div class="cb-card">
+      <div class="section-title">Spending Breakdown</div>
+      <div id="spendingBreakdown" class="chart-box"></div>
+    </div>
+
+    <div class="cb-card">
+      <div class="section-title">Savings vs Debt</div>
+      <div id="savingsDebt" class="chart-box"></div>
+    </div>
+
+    <div class="cb-card summary-box" id="summaryText"></div>
+  </div>
+</div>
 
 <script>
-  // ---------- Model ----------
-  const STEPS = [
-    { key:'income', label:'Income' },
-    { key:'housing', label:'Housing & Transport' },
-    { key:'living', label:'Living Costs' },
-    { key:'debts', label:'Debts & Goals' },
-    { key:'review', label:'Review' },
-  ];
+document.getElementById("calcBtn").addEventListener("click", function () {
+  const age = Number(document.getElementById("age").value);
+  const net = Number(document.getElementById("netIncome").value);
 
-  const state = {
-    payFreq: 'monthly',
-    netPerPay: '',
-    gross: '',
-    other: '',
-
-    rent: '', utilities: '', internet: '', carPay: '', carIns: '', gas: '',
-
-    groceries: '', dining: '', entertain: '', shopping: '', subs: '', health: '', childcare: '',
-
-    ccMin: '', loans: '', targetSave: '', efCash: '',
+  const categories = {
+    Rent: Number(rent.value),
+    Utilities: Number(utilities.value),
+    Internet: Number(internet.value),
+    Car: Number(car.value),
+    "Car Insurance": Number(carIns.value),
+    Transport: Number(transport.value),
+    Groceries: Number(groceries.value),
+    Dining: Number(dining.value),
+    Entertainment: Number(entertainment.value),
+    Shopping: Number(shopping.value),
+    Subscriptions: Number(subs.value),
+    Healthcare: Number(health.value),
+    "Credit Cards": Number(cc.value),
+    Loans: Number(loans.value)
   };
 
-  // Helpers
-  const $ = sel => document.querySelector(sel);
-  const $$ = sel => Array.from(document.querySelectorAll(sel));
-  const money = n => '$' + (isFinite(n) ? Math.round(n).toLocaleString() : '0');
-  const num = v => {
-    const n = Number(v); return isFinite(n) ? n : 0;
+  const totalSpend = Object.values(categories).reduce((a,b)=>a+b,0);
+  const surplus = net - totalSpend;
+  const debtTotal = categories["Credit Cards"] + categories["Loans"];
+
+  // ------------------ Charts ------------------
+
+  Highcharts.chart("incomeVsSpending", {
+    chart: { type:"column", backgroundColor:"transparent" },
+    title: { text:null },
+    xAxis: { categories:["Monthly"] },
+    series: [
+      { name:"Income", data:[net] },
+      { name:"Expenses", data:[totalSpend] }
+    ]
+  });
+
+  Highcharts.chart("spendingBreakdown", {
+    chart: { type:"pie", backgroundColor:"transparent" },
+    title: { text:null },
+    plotOptions: { pie: { innerSize:"55%", dataLabels:{ enabled:false } } },
+    series: [{
+      name:"$",
+      data: Object.entries(categories).map(([k,v]) => ({ name:k, y:v }))
+    }]
+  });
+
+  Highcharts.chart("savingsDebt", {
+    chart: { type:"column", backgroundColor:"transparent" },
+    title: { text:null },
+    xAxis: { categories:["$"] },
+    series: [
+      { name:"Surplus (or Deficit)", data:[surplus] },
+      { name:"Monthly Debt Payments", data:[debtTotal] }
+    ]
+  });
+
+  // ------------------ Peer Comparison ------------------
+
+  let peerMessage = "";
+  if (age && totalSpend && net) {
+    const spendRate = totalSpend / net;
+
+    if (spendRate < 0.55)
+      peerMessage = "Your spending rate is lower than typical peers — strong savings potential.";
+    else if (spendRate < 0.75)
+      peerMessage = "Your spending rate is in line with peers. You’re in the normal range.";
+    else
+      peerMessage = "You’re spending more than peers your age. You may want to adjust key categories.";
   }
 
-  function monthlyIncome(){
-    const freq = state.payFreq;
-    const net = num(state.netPerPay);
-    const other = num(state.other);
-    const gross = num(state.gross); // not currently used in calc, displayed for ref
+  // ------------------ Summary ------------------
+  let summary = `
+    <strong>Summary</strong><br><br>
+    Income: $${net.toLocaleString()}<br>
+    Spending: $${totalSpend.toLocaleString()}<br>
+    Surplus/Deficit: <strong style="color:${surplus>=0?"green":"red"};">
+      $${surplus.toLocaleString()}
+    </strong><br><br>
 
-    const factor = (freq === 'weekly') ? 52/12 : (freq === 'biweekly') ? 26/12 : 1;
-    return { monthlyNet: net * factor + other, gross };
-  }
+    ${peerMessage ? "<strong>Peer Comparison:</strong> " + peerMessage + "<br><br>" : ""}
+    
+    <strong>Observations:</strong><br>
+  `;
 
-  function monthlyExpenses(){
-    const needs = {
-      Housing: num(state.rent) + num(state.utilities) + num(state.internet) + num(state.carPay) + num(state.carIns) + num(state.gas),
-      Groceries: num(state.groceries),
-      Health: num(state.health),
-      Childcare: num(state.childcare),
-      Debt_Mins: num(state.ccMin) + num(state.loans),
-    };
-    const wants = {
-      Dining_Coffee: num(state.dining),
-      Entertainment: num(state.entertain),
-      Shopping_Misc: num(state.shopping),
-      Subscriptions: num(state.subs),
-    };
+  const biggest = Object.entries(categories).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  biggest.forEach(([k,v]) => {
+    summary += `• ${k} is one of your top spending areas ($${v.toLocaleString()}).<br>`;
+  });
 
-    const categories = {
-      Housing: needs.Housing,
-      Groceries: needs.Groceries,
-      Utilities_Internet: num(state.utilities) + num(state.internet),
-      Transport: num(state.carPay) + num(state.carIns) + num(state.gas),
-      Health: needs.Health,
-      Childcare: needs.Childcare,
-      Debt_Mins: needs.Debt_Mins,
-      Dining_Coffee: wants.Dining_Coffee,
-      Entertainment: wants.Entertainment,
-      Shopping_Misc: wants.Shopping_Misc,
-      Subscriptions: wants.Subscriptions,
-    };
+  summary += `<br><em>Want to go deeper?</em> Try the upcoming <strong>Mega Budget</strong> to upload statements and get full categorization.`;
 
-    const totalNeeds = needs.Housing + needs.Groceries + needs.Health + needs.Childcare + needs.Debt_Mins + (num(state.utilities)+num(state.internet)) + (num(state.carPay)+num(state.carIns)+num(state.gas));
-    const totalWants = wants.Dining_Coffee + wants.Entertainment + wants.Shopping_Misc + wants.Subscriptions;
-    const total = Object.values(categories).reduce((s,v)=>s+v,0);
+  document.getElementById("summaryText").innerHTML = summary;
+  document.getElementById("results").style.display = "block";
 
-    return { categories, total, totalNeeds, totalWants };
-  }
-
-  function calcResults(){
-    const inc = monthlyIncome();
-    const exp = monthlyExpenses();
-    const income = inc.monthlyNet;
-    const expenses = exp.total;
-    const savings = Math.max(0, income - expenses);
-    const rate = income > 0 ? (savings / income) * 100 : 0;
-    const efMonths = exp.total > 0 ? (num(state.efCash) / exp.total) : 0;
-
-    return { income, expenses, savings, rate, efMonths, categories: exp.categories, needs: exp.totalNeeds, wants: exp.totalWants };
-  }
-
-  // ---------- UI: Stepper & Sections ----------
-  let currentStep = 0;
-
-  function renderStepper(){
-    const el = document.getElementById('stepper');
-    el.innerHTML = '';
-    STEPS.forEach((s, i) => {
-      const div = document.createElement('div');
-      div.className = 'step' + (i===currentStep ? ' active' : '');
-      div.textContent = `${i+1}. ${s.label}`;
-      if (i < currentStep) div.onclick = () => { currentStep = i; render(); };
-      el.appendChild(div);
-    });
-  }
-
-  function fieldRow(id, label, placeholder='', required=false){
-    return `
-      <div class="field">
-        <label for="${id}">${label} ${required ? '<span style="color:#b91c1c">*</span>' : ''}</label>
-        <input id="${id}" type="number" inputmode="decimal" placeholder="${placeholder}" value="${state[id] ?? ''}">
-      </div>`;
-  }
-
-  function sectionIncome(){
-    return `
-      <div class="section">
-        <div class="grid">
-          <div class="field">
-            <label for="payFreq">Pay frequency</label>
-            <select id="payFreq">
-              <option value="monthly" ${state.payFreq==='monthly'?'selected':''}>Monthly</option>
-              <option value="biweekly" ${state.payFreq==='biweekly'?'selected':''}>Bi-weekly</option>
-              <option value="weekly" ${state.payFreq==='weekly'?'selected':''}>Weekly</option>
-            </select>
-          </div>
-          ${fieldRow('netPerPay','Net income per pay', 'e.g., 2200', true)}
-          ${fieldRow('gross','Gross income (optional)','e.g., 3200')}
-          ${fieldRow('other','Other income (optional)','e.g., 250')}
-        </div>
-      </div>`;
-  }
-
-  function sectionHousing(){
-    return `
-      <div class="section">
-        <div class="grid">
-          ${fieldRow('rent','Rent/Mortgage', 'e.g., 1800', true)}
-          ${fieldRow('utilities','Utilities','e.g., 180')}
-          ${fieldRow('internet','Internet','e.g., 70')}
-          ${fieldRow('carPay','Car payment','e.g., 350')}
-          ${fieldRow('carIns','Car insurance','e.g., 120')}
-          ${fieldRow('gas','Gas/Transit','e.g., 140')}
-        </div>
-      </div>`;
-  }
-
-  function sectionLiving(){
-    return `
-      <div class="section">
-        <div class="grid">
-          ${fieldRow('groceries','Groceries', 'e.g., 450', true)}
-          ${fieldRow('dining','Dining/coffee','e.g., 160')}
-          ${fieldRow('entertain','Entertainment','e.g., 80')}
-          ${fieldRow('shopping','Shopping/Misc','e.g., 120')}
-          ${fieldRow('subs','Subscriptions','e.g., 40')}
-          ${fieldRow('health','Health/meds','e.g., 60')}
-          ${fieldRow('childcare','Childcare (optional)','e.g., 0')}
-        </div>
-      </div>`;
-  }
-
-  function sectionDebts(){
-    return `
-      <div class="section">
-        <div class="grid">
-          ${fieldRow('ccMin','Credit card minimums','e.g., 75')}
-          ${fieldRow('loans','Student/Personal loan payments','e.g., 220')}
-          ${fieldRow('targetSave','Target monthly savings','e.g., 300')}
-          ${fieldRow('efCash','Emergency fund (cash on hand)','e.g., 2500')}
-        </div>
-      </div>`;
-  }
-
-  function renderSection(){
-    const fc = document.getElementById('formCard');
-    let body = '';
-    if (currentStep===0) body = sectionIncome();
-    if (currentStep===1) body = sectionHousing();
-    if (currentStep===2) body = sectionLiving();
-    if (currentStep===3) body = sectionDebts();
-
-    fc.innerHTML = `
-      ${body}
-      <div class="actions">
-        <button class="btn secondary" id="backBtn" ${currentStep===0?'disabled':''}>Back</button>
-        <div style="display:flex; gap:8px;">
-          <button class="btn secondary" id="clearBtn">Clear</button>
-          <button class="btn" id="nextBtn">${currentStep===STEPS.length-2?'Review':'Next'}</button>
-        </div>
-      </div>`;
-
-    // Bind inputs
-    $$('#formCard input, #formCard select').forEach(el => {
-      el.addEventListener('input', () => {
-        state[el.id] = el.type==='number' ? el.value : el.value;
-      });
-    });
-
-    $('#backBtn')?.addEventListener('click', ()=>{ if(currentStep>0){ currentStep--; render(); }});
-    $('#clearBtn')?.addEventListener('click', ()=>{ Object.keys(state).forEach(k=> state[k]=''); state.payFreq='monthly'; render(); });
-    $('#nextBtn')?.addEventListener('click', ()=>{
-      // minimal required validation
-      if (currentStep===0 && (!state.netPerPay || Number(state.netPerPay)<=0)) return alert('Enter your net income per pay.');
-      if (currentStep===1 && (!state.rent || Number(state.rent)<=0)) return alert('Enter your Rent/Mortgage.');
-      if (currentStep===2 && (!state.groceries || Number(state.groceries)<=0)) return alert('Enter your Groceries.');
-
-      if (currentStep < STEPS.length-2){ currentStep++; render(); }
-      else { currentStep++; render(); }
-    });
-  }
-
-  function renderReview(){
-    if (currentStep !== STEPS.length-1) return;
-    $('#formCard').style.display='none';
-    $('#reviewCard').style.display='block';
-
-    const rows = [
-      ['Pay frequency','payFreq'], ['Net per pay','netPerPay'], ['Gross (opt)','gross'], ['Other income','other'],
-      ['Rent/Mortgage','rent'], ['Utilities','utilities'], ['Internet','internet'], ['Car payment','carPay'], ['Car insurance','carIns'], ['Gas/Transit','gas'],
-      ['Groceries','groceries'], ['Dining/coffee','dining'], ['Entertainment','entertain'], ['Shopping/Misc','shopping'], ['Subscriptions','subs'], ['Health/meds','health'], ['Childcare','childcare'],
-      ['CC minimums','ccMin'], ['Loans','loans'], ['Target savings','targetSave'], ['Emergency fund','efCash']
-    ];
-
-    const table = document.createElement('table');
-    table.innerHTML = `<thead><tr><th>Item</th><th>Amount</th></tr></thead><tbody></tbody>`;
-    const tbody = table.querySelector('tbody');
-
-    rows.forEach(([label,key])=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${label}</td><td><input id="rev_${key}" type="number" inputmode="decimal" value="${state[key]??''}" style="width:160px; padding:8px 10px; border:1px solid var(--stroke); border-radius:8px;" /></td>`;
-      tbody.appendChild(tr);
-    });
-
-    const container = document.getElementById('reviewTable');
-    container.innerHTML='';
-    container.appendChild(table);
-
-    // Bind review edits back to state
-    rows.forEach(([_,key])=>{
-      const el = document.getElementById('rev_'+key);
-      el.addEventListener('input', ()=>{ state[key] = el.value; });
-    });
-
-    $('#backFromReview').onclick = ()=>{ currentStep = STEPS.length-2; $('#reviewCard').style.display='none'; $('#formCard').style.display='block'; render(); };
-    $('#clearAll').onclick = ()=>{ Object.keys(state).forEach(k=> state[k]=''); state.payFreq='monthly'; location.hash=''; currentStep=0; $('#reviewCard').style.display='none'; $('#formCard').style.display='block'; render(); };
-    $('#calculateBtn').onclick = ()=>{ doCalculate(); };
-  }
-
-  function render(){
-    renderStepper();
-    if (currentStep < STEPS.length-1){ $('#formCard').style.display='block'; $('#reviewCard').style.display='none'; renderSection(); }
-    else { renderReview(); }
-  }
-
-  // ---------- Results ----------
-  function doCalculate(){
-    const r = calcResults();
-
-    // KPIs
-    $('#kpiIncome').textContent = money(r.income);
-    $('#kpiExpenses').textContent = money(r.expenses);
-    $('#kpiSavings').textContent = money(r.savings);
-    $('#kpiRate').textContent = `${r.rate.toFixed(1)}%`;
-
-    // Charts
-    const spendData = Object.entries(r.categories)
-      .filter(([_,v])=>v>0)
-      .map(([k,v])=>({ name:k.replace('_',' / '), y: v }));
-
-    Highcharts.chart('spendChart', {
-      chart: { type:'pie', backgroundColor:'transparent' },
-      title: { text:null },
-      tooltip: { pointFormat: '<b>${point.y:,.0f}</b> ({point.percentage:.1f}%)' },
-      plotOptions: { pie:{ dataLabels:{ enabled:true, format:'{point.name}: ${point.y:,.0f}' } } },
-      series: [{ name:'Spend', data: spendData }],
-      credits: { enabled:false }
-    });
-
-    Highcharts.chart('incomeChart', {
-      chart: { type:'column', backgroundColor:'transparent' },
-      title: { text:null },
-      xAxis: { categories:['Income','Expenses'] },
-      yAxis: { title:{ text:'$ / month' } },
-      series: [{ name:'Monthly', data:[ r.income, r.expenses ] }],
-      credits:{ enabled:false }
-    });
-
-    // Suggestions (simple rules)
-    const sug = [];
-    if (r.rate < 10) sug.push('Savings rate is under 10%. Aim for 15% as a next step.');
-    if (r.categories.Subscriptions > 0 && r.categories.Subscriptions > r.income * 0.03) sug.push('Subscriptions look high. Audit and target under 3% of income.');
-    if (r.categories.Dining_Coffee > r.income * 0.05) sug.push('Dining & coffee over 5% of income. Try meal prep and a weekly cap.');
-    if (r.categories.Shopping_Misc > r.income * 0.05) sug.push('Shopping/Misc is heavy. Add a monthly spending limit.');
-    if (r.efMonths < 3 && num(state.efCash) > 0) sug.push(`Emergency fund covers ~${r.efMonths.toFixed(1)} months. Target 3–6 months.`);
-    if (r.efMonths === 0) sug.push('No emergency fund entered. Build a small cushion first (e.g., $1,000).');
-    if (r.categories.Debt_Mins > r.income*0.1) sug.push('Debt minimums >10% of income. Consider a payoff plan (snowball/avalanche).');
-
-    const ul = document.getElementById('suggestions');
-    ul.innerHTML = sug.length ? '' : '<li>Looking good. Keep it steady and review monthly.</li>';
-    sug.forEach(s=>{ const li=document.createElement('li'); li.textContent=s; ul.appendChild(li); });
-
-    // Show results
-    $('#resultsCard').style.display='block';
-    window.scrollTo({ top: document.getElementById('resultsCard').offsetTop - 20, behavior:'smooth' });
-
-    // Actions
-    $('#editAgain').onclick = ()=>{ $('#resultsCard').style.display='none'; currentStep = STEPS.length-1; render(); };
-    $('#startOver').onclick = ()=>{ Object.keys(state).forEach(k=> state[k]=''); state.payFreq='monthly'; currentStep=0; $('#resultsCard').style.display='none'; render(); };
-  }
-
-  // Kickoff
-  render();
+  window.scrollTo({ top: results.offsetTop - 20, behavior: "smooth" });
+});
 </script>
+
 </body>
 </html>
-
