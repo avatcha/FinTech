@@ -147,22 +147,17 @@
         <p class="muted" style="margin:0 0 12px 0;">We build based on your feedback. What’s your #1 challenge right now?</p>
 
         <!-- RESTORED: feedback form without email -->
-        <form id="featureForm">
-          <div class="form-row" style="margin-bottom:10px;">
-            <div>
-              <label for="topic">Topic</label>
-              <select id="topic" required>
-                <option value="">Choose a topic…</option>
-                <option>Budgeting</option>
-                <option>Debt Paydown</option>
-                <option>Investing</option>
-                <option>Retirement</option>
-                <option>Healthcare</option>
-                <option>Taxes</option>
-                <option>Other</option>
-              </select>
-            </div>
-          </div>
+          <form id="featureForm" action="https://formspree.io/f/mrbrbbeb" method="POST">
+  <label for="topic">Topic</label>
+  <input type="text" id="topic" name="topic" required>
+
+  <label for="message">What should we build next?</label>
+  <textarea id="message" name="message" required></textarea>
+
+  <button type="submit" class="btn">Send Feedback</button>
+</form>
+<p id="featureHint" style="margin-top:8px; color:var(--muted)">Your feedback is sent directly to the StakxAI team.</p>
+
 
           <div style="margin-bottom:12px;">
             <label for="message">Your request or problem</label>
