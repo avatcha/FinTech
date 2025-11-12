@@ -157,40 +157,103 @@
         <h2 style="margin:0 0 8px 0; font-size:22px;">Tell Us What to Build Next</h2>
         <p class="muted" style="margin:0 0 12px 0;">We build based on your feedback. What’s your #1 challenge right now?</p>
 
-        <form id="featureForm">
-          <div class="form-row" style="margin-bottom:10px;">
-            <div>
-              <label for="topic">Topic</label>
-              <select id="topic" required>
-                <option value="">Choose a topic…</option>
-                <option>Budgeting</option>
-                <option>Debt Paydown</option>
-                <option>Investing</option>
-                <option>Retirement</option>
-                <option>Healthcare</option>
-                <option>Taxes</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div>
-              <label for="email">Email (optional, for updates)</label>
-              <input type="email" id="email" placeholder="you@email.com" />
-            </div>
-          </div>
+<script>
+// ---- Feedback storage helpers (local only) ----
+const LS_KEY = 'stakx_feature_requests';
 
-          <div style="margin-bottom:12px;">
-            <label for="message">Your request or problem</label>
-            <textarea id="message" placeholder="Tell us what you want us to build or fix…" required></textarea>
-          </div>
+function getReqs(){
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+  catch { return []; }
+}
+function setReqs(arr){
+  localStorage.setItem(LS_KEY, JSON.stringify(arr));
+}
 
-          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <button class="btn" type="submit">Submit Feedback</button>
-            <span class="muted" id="featureHint">Saved locally for now—wire up to your backend later.</span>
-          </div>
-        </form>
+// ---- Render list of saved requests (optional UI) ----
+function renderRequests(){
+  const el = document.getElementById('featureList');
+  if (!el) return;
+  const items = getReqs();
+  if (items.length === 0){
+    el.innerHTML = '<p class="muted" style="margin:8px 0 0;">No feedback yet.</p>';
+    return;
+  }
+  el.innerHTML = `
+    <div class="card" style="margin-top:8px;">
+      <h3 style="margin:0 0 8px 0; font-size:16px;">Saved Feedback (local)</h3>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        ${items.map(i => `
+          <div style="border:1px dashed var(--stroke); border-radius:10px; padding:8px 10px;">
+            <div style="font-size:12px; color:#6b7280;">${new Date(i.at).toLocaleString()}</div>
+            <div style="font-weight:700;">${i.topic}</div>
+            <div>${i.message.replace(/</g,'&lt;')}</div>
+          </div>`).join('')}
       </div>
-    </div>
-  </section>
+    </div>`;
+}
+
+// ---- Export to CSV ----
+function exportCSV(){
+  const rows = getReqs();
+  if (rows.length === 0){ alert('No feedback to export.'); return; }
+  const header = ['id','topic','message','at'];
+  const csv = [
+    header.join(','),
+    ...rows.map(r => {
+      const safe = s => `"${String(s ?? '').replace(/"/g,'""')}"`;
+      return [r.id, r.topic, r.message, r.at].map(safe).join(',');
+    })
+  ].join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'stakxai_feedback.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// ---- Clear all ----
+function clearAll(){
+  if (!confirm('Clear all saved feedback from this browser?')) return;
+  localStorage.removeItem(LS_KEY);
+  const hint = document.getElementById('featureHint');
+  if (hint){ hint.textContent = 'Cleared. (Local only)'; hint.style.color = '#b91c1c'; }
+  renderRequests();
+}
+
+// ---- Wire up form ----
+document.addEventListener('DOMContentLoaded', ()=> {
+  const featureForm = document.getElementById('featureForm');
+  const exportBtn = document.getElementById('exportFeedback');
+  const clearBtn = document.getElementById('clearFeedback');
+
+  featureForm?.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const topic = document.getElementById('topic').value.trim();
+    const message = document.getElementById('message').value.trim();
+    if (!topic || !message) return;
+
+    const items = getReqs();
+    items.push({ id: Date.now(), topic, message, at: new Date().toISOString() });
+    setReqs(items);
+
+    e.target.reset();
+    const hint = document.getElementById('featureHint');
+    if (hint){ hint.textContent = 'Thanks! Saved locally.'; hint.style.color = 'var(--success, #15803d)'; }
+    renderRequests();
+  });
+
+  exportBtn?.addEventListener('click', exportCSV);
+  clearBtn?.addEventListener('click', clearAll);
+
+  renderRequests();
+});
+</script>
+
 
   <!-- Community -->
   <section id="community" class="section">
