@@ -28,7 +28,7 @@
     margin:0;
     background:var(--bg);
     color:var(--text);
-    padding-top: 86px; /* room for the fixed namespaced header */
+    padding-top: 86px; /* room for the fixed header */
   }
 
   .cb-wrap {
@@ -88,7 +88,7 @@
   #incomeVsExpenses, #categoryChart { background:transparent; height:340px; }
   h2 { margin-top:0; }
 
-  /* ========= NEW, NAMESPACED HEADER + STRIP (won't override your classes) ========= */
+  /* ========= NAMESPACED HEADER + STRIP ========= */
   :root{
     --stk-pad-x:24px; --stk-stroke:#e5e9f2; --stk-card:#fff; --stk-text:#0a0f2c;
     --stk-brand:#1a73e8; --stk-soft:#f7f9ff;
@@ -129,21 +129,21 @@
 
 <body>
 
-  <!-- ===== Namespaced, fixed header (safe) ===== -->
+  <!-- ===== Header (links wired by JS below) ===== -->
   <header class="stk-header">
     <div class="stk-container stk-header-inner">
-      <a class="stk-brand" href="index.html">stakxAi</a>
+      <a class="stk-brand" data-link="home" href="#">stakxAi</a>
       <button class="stk-toggle" aria-expanded="false" aria-controls="stk-primary-nav" aria-label="Toggle navigation">☰</button>
       <nav id="stk-primary-nav" class="stk-nav" aria-label="Primary">
-        <a href="retirement.html">Retirement Planning</a>
-        <a href="budget/easy.html">Budget Tool</a>
-        <a href="questions.html">Healthcare Tool</a>
-        <a href="community.html">Community Boards</a>
+        <a data-link="retirement" href="#">Retirement Planning</a>
+        <a data-link="budget" href="#">Budget Tool</a>
+        <a data-link="health" href="#">Healthcare Tool</a>
+        <a data-link="community" href="#">Community Boards</a>
       </nav>
     </div>
   </header>
 
-  <!-- Top kicker + info strip (namespaced) -->
+  <!-- Top kicker + info strip -->
   <div class="stk-container" style="margin-top:12px;">
     <div class="stk-kicker">Rack your Stakx.</div>
     <div class="stk-strip" role="status" aria-live="polite">
@@ -154,7 +154,7 @@
     </div>
   </div>
 
-  <!-- ===== Your page content (unchanged) ===== -->
+  <!-- ===== Page content (unchanged) ===== -->
   <div class="cb-wrap">
     <h1 style="margin-top:10px; font-size:32px; font-weight:800;">Snap Budget</h1>
     <p style="color:var(--muted); margin-bottom:25px;">A fast, simple breakdown of your money — with insights.</p>
@@ -239,11 +239,11 @@
             <div><label>Total Balance</label><input type="number" id="save_total" /></div>
           </div>
 
-            <h3>Bonds / Securities / Crypto</h3>
-            <div class="cb-row">
-              <div><label>Monthly Contribution</label><input type="number" id="inv_month" /></div>
-              <div><label>Total Balance</label><input type="number" id="inv_total" /></div>
-            </div>
+          <h3>Bonds / Securities / Crypto</h3>
+          <div class="cb-row">
+            <div><label>Monthly Contribution</label><input type="number" id="inv_month" /></div>
+            <div><label>Total Balance</label><input type="number" id="inv_total" /></div>
+          </div>
         </div>
       </div>
 
@@ -266,6 +266,32 @@
   </div>
 
 <script>
+  /* --------- CONFIGURE THIS ONCE ---------
+     If using a custom domain like https://stakxai.com, set SITE_BASE = ''.
+     If using GitHub Pages project site like https://username.github.io/repo-name/,
+     set SITE_BASE = '/repo-name/' (include leading/trailing slashes).
+  ---------------------------------------- */
+  const SITE_BASE = '';  // <-- set to '' for stakxai.com; or '/your-repo-name/' for GH Pages project
+
+  /* Build absolute-in-site links safely from any subfolder */
+  function siteLink(path){ return (SITE_BASE || '/').replace(/\/?$/, '/') + path.replace(/^\//,''); }
+
+  /* Wire header links */
+  (function wireNav(){
+    const map = {
+      home: 'index.html',
+      retirement: 'retirement.html',
+      budget: 'budget/easy.html',
+      health: 'questions.html',
+      community: 'community.html'
+    };
+    Object.entries(map).forEach(([key, path])=>{
+      document.querySelectorAll(`[data-link="${key}"]`).forEach(a=>{
+        a.setAttribute('href', siteLink(path));
+      });
+    });
+  })();
+
   /* Mobile nav (namespaced) */
   document.addEventListener('DOMContentLoaded', () => {
     const btn = document.querySelector('.stk-toggle');
@@ -391,5 +417,6 @@
 
 </body>
 </html>
+
 
 
