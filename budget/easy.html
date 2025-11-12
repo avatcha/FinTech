@@ -1,221 +1,482 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Snap Budget</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Snap Budget</title>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://code.highcharts.com/highcharts.js"></script>
 
-  <!-- Highcharts -->
-  <script src="https://code.highcharts.com/highcharts.js"></script>
-
-  <style>
-    :root{
-      --bg:#f7f9fc; --text:#0a0f2c; --muted:#4a5568; --brand:#1a73e8; --brand-700:#0f5ad2;
-      --card:#fff; --stroke:#e5e9f2; --soft:#f7f9ff; --shadow:0 10px 30px rgba(2,6,23,0.07);
-      --radius:18px; --pad-x:28px; --content-w:1200px;
+<style>
+    :root {
+        --bg:#f5f7fa;
+        --card:#ffffff;
+        --text:#1b1f3b;
+        --muted:#6b7280;
+        --stroke:#d9dee7;
+        --brand:#1a73e8;
+        --brand-dark:#125ac0;
+        --radius:18px;
+        --shadow:0 8px 24px rgba(0,0,0,0.06);
     }
 
     body {
-      font-family:'Inter', sans-serif;
-      background:var(--bg); margin:0; padding-top:70px; color:var(--text);
+        font-family:"Inter", sans-serif;
+        margin:0;
+        background:var(--bg);
+        color:var(--text);
+        padding-top:70px;
     }
 
-    .cb-wrap { max-width: var(--content-w); margin:0 auto; padding:0 var(--pad-x); }
-
-    .cb-card {
-      background:var(--card);
-      padding:20px;
-      border-radius:var(--radius);
-      border:1px solid var(--stroke);
-      box-shadow:var(--shadow);
-      margin-bottom:20px;
+    .cb-wrap {
+        max-width: 900px;
+        margin:0 auto;
+        padding:0 20px 50px;
     }
 
-    .section-title {
-      font-size:20px;
-      font-weight:700;
-      margin-bottom:10px;
+    .header {
+        position:fixed; top:0; left:0; width:100%;
+        background:rgba(255,255,255,0.9);
+        backdrop-filter:blur(8px);
+        border-bottom:1px solid var(--stroke);
+        box-shadow:0 2px 10px rgba(0,0,0,0.05);
+        z-index:999;
     }
+    .header-inner {
+        max-width:900px;
+        margin:0 auto;
+        padding:15px 20px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+    }
+    .brand {
+        font-size:22px;
+        font-weight:800;
+        text-decoration:none;
+        color:var(--text);
+    }
+
+    /* Accordion */
+    .accordion {
+        margin-top:20px;
+    }
+    .acc-item {
+        background:var(--card);
+        border:1px solid var(--stroke);
+        border-radius:var(--radius);
+        margin-bottom:14px;
+        box-shadow:var(--shadow);
+        overflow:hidden;
+    }
+    .acc-header {
+        padding:16px 20px;
+        font-weight:700;
+        cursor:pointer;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        background:var(--card);
+        font-size:17px;
+    }
+    .acc-header:hover { background:#f0f2f8; }
+
+    .acc-body {
+        display:none;
+        padding:20px;
+        border-top:1px solid var(--stroke);
+        background:var(--card);
+    }
+
+    .open .acc-body { display:block; }
 
     .cb-row {
-      display:grid;
-      grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
-      gap:16px;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:16px;
+    }
+    @media(max-width:600px) {
+        .cb-row { grid-template-columns:1fr; }
     }
 
-    label { font-size:14px; font-weight:600; }
-    input[type=number] {
-      padding:12px; font-size:15px; border-radius:14px;
-      border:1px solid var(--stroke); width:100%;
+    label {
+        font-size:14px;
+        font-weight:600;
+        margin-bottom:4px;
+    }
+    input[type="number"], input[type="text"] {
+        padding:12px 14px;
+        font-size:16px;
+        border-radius:12px;
+        border:1px solid var(--stroke);
+        width:100%;
+        background:white;
     }
 
-    .btn-primary {
-      background:var(--brand); color:white; border:0;
-      padding:14px 20px; font-size:16px; border-radius:14px;
-      font-weight:700; cursor:pointer;
+    input[readonly] {
+        background:#f2f3f7;
+        cursor:not-allowed;
     }
 
-    /* Charts layout */
-    .chart-grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:20px;
+    .calculate-btn {
+        margin-top:20px;
+        width:100%;
+        padding:16px;
+        font-size:18px;
+        font-weight:700;
+        background:var(--brand);
+        color:#fff;
+        border:none;
+        border-radius:14px;
+        cursor:pointer;
+    }
+    .calculate-btn:hover { background:var(--brand-dark); }
+
+    /* Results */
+    .results-box {
+        margin-top:30px;
+        padding:20px;
+        background:var(--card);
+        border-radius:var(--radius);
+        border:1px solid var(--stroke);
+        box-shadow:var(--shadow);
     }
 
-    @media(max-width:800px){
-      .chart-grid { grid-template-columns:1fr; }
+    #charts-wrapper {
+        margin-top:25px;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:20px;
+    }
+    @media(max-width:850px) {
+        #charts-wrapper { grid-template-columns:1fr; }
     }
 
-    .chart-box { height:300px; }
-
-    .summary-box {
-      background:var(--soft);
-      padding:16px;
-      border-radius:14px;
-      font-size:15px;
+    #incomeVsExpenses, #categoryChart {
+        background:transparent;
+        height:340px;
     }
-  </style>
+
+    h2 { margin-top:0; }
+
+</style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<header class="site-header" style="position:fixed; top:0; left:0; right:0; background:rgba(255,255,255,.85); backdrop-filter:blur(8px); border-bottom:1px solid var(--stroke); z-index:999;">
-  <div class="cb-wrap" style="display:flex; justify-content:space-between; align-items:center; height:60px;">
-    <a href="../index.html" style="font-weight:800; font-size:20px; color:var(--text); text-decoration:none;">stakxAi</a>
-    <nav style="display:flex; gap:20px;">
-      <a href="../index.html#retirement" style="text-decoration:none; font-weight:600; color:var(--text);">Retirement Planner</a>
-      <a href="easy.html" style="text-decoration:none; font-weight:600; color:var(--text);">Budget Tool</a>
-    </nav>
-  </div>
-</header>
-
+<div class="header">
+    <div class="header-inner">
+        <a href="../index.html" class="brand">stakxAi</a>
+    </div>
+</div>
 
 <div class="cb-wrap">
-  <h1 style="font-size:32px; font-weight:700;">Snap Budget</h1>
-  <p style="color:var(--muted); margin-top:-8px;">A quick snapshot of your monthly finances.</p>
 
-  <!-- ✅ SECTION 1 -->
-  <div class="cb-card">
-    <div class="section-title">1. Your Info</div>
-    <div class="cb-row">
-      <div>
-        <label>Current Age</label>
-        <input id="age" type="number" placeholder="e.g., 32">
-      </div>
-      <div>
-        <label>Monthly Gross Income ($)</label>
-        <input id="grossIncome" type="number" placeholder="e.g., 6000">
-      </div>
-      <div>
-        <label>Monthly Net Income ($)</label>
-        <input id="netIncome" type="number" placeholder="e.g., 4800">
-      </div>
+    <h1 style="margin-top:10px; font-size:32px; font-weight:800;">Snap Budget</h1>
+    <p style="color:var(--muted); margin-bottom:25px;">A fast, simple breakdown of your money — with insights.</p>
+
+    <!-- Accordion -->
+    <div class="accordion">
+
+        <!-- SECTION 1 — AGE & INCOME -->
+        <div class="acc-item">
+            <div class="acc-header">1. Age & Income <span>+</span></div>
+            <div class="acc-body">
+                <div class="cb-row">
+                    <div>
+                        <label>Current Age</label>
+                        <input type="number" id="age" min="16" max="100" />
+                    </div>
+                    <div>
+                        <label>Monthly Gross Income ($)</label>
+                        <input type="number" id="grossIncome" />
+                    </div>
+                    <div>
+                        <label>Monthly Taxes ($)</label>
+                        <input type="number" id="taxes" />
+                    </div>
+                    <div>
+                        <label>Monthly Net Income ($)</label>
+                        <input type="number" id="netIncome" readonly />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2 — HOUSING & TRANSPORT -->
+        <div class="acc-item">
+            <div class="acc-header">2. Housing & Transport <span>+</span></div>
+            <div class="acc-body">
+                <div class="cb-row">
+                    <div>
+                        <label>Rent / Mortgage</label>
+                        <input type="number" id="rent" />
+                    </div>
+                    <div>
+                        <label>Utilities</label>
+                        <input type="number" id="utilities" />
+                    </div>
+                    <div>
+                        <label>Internet</label>
+                        <input type="number" id="internet" />
+                    </div>
+                    <div>
+                        <label>Car Payment</label>
+                        <input type="number" id="carPayment" />
+                    </div>
+                    <div>
+                        <label>Car Insurance</label>
+                        <input type="number" id="carInsurance" />
+                    </div>
+                    <div>
+                        <label>Gas / Transit</label>
+                        <input type="number" id="gas" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3 — LIVING COSTS -->
+        <div class="acc-item">
+            <div class="acc-header">3. Living Costs <span>+</span></div>
+            <div class="acc-body">
+                <div class="cb-row">
+                    <div>
+                        <label>Groceries</label>
+                        <input type="number" id="groceries" />
+                    </div>
+                    <div>
+                        <label>Dining / Coffee</label>
+                        <input type="number" id="dining" />
+                    </div>
+                    <div>
+                        <label>Entertainment</label>
+                        <input type="number" id="entertainment" />
+                    </div>
+                    <div>
+                        <label>Shopping</label>
+                        <input type="number" id="shopping" />
+                    </div>
+                    <div>
+                        <label>Phone Bill</label>
+                        <input type="number" id="phone" />
+                    </div>
+                    <div>
+                        <label>Miscellaneous</label>
+                        <input type="number" id="misc" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4 — DEBTS -->
+        <div class="acc-item">
+            <div class="acc-header">4. Debts <span>+</span></div>
+            <div class="acc-body">
+                <div class="cb-row">
+                    <div>
+                        <label>Credit Card Minimums</label>
+                        <input type="number" id="ccMin" />
+                    </div>
+                    <div>
+                        <label>Loan Payments</label>
+                        <input type="number" id="loans" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 5 — SAVINGS -->
+        <div class="acc-item">
+            <div class="acc-header">5. Savings <span>+</span></div>
+            <div class="acc-body">
+                <!-- Monthly + Total layout -->
+                <h3>Traditional Retirement</h3>
+                <div class="cb-row">
+                    <div>
+                        <label>Monthly Contribution</label>
+                        <input type="number" id="trad_month" />
+                    </div>
+                    <div>
+                        <label>Total Balance</label>
+                        <input type="number" id="trad_total" />
+                    </div>
+                </div>
+
+                <h3>Roth Retirement</h3>
+                <div class="cb-row">
+                    <div>
+                        <label>Monthly Contribution</label>
+                        <input type="number" id="roth_month" />
+                    </div>
+                    <div>
+                        <label>Total Balance</label>
+                        <input type="number" id="roth_total" />
+                    </div>
+                </div>
+
+                <h3>Savings Accounts</h3>
+                <div class="cb-row">
+                    <div>
+                        <label>Monthly Contribution</label>
+                        <input type="number" id="save_month" />
+                    </div>
+                    <div>
+                        <label>Total Balance</label>
+                        <input type="number" id="save_total" />
+                    </div>
+                </div>
+
+                <h3>Bonds / Securities / Crypto</h3>
+                <div class="cb-row">
+                    <div>
+                        <label>Monthly Contribution</label>
+                        <input type="number" id="inv_month" />
+                    </div>
+                    <div>
+                        <label>Total Balance</label>
+                        <input type="number" id="inv_total" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-  </div>
 
-  <!-- ✅ SECTION 2 -->
-  <div class="cb-card">
-    <div class="section-title">2. Housing & Transport</div>
-    <div class="cb-row">
-      <div><label>Rent/Mortgage</label><input id="rent" type="number"></div>
-      <div><label>Utilities</label><input id="utilities" type="number"></div>
-      <div><label>Internet</label><input id="internet" type="number"></div>
-      <div><label>Car Payment</label><input id="car" type="number"></div>
-      <div><label>Car Insurance</label><input id="carIns" type="number"></div>
-      <div><label>Gas/Transit</label><input id="transport" type="number"></div>
-    </div>
-  </div>
+    <!-- CALCULATE -->
+    <button class="calculate-btn" id="calculateBtn">Calculate Budget</button>
 
-  <!-- ✅ SECTION 3 -->
-  <div class="cb-card">
-    <div class="section-title">3. Living Costs</div>
-    <div class="cb-row">
-      <div><label>Groceries</label><input id="groceries" type="number"></div>
-      <div><label>Dining & Coffee</label><input id="dining" type="number"></div>
-      <div><label>Entertainment</label><input id="entertainment" type="number"></div>
-      <div><label>Shopping & Misc</label><input id="shopping" type="number"></div>
-      <div><label>Subscriptions</label><input id="subs" type="number"></div>
-      <div><label>Phone Bill</label><input id="phone" type="number"></div>
-      <div><label>Healthcare</label><input id="health" type="number"></div>
-    </div>
-  </div>
+    <!-- RESULTS -->
+    <div id="results" class="results-box" style="display:none;">
+        <h2>Your Budget Summary</h2>
 
-  <!-- ✅ SECTION 4 -->
-  <div class="cb-card">
-    <div class="section-title">4. Debts</div>
-    <div class="cb-row">
-      <div><label>Credit Card Payments</label><input id="cc" type="number"></div>
-      <div><label>Loans (Student/Personal)</label><input id="loans" type="number"></div>
-    </div>
-  </div>
+        <div id="charts-wrapper">
+            <div id="incomeVsExpenses"></div>
+            <div id="categoryChart"></div>
+        </div>
 
-  <div style="text-align:right; margin-bottom:20px;">
-    <button id="calcBtn" class="btn-primary">Calculate Budget</button>
-  </div>
-
-  <!-- ✅ RESULTS -->
-  <div id="results" style="display:none;">
-    <div class="chart-grid">
-      <div class="cb-card">
-        <div class="section-title">Income vs Spending</div>
-        <div id="incomeVsSpending" class="chart-box"></div>
-      </div>
-      <div class="cb-card">
-        <div class="section-title">Expenses by Category</div>
-        <div id="spendingBreakdown" class="chart-box"></div>
-      </div>
+        <h2 style="margin-top:30px;">Insights</h2>
+        <div id="insights"></div>
     </div>
 
-    <div class="cb-card summary-box" id="summaryText"></div>
-  </div>
 </div>
 
 <script>
-document.getElementById("calcBtn").addEventListener("click", function () {
-  const age = Number(age.value);
-  const gross = Number(grossIncome.value);
-  const net = Number(netIncome.value);
+/* ------------- Accordion Behavior ------------- */
+document.querySelectorAll('.acc-header').forEach(header=>{
+    header.addEventListener('click', ()=>{
+        const item = header.parentElement;
+        item.classList.toggle('open');
+        header.querySelector('span').textContent = item.classList.contains('open') ? '−' : '+';
+    });
+});
 
-  const categories = {
-    Rent: Number(rent.value),
-    Utilities: Number(utilities.value),
-    Internet: Number(internet.value),
-    Car: Number(car.value),
-    "Car Insurance": Number(carIns.value),
-    Transport: Number(transport.value),
-    Groceries: Number(groceries.value),
-    Dining: Number(dining.value),
-    Entertainment: Number(entertainment.value),
-    Shopping: Number(shopping.value),
-    Subscriptions: Number(subs.value),
-    Phone: Number(phone.value),
-    Healthcare: Number(health.value),
-    "Credit Cards": Number(cc.value),
-    Loans: Number(loans.value)
-  };
+/* ------------- Net Income Auto Calculation ------------- */
+const grossEl = document.getElementById("grossIncome");
+const taxEl = document.getElementById("taxes");
+const netEl = document.getElementById("netIncome");
 
-  const totalSpend = Object.values(categories).reduce((a,b)=>a+b,0);
-  const surplus = net - totalSpend;
+function updateNet() {
+    const gross = Number(grossEl.value||0);
+    const taxes = Number(taxEl.value||0);
+    netEl.value = Math.max(0, gross - taxes);
+}
 
-  // ✅ Income vs Spending
-  Highcharts.chart("incomeVsSpending", {
-    chart: { type:"column", backgroundColor:"transparent" },
-    title: { text:null },
-    xAxis: { categories:["Monthly"] },
-    series: [
-      { name:"Income", data:[net] },
-      { name:"Expenses", data:[totalSpend] }
-    ]
-  });
+grossEl.addEventListener("input", updateNet);
+taxEl.addEventListener("input", updateNet);
 
-  // ✅ Category Donut Chart
-  Highcharts.chart("spendingBreakdown", {
-    chart: { type:"pie", backgroundColor:"transparent" },
-    title: { text:null },
-    plotOptions: { pie:{ innerSize:"55%", dataLabels:{ enabl
+/* ------------- Calculate Everything ------------- */
+document.getElementById("calculateBtn").addEventListener("click", ()=>{
+
+    const income = Number(netEl.value||0);
+
+    // Collect expenses
+    const expenses = {
+        Rent: Number(rent.value||0),
+        Utilities: Number(utilities.value||0),
+        Internet: Number(internet.value||0),
+        CarPayment: Number(carPayment.value||0),
+        CarInsurance: Number(carInsurance.value||0),
+        Gas: Number(gas.value||0),
+        Groceries: Number(groceries.value||0),
+        Dining: Number(dining.value||0),
+        Entertainment: Number(entertainment.value||0),
+        Shopping: Number(shopping.value||0),
+        Phone: Number(phone.value||0),
+        Misc: Number(misc.value||0),
+        CreditMin: Number(ccMin.value||0),
+        Loans: Number(loans.value||0)
+    };
+
+    const totalExpenses = Object.values(expenses).reduce((a,b)=>a+b,0);
+
+    /* ----------- CHART: Income vs Expenses ----------- */
+    Highcharts.chart("incomeVsExpenses", {
+        chart:{ type:"column", backgroundColor:"transparent" },
+        title:{ text:"Income vs Expenses" },
+        xAxis:{ categories:["Monthly"] },
+        yAxis:{ title:{ text:"Amount ($)" }},
+        series:[
+            { name:"Income", data:[income], color:"#2b8a3e" },
+            { name:"Expenses", data:[totalExpenses], color:"#d62828" }
+        ],
+        credits:{ enabled:false }
+    });
+
+    /* ----------- CHART: Category Breakdown ----------- */
+    const donutData = Object.entries(expenses)
+        .filter(([k,v])=>v>0)
+        .map(([k,v])=>({ name:k, y:v }));
+
+    Highcharts.chart("categoryChart", {
+        chart:{ type:"pie", backgroundColor:"transparent" },
+        title:{ text:"Expenses by Category" },
+        plotOptions:{ pie:{ innerSize:"55%", dataLabels:{ enabled:true } } },
+        series:[{ name:"$", data:donutData }],
+        credits:{ enabled:false }
+    });
+
+    /* ----------- Insights ----------- */
+    const age = Number(document.getElementById("age").value||0);
+    const insights = [];
+
+    // Peer comparison (super simple mock ranges)
+    if (age > 0) {
+        if (totalExpenses > income) {
+            insights.push("⚠️ You are spending more than you earn. This is unsustainable and should be fixed immediately.");
+        }
+        if (income - totalExpenses > income*0.25) {
+            insights.push("✅ Your savings rate is strong. You're ahead of most people your age.");
+        }
+        if (income - totalExpenses < income*0.10) {
+            insights.push("⚠️ Your savings rate is low. Consider reducing discretionary spending.");
+        }
+    }
+
+    // Category flags
+    if (expenses.Dining > income*0.10) {
+        insights.push("🍽 Dining/coffee spending appears high relative to income.");
+    }
+    if (expenses.Shopping > income*0.10) {
+        insights.push("🛍 Shopping looks unusually high — consider reducing discretionary purchases.");
+    }
+    if (expenses.Rent > income*0.35) {
+        insights.push("🏠 Housing costs exceed 35% of income. This is above recommended guidelines.");
+    }
+
+    // If no insights yet:
+    if (insights.length === 0) {
+        insights.push("✅ Your spending profile appears balanced with no major red flags.");
+    }
+
+    document.getElementById("insights").innerHTML = insights.map(i=>`<p>${i}</p>`).join("");
+
+    document.getElementById("results").style.display = "block";
+});
+</script>
+
+</body>
+</html>
+
