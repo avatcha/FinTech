@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Snap Budget</title>
 
-  <!-- Font -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,57 +19,88 @@
       --card:#fff; --stroke:#e5e9f2; --soft:#f7f9ff; --shadow:0 10px 30px rgba(2,6,23,0.07);
       --radius:18px; --pad-x:28px; --content-w:1200px;
     }
-    @media (prefers-color-scheme: dark){
-      :root{ --bg:#0b1220; --text:#e7ecf6; --muted:#a5b1cc; --card:#0e172a; --stroke:#1e293b; --soft:#0f1b33; --shadow:none; }
-    }
 
     body {
       font-family:'Inter', sans-serif;
       background:var(--bg); margin:0; padding-top:70px; color:var(--text);
     }
 
-    .cb-wrap { max-width: var(--content-w); margin: 0 auto; padding: 0 var(--pad-x); }
-    .cb-card { background:var(--card); padding:20px; border-radius:var(--radius); border:1px solid var(--stroke); box-shadow:var(--shadow); margin-bottom:20px; }
-    .cb-row { display:grid; gap:16px; grid-template-columns:1fr 1fr; }
-    @media(max-width:700px){ .cb-row{ grid-template-columns:1fr; } }
+    .cb-wrap { max-width: var(--content-w); margin:0 auto; padding:0 var(--pad-x); }
+
+    .cb-card {
+      background:var(--card);
+      padding:20px;
+      border-radius:var(--radius);
+      border:1px solid var(--stroke);
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+
+    .section-title {
+      font-size:20px;
+      font-weight:700;
+      margin-bottom:10px;
+    }
+
+    .cb-row {
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+      gap:16px;
+    }
 
     label { font-size:14px; font-weight:600; }
-    input[type=number], input[type=text] {
+    input[type=number] {
       padding:12px; font-size:15px; border-radius:14px;
       border:1px solid var(--stroke); width:100%;
     }
 
     .btn-primary {
-      background:var(--brand); color:white; border:0; padding:14px 20px; font-size:16px;
-      border-radius:14px; font-weight:700; cursor:pointer;
+      background:var(--brand); color:white; border:0;
+      padding:14px 20px; font-size:16px; border-radius:14px;
+      font-weight:700; cursor:pointer;
     }
 
-    .section-title {
-      font-size:20px; font-weight:700; margin-bottom:10px;
+    /* Charts layout */
+    .chart-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
     }
 
-    .chart-box { height:300px; margin-top:20px; }
-    .summary-box { background:var(--soft); padding:16px; border-radius:14px; font-size:15px; }
+    @media(max-width:800px){
+      .chart-grid { grid-template-columns:1fr; }
+    }
+
+    .chart-box { height:300px; }
+
+    .summary-box {
+      background:var(--soft);
+      padding:16px;
+      border-radius:14px;
+      font-size:15px;
+    }
   </style>
 </head>
 
 <body>
 
+<!-- HEADER -->
 <header class="site-header" style="position:fixed; top:0; left:0; right:0; background:rgba(255,255,255,.85); backdrop-filter:blur(8px); border-bottom:1px solid var(--stroke); z-index:999;">
   <div class="cb-wrap" style="display:flex; justify-content:space-between; align-items:center; height:60px;">
-    <a class="brand" href="../index.html" style="font-weight:800; font-size:20px; color:var(--text); text-decoration:none;">stakxAi</a>
-    <nav class="nav-links" style="display:flex; gap:20px;">
+    <a href="../index.html" style="font-weight:800; font-size:20px; color:var(--text); text-decoration:none;">stakxAi</a>
+    <nav style="display:flex; gap:20px;">
       <a href="../index.html#retirement" style="text-decoration:none; font-weight:600; color:var(--text);">Retirement Planner</a>
       <a href="easy.html" style="text-decoration:none; font-weight:600; color:var(--text);">Budget Tool</a>
     </nav>
   </div>
 </header>
 
-<div class="cb-wrap">
-  <h1 class="cb-title" style="font-size:32px; font-weight:700;">Snap Budget</h1>
-  <p style="color:var(--muted); margin-top:-8px;">A quick financial snapshot to understand where your money is going.</p>
 
-  <!-- ------------------- INPUTS ------------------- -->
+<div class="cb-wrap">
+  <h1 style="font-size:32px; font-weight:700;">Snap Budget</h1>
+  <p style="color:var(--muted); margin-top:-8px;">A quick snapshot of your monthly finances.</p>
+
+  <!-- ✅ SECTION 1 -->
   <div class="cb-card">
     <div class="section-title">1. Your Info</div>
     <div class="cb-row">
@@ -78,83 +109,49 @@
         <input id="age" type="number" placeholder="e.g., 32">
       </div>
       <div>
+        <label>Monthly Gross Income ($)</label>
+        <input id="grossIncome" type="number" placeholder="e.g., 6000">
+      </div>
+      <div>
         <label>Monthly Net Income ($)</label>
         <input id="netIncome" type="number" placeholder="e.g., 4800">
       </div>
     </div>
   </div>
 
+  <!-- ✅ SECTION 2 -->
   <div class="cb-card">
     <div class="section-title">2. Housing & Transport</div>
     <div class="cb-row">
-      <div>
-        <label>Rent/Mortgage ($)</label>
-        <input id="rent" type="number">
-      </div>
-      <div>
-        <label>Utilities ($)</label>
-        <input id="utilities" type="number">
-      </div>
-      <div>
-        <label>Internet ($)</label>
-        <input id="internet" type="number">
-      </div>
-      <div>
-        <label>Car Payment ($)</label>
-        <input id="car" type="number">
-      </div>
-      <div>
-        <label>Car Insurance ($)</label>
-        <input id="carIns" type="number">
-      </div>
-      <div>
-        <label>Gas/Transit ($)</label>
-        <input id="transport" type="number">
-      </div>
+      <div><label>Rent/Mortgage</label><input id="rent" type="number"></div>
+      <div><label>Utilities</label><input id="utilities" type="number"></div>
+      <div><label>Internet</label><input id="internet" type="number"></div>
+      <div><label>Car Payment</label><input id="car" type="number"></div>
+      <div><label>Car Insurance</label><input id="carIns" type="number"></div>
+      <div><label>Gas/Transit</label><input id="transport" type="number"></div>
     </div>
   </div>
 
+  <!-- ✅ SECTION 3 -->
   <div class="cb-card">
     <div class="section-title">3. Living Costs</div>
     <div class="cb-row">
-      <div>
-        <label>Groceries ($)</label>
-        <input id="groceries" type="number">
-      </div>
-      <div>
-        <label>Dining & Coffee ($)</label>
-        <input id="dining" type="number">
-      </div>
-      <div>
-        <label>Entertainment ($)</label>
-        <input id="entertainment" type="number">
-      </div>
-      <div>
-        <label>Shopping & Misc ($)</label>
-        <input id="shopping" type="number">
-      </div>
-      <div>
-        <label>Subscriptions ($)</label>
-        <input id="subs" type="number">
-      </div>
-      <div>
-        <label>Healthcare (insurance, meds, visits) ($)</label>
-        <input id="health" type="number">
-      </div>
+      <div><label>Groceries</label><input id="groceries" type="number"></div>
+      <div><label>Dining & Coffee</label><input id="dining" type="number"></div>
+      <div><label>Entertainment</label><input id="entertainment" type="number"></div>
+      <div><label>Shopping & Misc</label><input id="shopping" type="number"></div>
+      <div><label>Subscriptions</label><input id="subs" type="number"></div>
+      <div><label>Phone Bill</label><input id="phone" type="number"></div>
+      <div><label>Healthcare</label><input id="health" type="number"></div>
     </div>
   </div>
 
+  <!-- ✅ SECTION 4 -->
   <div class="cb-card">
     <div class="section-title">4. Debts</div>
     <div class="cb-row">
-      <div>
-        <label>Credit Card Minimums ($)</label>
-        <input id="cc" type="number">
-      </div>
-      <div>
-        <label>Student/Personal Loan Payments ($)</label>
-        <input id="loans" type="number">
-      </div>
+      <div><label>Credit Card Payments</label><input id="cc" type="number"></div>
+      <div><label>Loans (Student/Personal)</label><input id="loans" type="number"></div>
     </div>
   </div>
 
@@ -162,22 +159,17 @@
     <button id="calcBtn" class="btn-primary">Calculate Budget</button>
   </div>
 
-  <!-- ------------------- RESULTS ------------------- -->
+  <!-- ✅ RESULTS -->
   <div id="results" style="display:none;">
-
-    <div class="cb-card">
-      <div class="section-title">Income vs Spending</div>
-      <div id="incomeVsSpending" class="chart-box"></div>
-    </div>
-
-    <div class="cb-card">
-      <div class="section-title">Spending Breakdown</div>
-      <div id="spendingBreakdown" class="chart-box"></div>
-    </div>
-
-    <div class="cb-card">
-      <div class="section-title">Savings vs Debt</div>
-      <div id="savingsDebt" class="chart-box"></div>
+    <div class="chart-grid">
+      <div class="cb-card">
+        <div class="section-title">Income vs Spending</div>
+        <div id="incomeVsSpending" class="chart-box"></div>
+      </div>
+      <div class="cb-card">
+        <div class="section-title">Expenses by Category</div>
+        <div id="spendingBreakdown" class="chart-box"></div>
+      </div>
     </div>
 
     <div class="cb-card summary-box" id="summaryText"></div>
@@ -186,8 +178,9 @@
 
 <script>
 document.getElementById("calcBtn").addEventListener("click", function () {
-  const age = Number(document.getElementById("age").value);
-  const net = Number(document.getElementById("netIncome").value);
+  const age = Number(age.value);
+  const gross = Number(grossIncome.value);
+  const net = Number(netIncome.value);
 
   const categories = {
     Rent: Number(rent.value),
@@ -201,6 +194,7 @@ document.getElementById("calcBtn").addEventListener("click", function () {
     Entertainment: Number(entertainment.value),
     Shopping: Number(shopping.value),
     Subscriptions: Number(subs.value),
+    Phone: Number(phone.value),
     Healthcare: Number(health.value),
     "Credit Cards": Number(cc.value),
     Loans: Number(loans.value)
@@ -208,10 +202,8 @@ document.getElementById("calcBtn").addEventListener("click", function () {
 
   const totalSpend = Object.values(categories).reduce((a,b)=>a+b,0);
   const surplus = net - totalSpend;
-  const debtTotal = categories["Credit Cards"] + categories["Loans"];
 
-  // ------------------ Charts ------------------
-
+  // ✅ Income vs Spending
   Highcharts.chart("incomeVsSpending", {
     chart: { type:"column", backgroundColor:"transparent" },
     title: { text:null },
@@ -222,67 +214,8 @@ document.getElementById("calcBtn").addEventListener("click", function () {
     ]
   });
 
+  // ✅ Category Donut Chart
   Highcharts.chart("spendingBreakdown", {
     chart: { type:"pie", backgroundColor:"transparent" },
     title: { text:null },
-    plotOptions: { pie: { innerSize:"55%", dataLabels:{ enabled:false } } },
-    series: [{
-      name:"$",
-      data: Object.entries(categories).map(([k,v]) => ({ name:k, y:v }))
-    }]
-  });
-
-  Highcharts.chart("savingsDebt", {
-    chart: { type:"column", backgroundColor:"transparent" },
-    title: { text:null },
-    xAxis: { categories:["$"] },
-    series: [
-      { name:"Surplus (or Deficit)", data:[surplus] },
-      { name:"Monthly Debt Payments", data:[debtTotal] }
-    ]
-  });
-
-  // ------------------ Peer Comparison ------------------
-
-  let peerMessage = "";
-  if (age && totalSpend && net) {
-    const spendRate = totalSpend / net;
-
-    if (spendRate < 0.55)
-      peerMessage = "Your spending rate is lower than typical peers — strong savings potential.";
-    else if (spendRate < 0.75)
-      peerMessage = "Your spending rate is in line with peers. You’re in the normal range.";
-    else
-      peerMessage = "You’re spending more than peers your age. You may want to adjust key categories.";
-  }
-
-  // ------------------ Summary ------------------
-  let summary = `
-    <strong>Summary</strong><br><br>
-    Income: $${net.toLocaleString()}<br>
-    Spending: $${totalSpend.toLocaleString()}<br>
-    Surplus/Deficit: <strong style="color:${surplus>=0?"green":"red"};">
-      $${surplus.toLocaleString()}
-    </strong><br><br>
-
-    ${peerMessage ? "<strong>Peer Comparison:</strong> " + peerMessage + "<br><br>" : ""}
-    
-    <strong>Observations:</strong><br>
-  `;
-
-  const biggest = Object.entries(categories).sort((a,b)=>b[1]-a[1]).slice(0,3);
-  biggest.forEach(([k,v]) => {
-    summary += `• ${k} is one of your top spending areas ($${v.toLocaleString()}).<br>`;
-  });
-
-  summary += `<br><em>Want to go deeper?</em> Try the upcoming <strong>Mega Budget</strong> to upload statements and get full categorization.`;
-
-  document.getElementById("summaryText").innerHTML = summary;
-  document.getElementById("results").style.display = "block";
-
-  window.scrollTo({ top: results.offsetTop - 20, behavior: "smooth" });
-});
-</script>
-
-</body>
-</html>
+    plotOptions: { pie:{ innerSize:"55%", dataLabels:{ enabl
