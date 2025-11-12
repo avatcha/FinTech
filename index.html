@@ -83,20 +83,14 @@
   .card h3{ margin:0 0 6px 0; font-size:18px }
   .muted{ color:var(--muted) }
 
-  /* Tools tiles */
-  .tool{ display:flex; flex-direction:column; gap:10px }
-  .tool .actions{ display:flex; gap:8px; flex-wrap:wrap }
-
   /* Community preview */
   .qa{ display:flex; flex-direction:column; gap:12px }
   .qa-item{ padding:14px; border:1px dashed var(--stroke); border-radius:14px; background:linear-gradient(0deg, rgba(0,0,0,0.02), rgba(0,0,0,0.02)), var(--card) }
-  .tag{ display:inline-block; font-size:12px; font-weight:800; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59 }
 
   /* Feedback form */
-  .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
-  @media (max-width:700px){ .form-row{ grid-template-columns:1fr } }
+  .form-row{ display:grid; grid-template-columns:1fr; gap:12px }
   label{ font-size:14px; font-weight:600 }
-  input[type=text], input[type=email], textarea, select{
+  input[type=text], textarea, select{
     width:100%; padding:12px 14px; border-radius:14px; border:1px solid var(--stroke); background:#fdfdfd; color:inherit; font-size:16px;
   }
   textarea{ min-height:110px; resize:vertical }
@@ -104,18 +98,13 @@
   /* Modal */
   .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; padding:20px; z-index:2000 }
   .modal{ background:var(--card); border:1px solid var(--stroke); border-radius:16px; box-shadow:0 18px 60px rgba(2,6,23,.2); max-width:640px; width:100%; overflow:hidden }
-  .modal { padding:16px 18px; border-bottom:1px solid var(--stroke); display:flex; align-items:center; justify-content:space-between }
+  .modal header { padding:16px 18px; border-bottom:1px solid var(--stroke); display:flex; align-items:center; justify-content:space-between }
   .modal .content{ padding:18px }
   .close{ background:none; border:0; font-size:22px; cursor:pointer; color:var(--muted) }
 
   /* Footer */
   footer{ padding:34px 0; color:var(--muted) }
   .footer-row{ display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between }
-  .inline-form{ display:flex; gap:8px; flex-wrap:wrap }
-  .inline-form input[type=email]{ min-width:260px }
-
-  /* Tiny helpers */
-  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0 }
 </style>
 </head>
 <body>
@@ -145,115 +134,54 @@
 
       <div class="strip" role="status" aria-live="polite">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></svg>
-        Free forever. No login required. No data is collected by us. Data lives on your broswer and deleted when you shut it down.
+        Free forever. No login required. No data is collected by us. Data lives on your browser and is deleted when you shut it down.
       </div>
     </div>
   </section>
 
-  <!-- Build-next feedback -->
+  <!-- Tell Us What to Build Next -->
   <section class="section">
     <div class="wrap">
       <div class="card">
         <h2 style="margin:0 0 8px 0; font-size:22px;">Tell Us What to Build Next</h2>
         <p class="muted" style="margin:0 0 12px 0;">We build based on your feedback. What’s your #1 challenge right now?</p>
 
-<script>
-// ---- Feedback storage helpers (local only) ----
-const LS_KEY = 'stakx_feature_requests';
+        <!-- RESTORED: feedback form without email -->
+        <form id="featureForm">
+          <div class="form-row" style="margin-bottom:10px;">
+            <div>
+              <label for="topic">Topic</label>
+              <select id="topic" required>
+                <option value="">Choose a topic…</option>
+                <option>Budgeting</option>
+                <option>Debt Paydown</option>
+                <option>Investing</option>
+                <option>Retirement</option>
+                <option>Healthcare</option>
+                <option>Taxes</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
 
-function getReqs(){
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
-  catch { return []; }
-}
-function setReqs(arr){
-  localStorage.setItem(LS_KEY, JSON.stringify(arr));
-}
+          <div style="margin-bottom:12px;">
+            <label for="message">Your request or problem</label>
+            <textarea id="message" placeholder="Tell us what you want us to build or fix…" required></textarea>
+          </div>
 
-// ---- Render list of saved requests (optional UI) ----
-function renderRequests(){
-  const el = document.getElementById('featureList');
-  if (!el) return;
-  const items = getReqs();
-  if (items.length === 0){
-    el.innerHTML = '<p class="muted" style="margin:8px 0 0;">No feedback yet.</p>';
-    return;
-  }
-  el.innerHTML = `
-    <div class="card" style="margin-top:8px;">
-      <h3 style="margin:0 0 8px 0; font-size:16px;">Saved Feedback (local)</h3>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        ${items.map(i => `
-          <div style="border:1px dashed var(--stroke); border-radius:10px; padding:8px 10px;">
-            <div style="font-size:12px; color:#6b7280;">${new Date(i.at).toLocaleString()}</div>
-            <div style="font-weight:700;">${i.topic}</div>
-            <div>${i.message.replace(/</g,'&lt;')}</div>
-          </div>`).join('')}
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <button class="btn" type="submit">Submit Feedback</button>
+            <button class="btn secondary" type="button" id="exportFeedback" style="background:#eef2ff; color:#1f2a59;">Export (.csv)</button>
+            <button class="btn secondary" type="button" id="clearFeedback" style="background:#eef2ff; color:#1f2a59;">Clear</button>
+            <span class="muted" id="featureHint">Saved locally in your browser. Nothing is uploaded.</span>
+          </div>
+
+          <!-- Optional live list -->
+          <div id="featureList" style="margin-top:12px;"></div>
+        </form>
       </div>
-    </div>`;
-}
-
-// ---- Export to CSV ----
-function exportCSV(){
-  const rows = getReqs();
-  if (rows.length === 0){ alert('No feedback to export.'); return; }
-  const header = ['id','topic','message','at'];
-  const csv = [
-    header.join(','),
-    ...rows.map(r => {
-      const safe = s => `"${String(s ?? '').replace(/"/g,'""')}"`;
-      return [r.id, r.topic, r.message, r.at].map(safe).join(',');
-    })
-  ].join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'stakxai_feedback.csv';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-// ---- Clear all ----
-function clearAll(){
-  if (!confirm('Clear all saved feedback from this browser?')) return;
-  localStorage.removeItem(LS_KEY);
-  const hint = document.getElementById('featureHint');
-  if (hint){ hint.textContent = 'Cleared. (Local only)'; hint.style.color = '#b91c1c'; }
-  renderRequests();
-}
-
-// ---- Wire up form ----
-document.addEventListener('DOMContentLoaded', ()=> {
-  const featureForm = document.getElementById('featureForm');
-  const exportBtn = document.getElementById('exportFeedback');
-  const clearBtn = document.getElementById('clearFeedback');
-
-  featureForm?.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const topic = document.getElementById('topic').value.trim();
-    const message = document.getElementById('message').value.trim();
-    if (!topic || !message) return;
-
-    const items = getReqs();
-    items.push({ id: Date.now(), topic, message, at: new Date().toISOString() });
-    setReqs(items);
-
-    e.target.reset();
-    const hint = document.getElementById('featureHint');
-    if (hint){ hint.textContent = 'Thanks! Saved locally.'; hint.style.color = 'var(--success, #15803d)'; }
-    renderRequests();
-  });
-
-  exportBtn?.addEventListener('click', exportCSV);
-  clearBtn?.addEventListener('click', clearAll);
-
-  renderRequests();
-});
-</script>
-
+    </div>
+  </section>
 
   <!-- Community -->
   <section id="community" class="section">
@@ -286,7 +214,8 @@ document.addEventListener('DOMContentLoaded', ()=> {
       </div>
     </div>
   </section>
-  
+</main>
+
 <footer>
   <div class="wrap footer-row">
     <div>© 2025 StakxAI • Free • Rack Your Stackx</div>
@@ -344,11 +273,7 @@ document.addEventListener('DOMContentLoaded', ()=> {
     });
   }
 
-  // Year (guard in case element doesn't exist)
-  const yEl = document.getElementById('year');
-  if (yEl) yEl.textContent = new Date().getFullYear();
-
-  // Modal behavior
+  // Modal behavior (Ask a Question)
   const askModal = document.getElementById('askModal');
   const openAsk = document.getElementById('openAsk');
   const openAsk2 = document.getElementById('openAsk2');
@@ -369,69 +294,97 @@ document.addEventListener('DOMContentLoaded', ()=> {
   askModal?.addEventListener('click', (e)=>{ if(e.target === askModal) closeModal(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && askModal.style.display === 'flex') closeModal(); });
 
-  // “Build Next” feedback form — stores in localStorage for now
-  const featureForm = document.getElementById('featureForm');
-  featureForm?.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const topic = document.getElementById('topic').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const message = document.getElementById('message').value.trim();
-    if(!topic || !message) return;
+  // ---- Feedback (local only) ----
+  const LS_KEY = 'stakx_feature_requests';
 
-    const existing = JSON.parse(localStorage.getItem('stakx_feature_requests') || '[]');
-    existing.push({ id: Date.now(), topic, email, message });
-    localStorage.setItem('stakx_feature_requests', JSON.stringify(existing));
+  function getReqs(){
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+    catch { return []; }
+  }
+  function setReqs(arr){
+    localStorage.setItem(LS_KEY, JSON.stringify(arr));
+  }
 
-    e.target.reset();
-    const hint = document.getElementById('featureHint');
-    hint.textContent = 'Thanks! Saved. (Check localStorage key: stakx_feature_requests)';
-    hint.style.color = 'var(--success)';
-  });
-
-  // Email capture — demo validation, no backend
-  const emailForm = document.getElementById('emailForm');
-  emailForm?.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const input = document.getElementById('subEmail');
-    const msg = document.getElementById('subMsg');
-    if(!input.value || !/^\S+@\S+\.\S+$/.test(input.value)){
-      msg.textContent = 'Please enter a valid email.';
-      msg.style.color = '#b91c1c';
+  function renderRequests(){
+    const el = document.getElementById('featureList');
+    if (!el) return;
+    const items = getReqs();
+    if (items.length === 0){
+      el.innerHTML = '<p class="muted" style="margin:8px 0 0;">No feedback yet.</p>';
       return;
     }
-    const list = JSON.parse(localStorage.getItem('stakx_subs') || '[]');
-    list.push({ email: input.value, at: new Date().toISOString() });
-    localStorage.setItem('stakx_subs', JSON.stringify(list));
-    msg.textContent = 'Subscribed! (Demo only—stored in localStorage: stakx_subs)';
-    msg.style.color = 'var(--success)';
-    input.value = '';
-  });
+    el.innerHTML = `
+      <div class="card" style="margin-top:8px;">
+        <h3 style="margin:0 0 8px 0; font-size:16px;">Saved Feedback (local)</h3>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${items.map(i => `
+            <div style="border:1px dashed var(--stroke); border-radius:10px; padding:8px 10px;">
+              <div style="font-size:12px; color:#6b7280;">${new Date(i.at).toLocaleString()}</div>
+              <div style="font-weight:700;">${i.topic}</div>
+              <div>${i.message.replace(/</g,'&lt;')}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
 
-  // Ask a Question — also localStorage for now
-  const askForm = document.getElementById('askForm');
-  askForm?.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const topic = document.getElementById('askTopic').value.trim();
-    const title = document.getElementById('askTitleInput').value.trim();
-    const body = document.getElementById('askBody').value.trim();
+  function exportCSV(){
+    const rows = getReqs();
+    if (rows.length === 0){ alert('No feedback to export.'); return; }
+    const header = ['id','topic','message','at'];
+    const csv = [
+      header.join(','),
+      ...rows.map(r => {
+        const safe = s => `"${String(s ?? '').replace(/"/g,'""')}"`;
+        return [r.id, r.topic, r.message, r.at].map(safe).join(',');
+      })
+    ].join('\n');
 
-    if(!topic || !title) return;
-    const posts = JSON.parse(localStorage.getItem('stakx_questions') || '[]');
-    posts.push({ id: Date.now(), topic, title, body });
-    localStorage.setItem('stakx_questions', JSON.stringify(posts));
-    closeModal();
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'stakxai_feedback.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
 
-    // Optional toast
-    const t = document.createElement('div');
-    t.textContent = 'Question posted (demo).';
-    t.style.position='fixed'; t.style.bottom='16px'; t.style.right='16px';
-    t.style.background='var(--card)'; t.style.border='1px solid var(--stroke)';
-    t.style.padding='10px 12px'; t.style.borderRadius='12px'; t.style.boxShadow='var(--shadow)';
-    document.body.appendChild(t);
-    setTimeout(()=> t.remove(), 2200);
+  function clearAll(){
+    if (!confirm('Clear all saved feedback from this browser?')) return;
+    localStorage.removeItem(LS_KEY);
+    const hint = document.getElementById('featureHint');
+    if (hint){ hint.textContent = 'Cleared. (Local only)'; hint.style.color = '#b91c1c'; }
+    renderRequests();
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=> {
+    const featureForm = document.getElementById('featureForm');
+    const exportBtn = document.getElementById('exportFeedback');
+    const clearBtn = document.getElementById('clearFeedback');
+
+    featureForm?.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const topic = document.getElementById('topic').value.trim();
+      const message = document.getElementById('message').value.trim();
+      if (!topic || !message) return;
+
+      const items = getReqs();
+      items.push({ id: Date.now(), topic, message, at: new Date().toISOString() });
+      setReqs(items);
+
+      e.target.reset();
+      const hint = document.getElementById('featureHint');
+      if (hint){ hint.textContent = 'Thanks! Saved locally.'; hint.style.color = 'var(--success, #15803d)'; }
+      renderRequests();
+    });
+
+    exportBtn?.addEventListener('click', exportCSV);
+    clearBtn?.addEventListener('click', clearAll);
+
+    renderRequests();
   });
 </script>
 
 </body>
 </html>
-
