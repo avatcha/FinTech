@@ -31,19 +31,20 @@
     .cb-sub { font-size: 15px; color: var(--muted); margin-top: 6px; }
 
     .cb-stack { display: flex; flex-direction: column; gap: 16px; }
-    .cb-card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--stroke); }
+    .cb-card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--stroke); overflow:hidden; }
 
     .cb-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
     @media (min-width:1100px){ .cb-row { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 640px){ .cb-row { grid-template-columns: 1fr; gap: 12px; } }
 
     .cb-field { display: flex; flex-direction: column; gap: 6px; }
-    label { font-size: 14px; font-weight: 600; }
+    label { font-size: 14px; font-weight: 600; display:block; }
 
-    input[type="date"], input[type="number"], select, input[type="text"] {
+    input[type="month"], input[type="number"], select, input[type="text"] {
       font-size: 16px;
       padding: 12px 14px; border-radius: 14px; border: 1px solid var(--stroke); background: #fdfdfd;
       color: inherit; line-height:1.2; appearance: auto; -moz-appearance: textfield;
+      width:100%; max-width:100%;
     }
 
     .cb-card:not(#scenario-inputs) input[type=number]::-webkit-outer-spin-button,
@@ -71,42 +72,22 @@
       .nav-links a { display:block; padding:8px 10px; }
     }
 
-    .tooltip-click-container { position:relative; display:inline-flex; align-items:center; gap:8px; isolation:isolate; }
+    /* Tooltip bits */
+    .label-row{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
     .click-icon { width:20px; height:20px; border-radius:50%; background:var(--brand); color:white; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
     .tooltip-click-box {
-      display:none;
-      position:absolute;
-      inset-block-start:-10px;
-      inset-inline-start:0;
-      transform:translateY(-100%);
-      background:#ffffff;
-      padding:14px 16px;
-      border-radius:12px;
-      max-width:min(320px, 80vw);
-      border:1px solid var(--stroke);
-      box-shadow:0 8px 24px rgba(2,6,23,0.15);
-      font-size:13px;
-      z-index:99999;
-      white-space: normal;
-      overflow-wrap: anywhere;
-      pointer-events:auto;
+      display:none; position:absolute; inset-block-start:-10px; inset-inline-start:0; transform:translateY(-100%);
+      background:#ffffff; padding:14px 16px; border-radius:12px; max-width:min(320px, 80vw);
+      border:1px solid var(--stroke); box-shadow:0 8px 24px rgba(2,6,23,0.15); font-size:13px; z-index:99999;
+      white-space: normal; overflow-wrap: anywhere; pointer-events:auto;
     }
+    .tooltip-anchor { position:relative; display:inline-block; isolation:isolate; }
 
-    .graph-row { display:grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items:start; }
-    @media (max-width: 900px){ .graph-row { grid-template-columns: 1fr; } }
-    .side-panel { display:flex; flex-direction:column; gap:16px; }
-    .mini-card { background: var(--soft); border: 1px solid var(--stroke); border-radius: 14px; padding: 14px; }
+    /* Success strip after Run */
+    .success-strip{ display:none; background:var(--soft); border:1px solid var(--stroke); border-radius:12px; padding:12px 14px; margin-top:12px; display:flex; align-items:center; gap:12px; }
+    .success-strip .hint{ font-size:13px; color:var(--muted); }
 
-    .toggle-item { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-    .switch { position:relative; width:52px; height:28px; flex:0 0 auto; }
-    .switch input { display:none; }
-    .slider { position:absolute; inset:0; background:#cbd5e1; border-radius:999px; transition:0.2s; cursor:pointer; }
-    .slider:before { content:""; position:absolute; width:22px; height:22px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.2s; }
-    input:checked + .slider { background:var(--brand); }
-    input:checked + .slider:before { transform:translateX(24px); }
-
-    #scenario-planner.fade-in { animation: fadeIn 0.35s ease-out forwards; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+    /* Scenario Planner */
     #scenarioGrid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
     @media (max-width: 900px){ #scenarioGrid { grid-template-columns: 1fr; } }
 
@@ -114,19 +95,16 @@
     .with-suffix input[type="number"] { padding-right: 70px; }
     .with-suffix::after { content: attr(data-suffix); position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--muted); pointer-events: none; }
 
-    .action-bar { position: sticky; bottom: 0; inset-inline: 0; background: rgba(255,255,255,.9); backdrop-filter: blur(6px); border-top: 1px solid var(--stroke); display:none; padding: 10px var(--pad-x); z-index: 999; }
-    .action-bar-inner{ max-width: var(--content-w); margin:0 auto; display:flex; gap:10px; align-items:center; }
-    .action-bar .hint { font-size: 12px; color: var(--muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    @media (max-width: 640px){ .action-bar{ display:block; } }
+    #breakdownChart, #scenarioChart { height: clamp(260px, 42vh, 360px); background:transparent; }
 
-    #chart { height: clamp(300px, 45vh, 420px); }
-    #breakdownChart, #scenarioChart { height: clamp(260px, 42vh, 360px); }
-
-    @media (prefers-reduced-motion: reduce){
-      *{ scroll-behavior: auto !important; animation: none !important; transition: none !important; }
-    }
+    /* Validation */
+    .is-invalid{ border-color:#dc2626 !important; box-shadow:0 0 0 4px rgba(220,38,38,0.12) !important; }
+    .field-hint-error{ color:#b91c1c; font-size:12px; margin-top:6px; }
 
     .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59; font-weight:700; font-size:12px; }
+    .center-title{ text-align:center; }
+
+    *,*::before,*::after{ box-sizing:border-box; }
   </style>
 
   <script src="https://code.highcharts.com/highcharts.js"></script>
@@ -138,8 +116,9 @@
     <a class="brand" href="#">stakxAi</a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle navigation">☰</button>
     <nav id="primary-nav" class="nav-links">
-      <a href="#retirement">Retirement Planner</a>
+      <a href="index.html#retirement">Retirement Planner</a>
       <a href="budget/easy.html">Budget Tool</a>
+      <a href="questions.html">Healthcare Plan Options</a>
     </nav>
   </div>
 </header>
@@ -153,125 +132,131 @@
   <div class="cb-stack">
     <div class="cb-card" id="input-card" aria-label="Inputs">
       <div class="cb-row">
-        <div class="cb-field"><label for="dob">Date of Birth</label><input id="dob" type="date" autocomplete="bday" /></div>
-        <div class="cb-field"><label for="retireDate">Retirement Date</label><input id="retireDate" type="date" /></div>
-        <div class="cb-field"><label for="retiresavings">Current Retirement Savings ($)</label><input id="retiresavings" type="number" inputmode="decimal" placeholder="e.g., 120000" /></div>
-
-        <div class="cb-field"><label for="futureretiresavings">Annual Contributions ($)</label><input id="futureretiresavings" type="number" inputmode="decimal" placeholder="e.g., 18000" /></div>
-        <div class="cb-field"><label for="socsecAge">Social Security Start</label><input id="socsecAge" type="date" /></div>
+        <div class="cb-field">
+          <label for="dob">Date of Birth</label>
+          <input id="dob" type="month" autocomplete="bday" placeholder="YYYY-MM" />
+        </div>
+        <div class="cb-field">
+          <label for="retireDate">Retirement Date</label>
+          <input id="retireDate" type="month" placeholder="YYYY-MM" />
+        </div>
+        <div class="cb-field">
+          <label for="retiresavings">Current Retirement Savings ($)</label>
+          <input id="retiresavings" type="number" inputmode="decimal" placeholder="e.g., 120000" />
+        </div>
 
         <div class="cb-field">
-          <label class="tooltip-click-container" for="socsecAmt">
-            Estimated Annual Social Security ($) Future Dollars
-            <span class="click-icon" id="ssInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="ssInfoBox">?</span>
-            <div class="tooltip-click-box" id="ssInfoBox">
-              Unsure how much you'll get? Use these official tools:<br><br>
-              • View your personalized estimate:<br>
-              <a href="https://www.ssa.gov/myaccount" target="_blank" rel="noopener">SSA MyAccount</a><br><br>
-              • Quick benefit estimate calculator:<br>
-              <a href="https://www.ssa.gov/OACT/quickcalc/" target="_blank" rel="noopener">SSA Quick Calculator</a>
-            </div>
+          <label for="futureretiresavings">Annual Contributions ($)</label>
+          <input id="futureretiresavings" type="number" inputmode="decimal" placeholder="e.g., 18000" />
+        </div>
+
+        <div class="cb-field">
+          <label for="socsecAge">Social Security Start</label>
+          <input id="socsecAge" type="month" placeholder="YYYY-MM" />
+        </div>
+
+        <div class="cb-field">
+          <label for="socsecAmt">
+            <span class="tooltip-anchor">
+              <span class="label-row">
+                Estimated Annual Social Security ($) Future Dollars
+                <span class="click-icon" id="ssInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="ssInfoBox">?</span>
+              </span>
+              <div class="tooltip-click-box" id="ssInfoBox">
+                Unsure how much you'll get? Use these official tools:<br><br>
+                • View your personalized estimate:<br>
+                <a href="https://www.ssa.gov/myaccount" target="_blank" rel="noopener">SSA MyAccount</a><br><br>
+                • Quick benefit estimate calculator:<br>
+                <a href="https://www.ssa.gov/OACT/quickcalc/" target="_blank" rel="noopener">SSA Quick Calculator</a>
+              </div>
+            </span>
           </label>
           <input id="socsecAmt" type="number" inputmode="decimal" placeholder="e.g., 24000" />
         </div>
 
-        <div class="cb-field"><label for="pensiondate">Pension Start</label><input id="pensiondate" type="date" /></div>
-        <div class="cb-field"><label for="pensions">Annual Pension Amount ($) Future Dollars</label><input id="pensions" type="number" inputmode="decimal" placeholder="e.g., 12000" /></div>
+        <div class="cb-field">
+          <label for="pensiondate">Pension Start</label>
+          <input id="pensiondate" type="month" placeholder="YYYY-MM" />
+        </div>
+        <div class="cb-field">
+          <label for="pensions">Annual Pension Amount ($) Future Dollars</label>
+          <input id="pensions" type="number" inputmode="decimal" placeholder="e.g., 12000" />
+        </div>
 
         <div class="cb-field">
-          <label class="tooltip-click-container" for="taxableNow">
-            Non-Retirement Assets ($)
-            <span class="click-icon" id="taxableInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="taxableInfoBox">i</span>
-            <div class="tooltip-click-box" id="taxableInfoBox">
-              Taxable savings/stocks/cash not in retirement accounts. We assume a small annual “tax drag”
-              on growth (default 0.6%) in the main projection. You can fine-tune this in Scenario Planner.
-            </div>
+          <label for="taxableNow">
+            <span class="tooltip-anchor">
+              <span class="label-row">
+                Non-Retirement Assets ($)
+                <span class="click-icon" id="taxableInfoBtn" tabindex="0" role="button" aria-expanded="false" aria-controls="taxableInfoBox">i</span>
+              </span>
+              <div class="tooltip-click-box" id="taxableInfoBox">
+                Taxable savings/stocks/cash not in retirement accounts. In projections we use an <strong>annual tax rate</strong> on returns (default 0.6%). You can adjust this in Scenario Planner.
+              </div>
+            </span>
           </label>
           <input id="taxableNow" type="number" inputmode="decimal" placeholder="e.g., 30000" />
         </div>
       </div>
 
-      <div class="cb-actions" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-        <button id="runCalc" class="btn-primary">Run Calculation</button>
-        <button id="clearAll" class="btn" style="background:#eef2ff; color:#1f2a59;">Clear</button>
+      <div class="cb-actions" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <button id="runCalc" type="button" class="btn-primary">Run Calculation</button>
+        <button id="clearAll" type="button" class="btn" style="background:#eef2ff; color:#1f2a59;">Clear</button>
       </div>
-    </div>
 
-    <div id="chartSection" class="cb-card" style="display:none;">
-      <h2 id="chartTitle" style="margin:0 0 6px 0; font-size:20px; font-weight:800; text-align:center;">Projected Retirement Savings</h2>
-      <div id="chartSubtitle" style="margin-bottom:10px; font-size:13px; color:var(--muted); text-align:center;"></div>
-
-      <div class="graph-row">
-        <div id="chart" role="img" aria-label="Projected savings line chart"></div>
-        <aside class="side-panel">
-          <div id="postCalcOptions" class="mini-card" style="display:none;">
-            <div class="toggle-item">
-              <div>
-                <div style="font-weight:700;">Account for inflation?</div>
-                <div style="font-size:13px;color:var(--muted);">Deflate the main chart to today’s dollars (3%).</div>
-              </div>
-              <label class="switch" aria-label="Toggle inflation">
-                <input type="checkbox" id="inflationToggle"><span class="slider" aria-hidden="true"></span>
-              </label>
-            </div>
-            <div class="toggle-item" style="margin-top:10px;">
-              <div>
-                <div style="font-weight:700;">Model withdrawals?</div>
-                <div style="font-size:13px;color:var(--muted);">Apply a 4% distribution after retirement.</div>
-              </div>
-              <label class="switch" aria-label="Toggle withdrawals">
-                <input type="checkbox" id="withdrawToggle"><span class="slider" aria-hidden="true"></span>
-              </label>
-            </div>
-          </div>
-
-          <div id="scenarioPrompt" class="mini-card" aria-live="polite" style="display:none;"></div>
-        </aside>
-      </div>
-    </div>
+      <!-- Removed prior middle chart section by design per request -->
 
     <section id="scenario-planner" class="cb-card" style="scroll-margin-top:80px; display:none;">
       <h2 style="margin:0 0 8px 0;">Scenario Planner</h2>
       <div class="cb-sub" style="margin:0 0 16px 0;">Start with your monthly need (today’s dollars). Then refine assumptions and review the projections.</div>
 
+      <!-- Monthly Need -->
       <div class="cb-card" id="sp-need-wrap" style="margin-bottom:16px;">
-        <h3 style="margin:0 0 8px 0; font-size:18px;">Monthly Need</h3>
+        <h3 style="margin:0 0 8px 0; font-size:18px;" class="center-title">Monthly Need</h3>
         <div class="cb-row" style="grid-template-columns: 1fr;">
           <div class="cb-field">
             <label for="spMonthlyNeed">Monthly spending needed in retirement (today’s dollars)</label>
             <input id="spMonthlyNeed" type="number" inputmode="decimal" placeholder="e.g., 4500" />
+            <div id="needErrorMsg" class="field-hint-error" style="display:none;">Please enter your monthly need to continue.</div>
             <small style="color:var(--muted);">Most people need <strong>70–90%</strong> of their current monthly spending.</small>
           </div>
         </div>
-        <div style="margin-top:10px;">
-          <button id="spBuildBtn" class="btn-primary">Create scenario</button>
+        <div style="margin-top:10px; display:flex; gap:8px;">
+          <button id="spBuildBtn" type="button" class="btn-primary">See Projections</button>
         </div>
       </div>
 
-      <div id="sp-rest" style="display:none;">
-        <div class="cb-card" id="scenario-inputs" style="margin-bottom:16px;">
-          <h3 style="margin:0 0 8px 0; font-size:18px;">Assumptions</h3>
-          <div class="cb-row" style="grid-template-columns: repeat(4, 1fr);">
-            <div class="cb-field with-suffix" data-suffix="%/yr">
-              <label for="spReturnPct">Expected Return</label>
-              <input id="spReturnPct" type="number" step="0.1" min="0" max="100" value="6" inputmode="decimal" />
-            </div>
-            <div class="cb-field with-suffix" data-suffix="%/yr">
-              <label for="spInflationPct">Inflation Rate</label>
-              <input id="spInflationPct" type="number" step="0.1" min="0" max="100" value="3" inputmode="decimal" />
-            </div>
-            <div class="cb-field with-suffix" data-suffix="%/yr">
-              <label for="spWithdrawPct">Withdrawal Rate</label>
-              <input id="spWithdrawPct" type="number" step="0.1" min="1" max="100" value="4" inputmode="decimal" />
-            </div>
-            <div class="cb-field with-suffix" data-suffix="%/yr">
-              <label for="spTaxDragPct">Tax Drag on Non-Retirement Assets</label>
-              <input id="spTaxDragPct" type="number" step="0.1" min="0" max="2" value="0.6" inputmode="decimal" />
-              <small style="color:var(--muted);">Reduces taxable-account growth to approximate ongoing taxes.</small>
-            </div>
+      <!-- Assumptions BEFORE charts with expert-default note -->
+      <div class="cb-card" id="scenario-inputs" style="margin-bottom:16px;">
+        <h3 style="margin:0 0 6px 0; font-size:18px;" class="center-title">Assumptions</h3>
+        <div class="cb-sub" style="margin:0 12px 12px; text-align:center;">Default assumptions reflect widely used expert guidelines. Adjust to explore different scenarios.</div>
+        <div class="cb-row" style="grid-template-columns: repeat(4, 1fr);">
+          <div class="cb-field with-suffix" data-suffix="%/yr">
+            <label for="spReturnPct">Expected Return</label>
+            <input id="spReturnPct" type="number" step="0.1" min="0" max="100" value="6" inputmode="decimal" />
+          </div>
+          <div class="cb-field with-suffix" data-suffix="%/yr">
+            <label for="spInflationPct">Inflation Rate</label>
+            <input id="spInflationPct" type="number" step="0.1" min="0" max="100" value="3" inputmode="decimal" />
+          </div>
+          <div class="cb-field with-suffix" data-suffix="%/yr">
+            <label for="spWithdrawPct">Withdrawal Rate</label>
+            <input id="spWithdrawPct" type="number" step="0.1" min="1" max="100" value="4" inputmode="decimal" />
+          </div>
+          <div class="cb-field with-suffix" data-suffix="%">
+            <label for="spTaxRatePct">Non-Retirement Account Tax Rate</label>
+            <input id="spTaxRatePct" type="number" step="0.1" min="0" max="60" value="0.6" inputmode="decimal" />
+            <small style="color:var(--muted);">Approximate annual tax rate on taxable-account returns.</small>
           </div>
         </div>
+      </div>
 
+      <!-- Disclaimer -->
+      <div class="cb-sub" style="margin:0 0 12px 0; text-align:center;">
+        <em>Note: The estimate does not include general taxes, but includes taxes on non‑retirement account assets.</em>
+      </div>
+
+      <div id="sp-rest" style="display:none;">
         <div id="scenarioGrid">
           <div>
             <h3 class="center-title" style="margin:0 0 8px 0; font-size:16px;">Monthly Retirement Estimate (Monthly cash flows)</h3>
@@ -282,36 +267,28 @@
             <div id="scenarioChart"></div>
           </div>
         </div>
-      </div> 
+      </div>
     </section>
 
   </div>
 </div>
 
-<div class="action-bar" aria-hidden="false">
-  <div class="action-bar-inner">
-    <div class="hint">Fill a few fields, then run your projection</div>
-    <button class="btn-primary" id="runCalcMobile" aria-label="Run calculation">Run</button>
-  </div>
-</div>
-
 <script>
+// Tooltips that stay open while interacting with links
 function setupTooltip(btnId, boxId) {
   const btn = document.getElementById(btnId);
   const box = document.getElementById(boxId);
   if (!btn || !box) return;
-  const container = btn.closest('.tooltip-click-container') || btn.parentElement;
   let open = false;
   const show = () => { box.style.display = 'block'; btn.setAttribute('aria-expanded','true'); open = true; };
   const hide = () => { box.style.display = 'none'; btn.setAttribute('aria-expanded','false'); open = false; };
   const toggle = () => (open ? hide() : show());
+
   btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); toggle(); });
   btn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); e.stopPropagation(); toggle(); } });
+  // keep popup open while clicking inside
   box.addEventListener('click', (e)=> e.stopPropagation());
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    container.addEventListener('mouseenter', show);
-    container.addEventListener('mouseleave', hide);
-  }
+  // close on outside click or Esc
   document.addEventListener('click', hide);
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hide(); });
 }
@@ -335,33 +312,21 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <script>
-let hcChart = null;
-const TAX_DRAG_DEFAULT = 0.006;
+let hcChart1 = null; // breakdownChart
+let hcChart2 = null; // scenarioChart
 const SS_COLA = 0.02;
 
-function parseDate(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y,(m||1)-1,d||1); }
+function parseDate(s){ if(!s) return null; const [y,m] = s.split('-').map(Number); return new Date(y,(m||1)-1,1); }
 function yearsBetween(a, b){ return (b - a) / (365.25 * 86400000); }
-function yearsFromToday(targetYear){ const now=new Date(); const then=new Date(targetYear, now.getMonth(), now.getDate()); return (then - now) / (365.25*86400000); }
 
-window.spInputs = { returnPct: 6, inflationPct: 3, withdrawPct: 4, taxDragPct: 0.6, monthlyNeed: 0 };
+window.spInputs = { returnPct: 6, inflationPct: 3, withdrawPct: 4, taxRatePct: 0.6, monthlyNeed: 0 };
 
 function bindNumber(id, key, min, max){
   const el = document.getElementById(id);
   if (!el) return;
   const clamp = v => Math.min(max, Math.max(min, Number(v)));
-  function onInput(){
-    const v = Number(el.value);
-    if (isFinite(v)) {
-      window.spInputs[key] = v;
-      document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
-    }
-  }
-  function onChange(){
-    const v = clamp(el.value || 0);
-    el.value = v;
-    window.spInputs[key] = v;
-    document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }}));
-  }
+  function onInput(){ const v = Number(el.value); if (isFinite(v)) { window.spInputs[key] = v; document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }})); } }
+  function onChange(){ const v = clamp(el.value || 0); el.value = v; window.spInputs[key] = v; document.dispatchEvent(new CustomEvent('scenario-inputs:change', { detail: { ...window.spInputs }})); }
   el.addEventListener('input', onInput);
   el.addEventListener('change', onChange);
 }
@@ -370,196 +335,65 @@ document.addEventListener('DOMContentLoaded', () => {
   bindNumber('spReturnPct','returnPct',0,100);
   bindNumber('spInflationPct','inflationPct',0,100);
   bindNumber('spWithdrawPct','withdrawPct',1,100);
-  bindNumber('spTaxDragPct','taxDragPct',0,2);
+  bindNumber('spTaxRatePct','taxRatePct',0,60);
 
   const needEl = document.getElementById('spMonthlyNeed');
   const buildBtn = document.getElementById('spBuildBtn');
   if (buildBtn && needEl){
     buildBtn.addEventListener('click', () => {
       const v = Number(needEl.value || 0);
-      if (v <= 0) { alert('Please enter your monthly need (today’s dollars).'); needEl.focus(); return; }
+      if (v <= 0) {
+        needEl.classList.add('is-invalid');
+        document.getElementById('needErrorMsg').style.display='block';
+        needEl.focus();
+        return;
+      }
+      needEl.classList.remove('is-invalid');
+      document.getElementById('needErrorMsg').style.display='none';
       window.spInputs.monthlyNeed = v;
-      const rest = document.getElementById('sp-rest');
-      if (rest) rest.style.display = 'block';
+      const rest = document.getElementById('sp-rest'); if (rest) rest.style.display = 'block';
       buildScenarioCharts();
       const target = document.getElementById('scenarioGrid') || rest;
       target.scrollIntoView({ behavior:'smooth', block:'start' });
     });
-
     needEl.addEventListener('change', () => {
       const rest = document.getElementById('sp-rest');
-      if (rest && rest.style.display !== 'none') {
-        window.spInputs.monthlyNeed = Number(needEl.value || 0);
-        buildScenarioCharts();
-      }
+      if (rest && rest.style.display !== 'none') { window.spInputs.monthlyNeed = Number(needEl.value || 0); buildScenarioCharts(); }
     });
   }
 });
 
-function showScenarioPrompt() {
-  const box = document.getElementById('scenarioPrompt');
-  if (!box || box.dataset.active === '1') return;
-  box.innerHTML = `
-    <div style="font-weight:700; margin-bottom:6px;">What does this mean? Want to see if this is enough to retire?</div>
-    <div style="font-size:13px; color:var(--muted); margin-bottom:10px;">Use the Scenario Planner to see monthly coverage (cash flows) and a year-by-year projection.</div>
-    <button id="scenarioBtn" class="btn-primary" style="width:100%;">Open Scenario Planner</button>
-  `;
-  box.style.display = 'block';
-  box.dataset.active = '1';
-
-  const btn = document.getElementById('scenarioBtn');
-  btn.addEventListener('click', () => {
-    const target = document.getElementById('scenario-planner');
-    if (!target) return;
-    target.style.display = 'block';
-    target.classList.add('fade-in');
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    buildScenarioCharts();
-  });
-}
-
+// Show planner entry point after Run
 function runCalcHandler(){
-  document.getElementById('chartSection').style.display = 'block';
-  document.getElementById('postCalcOptions').style.display = 'block';
-
-  function updateChartSubtitle() {
-    const inf = document.getElementById('inflationToggle').checked;
-    const wd  = document.getElementById('withdrawToggle').checked;
-    const infText = inf ? 'Main chart shows today’s dollars (3%).' : 'Main chart is nominal.';
-    const wdText = wd ? '4% distribution after retirement.' : 'No distributions in main chart.';
-    const taxDragDisclosure = 'Includes non-retirement assets with 0.6%/yr tax drag.';
-    const colaChip = '<span class="chip">SS includes 2% COLA</span>';
-    document.getElementById('chartSubtitle').innerHTML = `${infText} ${wdText} ${taxDragDisclosure} &nbsp; ${colaChip}`;
-  }
-
-  ['inflationToggle','withdrawToggle'].forEach(id=>{
-    const el = document.getElementById(id);
-    if (el && !el.dataset.bound){ el.addEventListener('change', runCalcHandler); el.dataset.bound = '1'; }
-  });
-
-  updateChartSubtitle();
-
-  const dobStr = document.getElementById('dob').value;
-  const retireStr = document.getElementById('retireDate').value;
-  if (!dobStr || !retireStr) return alert('Enter DOB and Retirement Date.');
-
-  const dob = parseDate(dobStr);
-  const retireDate = parseDate(retireStr);
-  const retireYear = retireDate.getFullYear();
-
-  const ssStr = document.getElementById('socsecAge').value;
-  const ssAmt = Number(document.getElementById('socsecAmt').value || 0);
-  const penStr = document.getElementById('pensiondate').value;
-  const penAmt = Number(document.getElementById('pensions').value || 0);
-
-  const ssStart = ssStr ? parseDate(ssStr) : null;
-  const penStart = penStr ? parseDate(penStr) : null;
-
-  const retireNow = Number(document.getElementById('retiresavings').value || 0);
-  const retireAnnual = Number(document.getElementById('futureretiresavings').value || 0);
-  const taxableNow = Number(document.getElementById('taxableNow').value || 0);
-
-  const inflationActive = document.getElementById('inflationToggle').checked;
-  const withdrawActive  = document.getElementById('withdrawToggle').checked;
-
-  const INFL = 0.03; const WD = 0.04;
-
-  const endYear = dob.getFullYear() + 100;
-  const startNeeded = retireYear - 5;
-  const currentYear = new Date().getFullYear() + 1;
-  const firstYear = Math.min(currentYear, startNeeded);
-  const timeline = [];
-  for (let y = firstYear; y <= endYear; y++) timeline.push(y);
-
-  const ssStartYear = ssStart ? ssStart.getFullYear() : null;
-  const flowContribRet = timeline.map(y => (y < retireYear ? retireAnnual : 0));
-  const flowSS = timeline.map(y => {
-    if (!ssStartYear || y < ssStartYear) return 0;
-    const yearsSinceStart = y - ssStartYear;
-    return ssAmt * Math.pow(1 + SS_COLA, yearsSinceStart);
-  });
-  const flowPension = timeline.map(y =>
-    (penStart && y >= penStart.getFullYear() && y <= dob.getFullYear()+92) ? penAmt : 0
-  );
-
-  function deflate(value, idx){ if (!inflationActive) return value; return value / Math.pow(1 + INFL, yearsFromToday(timeline[idx])); }
-
-  function simulateDual(rate){
-    let balRet = retireNow; let balTax = taxableNow; const totalBal = [];
-    for (let i=0; i<timeline.length; i++){
-      const y = timeline[i];
-      const rRet = rate; const rTax = Math.max(0, rate - TAX_DRAG_DEFAULT);
-      balRet *= (1 + rRet); balTax *= (1 + rTax);
-      balRet += flowContribRet[i];
-      if (withdrawActive && y >= retireYear){
-        const combined = balRet + balTax; const wdAmt = combined * WD;
-        const retShare = combined > 0 ? (balRet / combined) : 0.5;
-        const taxShare = 1 - retShare;
-        balRet -= wdAmt * retShare; balTax -= wdAmt * taxShare;
-      }
-      const sum = balRet + balTax + flowSS[i] + flowPension[i];
-      totalBal.push(deflate(sum, i));
-    }
-    return totalBal;
-  }
-
-  const p3 = simulateDual(0.03), p5 = simulateDual(0.05), p7 = simulateDual(0.07), p9 = simulateDual(0.09);
-
-  function filter(path){
-    const startYear = retireYear - 5;
-    return timeline
-      .map((y,i)=> y >= startYear ? [Date.UTC(y,0,1), path[i]] : null)
-      .filter(Boolean);
-  }
-
-  // --- X-AXIS YEAR LABELS (robust): explicit yearly ticks ---
-  const tickPositions = [];
-  for (let y = retireYear - 5; y <= endYear; y++) tickPositions.push(Date.UTC(y,0,1));
-
-  if (hcChart) hcChart.destroy();
-  hcChart = Highcharts.chart('chart', {
-    chart: { zooming:{type:'x'}, backgroundColor:'transparent', height: 360, reflow: true },
-    title: { text:null },
-    xAxis: {
-      type:'datetime',
-      tickPositions,
-      labels: { enabled:true, formatter(){ return Highcharts.dateFormat('%Y', this.value); } },
-      min: tickPositions[0],
-      max: tickPositions[tickPositions.length - 1]
-    },
-    yAxis: { title:{ text:'Total Resources ($)' }, labels:{ formatter(){ return '$' + Highcharts.numberFormat(this.value,0) } } },
-    legend:{ enabled:true, align:'center', verticalAlign:'top' },
-    tooltip:{ shared:true, formatter(){
-      const x=(this.points&&this.points[0])?this.points[0].x:this.x;
-      const year=Highcharts.dateFormat('%Y', x);
-      const lines=(this.points||[this.point]).map(p=>`<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y, 0)}</b>`).join('<br/>');
-      return `<b>${year}</b><br/>${lines}`;
-    }},
-    credits:{ enabled:false },
-    series:[
-      { name:'3%', data:filter(p3), type:'line', lineWidth:2 },
-      { name:'5%', data:filter(p5), type:'line', lineWidth:2 },
-      { name:'7%', data:filter(p7), type:'line', lineWidth:2 },
-      { name:'9%', data:filter(p9), type:'line', lineWidth:2 }
-    ]
-  });
-
-  setTimeout(()=>{ if(hcChart) hcChart.reflow(); }, 0);
-  showScenarioPrompt();
+  const success = document.getElementById('successStrip');
+  if (success) success.style.display = 'flex';
+  const planner = document.getElementById('scenario-planner');
+  if (planner) planner.style.display = 'block';
+  // auto-focus Monthly Need on desktop for speed
+  const needEl = document.getElementById('spMonthlyNeed');
+  if (needEl) needEl.focus();
 }
 
-document.getElementById('runCalc').addEventListener('click', runCalcHandler);
-const runMobile = document.getElementById('runCalcMobile');
-runMobile.addEventListener('click', ()=>{
-  const dob = document.getElementById('dob').value; const rd = document.getElementById('retireDate').value;
-  if(!dob || !rd){ document.getElementById('input-card').scrollIntoView({behavior:'smooth', block:'start'}); }
-  runCalcHandler();
+// Go-to-Need CTA
+document.addEventListener('DOMContentLoaded', ()=>{
+  const btn = document.getElementById('runCalc');
+  if (btn) btn.addEventListener('click', runCalcHandler);
+  const go = document.getElementById('goToNeed');
+  if (go) go.addEventListener('click', ()=>{
+    const target = document.getElementById('scenario-planner');
+    if (!target) return; target.style.display='block';
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+    const needEl = document.getElementById('spMonthlyNeed'); if (needEl) needEl.focus();
+  });
 });
 
-document.getElementById('clearAll').addEventListener('click', ()=>{
+// Clear
+const clearBtn = document.getElementById('clearAll');
+if (clearBtn) clearBtn.addEventListener('click', ()=>{
   ['dob','retireDate','socsecAge','socsecAmt','pensiondate','pensions','retiresavings','futureretiresavings','taxableNow','spMonthlyNeed'].forEach(id=>{ const el = document.getElementById(id); if(el) el.value = ''; });
   const sp = document.getElementById('sp-rest'); if (sp) sp.style.display='none';
-  const cs = document.getElementById('chartSection'); if (cs) cs.style.display='none';
+  const planner = document.getElementById('scenario-planner'); if (planner) planner.style.display='none';
+  const success = document.getElementById('successStrip'); if (success) success.style.display='none';
 });
 </script>
 
@@ -574,7 +408,7 @@ function buildScenarioCharts() {
   const retireYear = retireDate.getFullYear();
 
   const ssStr = document.getElementById('socsecAge').value;
-  const ssAmtAnnual = Number(document.getElementById('socsecAmt').value || 0);
+  const the_ss_amt = Number(document.getElementById('socsecAmt').value || 0);
   const penStr = document.getElementById('pensiondate').value;
   const penAmtAnnual = Number(document.getElementById('pensions').value || 0);
 
@@ -588,21 +422,20 @@ function buildScenarioCharts() {
   const rNom   = Number(window.spInputs.returnPct || 6) / 100;
   const infl   = Number(window.spInputs.inflationPct || 3) / 100;
   const wdRate = Number(window.spInputs.withdrawPct || 4) / 100;
-  const drag   = Math.max(0, Number(window.spInputs.taxDragPct || 0.6)) / 100;
+  const taxRate = Math.max(0, Math.min(0.6, Number(window.spInputs.taxRatePct || 0.6) / 100));
   const monthlyNeedToday = Number(window.spInputs.monthlyNeed || 0);
 
   if (monthlyNeedToday <= 0) return;
 
   const endYear = dob.getFullYear() + 100;
-  const years = [];
-  for (let y = retireYear; y <= endYear; y++) years.push(y);
+  const years = []; for (let y = retireYear; y <= endYear; y++) years.push(y);
 
   function growToRetirement() {
     const today = new Date(); const currentYear = today.getFullYear() + 1;
     let r = retireNow; let t = taxableNow;
     for (let y = currentYear; y <= retireYear; y++) {
       r *= (1 + rNom);
-      t *= (1 + Math.max(0, rNom - drag));
+      t *= (1 + Math.max(0, rNom * (1 - taxRate)));
       if (y < retireYear) r += retireAnnual;
     }
     return { r, t };
@@ -611,7 +444,7 @@ function buildScenarioCharts() {
 
   const ssStartYear = ssStart ? ssStart.getFullYear() : null;
   const ssMonthly = (ssStartYear && ssStartYear <= retireYear)
-    ? (ssAmtAnnual * Math.pow(1 + SS_COLA, Math.max(0, retireYear - ssStartYear))) / 12
+    ? (the_ss_amt * Math.pow(1 + SS_COLA, Math.max(0, retireYear - ssStartYear))) / 12
     : 0;
   const penMonthly = (penStart && penStart.getFullYear() <= retireYear) ? (penAmtAnnual / 12) : 0;
   const retWdMonthly = (wdRate * balRet0) / 12;
@@ -624,27 +457,16 @@ function buildScenarioCharts() {
   const gap = needMonthlyAtRet - stackMonthly;
   const gapText = gap > 0 ? `Gap: $${Highcharts.numberFormat(gap, 0)}/mo` : `Surplus: $${Highcharts.numberFormat(-gap, 0)}/mo`;
 
-  Highcharts.chart('breakdownChart', {
+  if (hcChart1) { try{ hcChart1.destroy(); }catch(e){} }
+  hcChart1 = Highcharts.chart('breakdownChart', {
     chart: { type: 'column', backgroundColor: 'transparent', height: 320, reflow: true },
     title: { text: null },
-    xAxis: { categories: ['Retirement Year'] },
-    yAxis: {
-      min: 0,
-      title: { text: 'Monthly Resources ($)' },
-      plotLines: [{
-        value: needMonthlyAtRet, color: '#000', width: 3, zIndex: 5,
-        label: { text: `Need: $${Highcharts.numberFormat(needMonthlyAtRet,0)}/mo`, align: 'right', x: -10, y: -6, style: { color: '#000', fontWeight: '700' } }
-      }]
-    },
+    xAxis: { categories: ['Retirement Year'], title:{ text:'Year' } },
+    yAxis: { min: 0, title: { text: 'Monthly Resources ($)' },
+      plotLines: [{ value: needMonthlyAtRet, color: '#000', width: 3, zIndex: 5,
+        label: { text: `Need: $${Highcharts.numberFormat(needMonthlyAtRet,0)}/mo`, align: 'right', x: -10, y: -6, style: { color: '#000', fontWeight: '700' } } }] },
     legend: { align:'center', verticalAlign:'top' },
-    tooltip: {
-      shared: true,
-      formatter: function(){
-        const total = this.points.reduce((s,p)=>s+p.y,0);
-        const lines = this.points.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`).join('<br/>');
-        return `<b>${this.x}</b><br/>${lines}<br/><b>Total: $${Highcharts.numberFormat(total,0)}/mo</b>`;
-      }
-    },
+    tooltip: { shared: true, formatter: function(){ const total = this.points.reduce((s,p)=>s+p.y,0); const lines = this.points.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}/mo</b>`).join('<br/>' ); return `<b>${this.x}</b><br/>${lines}<br/><b>Total: $${Highcharts.numberFormat(total,0)}/mo</b>`; } },
     plotOptions: { column: { stacking: 'normal', dataLabels: { enabled: true, formatter(){ return '$' + Highcharts.numberFormat(this.y,0); } } } },
     credits: { enabled:false },
     series: [
@@ -653,34 +475,23 @@ function buildScenarioCharts() {
       { name:'Retirement Acct Withdrawal', type:'column', data: [retWdMonthly] },
       { name:'Non-Retirement Withdrawal', type:'column', data: [taxWdMonthly] }
     ],
-    subtitle: { text: `Retirement year: ${retireYear} — ${gapText}`, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' } }
+    subtitle: { text: `Retirement year: ${retireYear} — ${gapText}`, style: { fontWeight:'700', color: gap > 0 ? '#b91c1c' : '#166534' }, align:'center' }
   });
 
   const seriesSS = [], seriesPen = [], seriesRetWd = [], seriesTaxWd = [], needLine = [];
   let r = balRet0, t = balTax0;
-  for (let i = 0; i < years.length; i++) {
-    const y = years[i];
-
+  for (let y of years) {
     const yrsFromToday = Math.max(0, yearsBetween(new Date(), new Date(y, 0, 1)));
     const needAnnual = monthlyNeedToday * 12 * Math.pow(1 + infl, yrsFromToday);
     needLine.push([Date.UTC(y,0,1), needAnnual]);
 
-    const ssAnnual = (ssStartYear && ssStartYear <= y)
-      ? ssAmtAnnual * Math.pow(1 + SS_COLA, Math.max(0, y - ssStartYear))
-      : 0;
-
+    const ssAnnual = (ssStartYear && ssStartYear <= y) ? the_ss_amt * Math.pow(1 + SS_COLA, Math.max(0, y - ssStartYear)) : 0;
     const penAnnual = (penStart && penStart.getFullYear() <= y) ? penAmtAnnual : 0;
 
     r *= (1 + rNom);
-    t *= (1 + Math.max(0, rNom - drag));
+    t *= (1 + Math.max(0, rNom * (1 - taxRate)));
     const total = r + t; let wdAnnual = 0, wdRet = 0, wdTax = 0;
-    if (total > 0) {
-      wdAnnual = total * wdRate;
-      const shareR = r / total;
-      wdRet = wdAnnual * shareR;
-      wdTax = wdAnnual * (1 - shareR);
-      r -= wdRet; t -= wdTax;
-    }
+    if (total > 0) { wdAnnual = total * wdRate; const shareR = r / total; wdRet = wdAnnual * shareR; wdTax = wdAnnual * (1 - shareR); r -= wdRet; t -= wdTax; }
 
     seriesSS.push([Date.UTC(y,0,1), ssAnnual]);
     seriesPen.push([Date.UTC(y,0,1), penAnnual]);
@@ -696,29 +507,23 @@ function buildScenarioCharts() {
   }
   const subtitle = firstShortfall ? `First shortfall: ${firstShortfall}` : `No shortfall through age 100`;
 
-  Highcharts.chart('scenarioChart', {
+  if (hcChart2) { try{ hcChart2.destroy(); }catch(e){} }
+  hcChart2 = Highcharts.chart('scenarioChart', {
     chart: { backgroundColor: 'transparent', height: 320, reflow: true },
     title: { text: null },
-    subtitle: { text: subtitle },
-    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}' }, tickInterval: 365*24*3600*1000 },
-    yAxis: {
-      title: { text: 'Annual Amount ($)' },
-      labels: { formatter(){ return '$' + Highcharts.numberFormat(this.value, 0); } }
-    },
+    subtitle: { text: subtitle, align:'center' },
+    xAxis: { type: 'datetime', labels:{ format:'{value:%Y}', style:{fontSize:'10px'} }, tickInterval: 365*24*3600*1000, title:{ text:'Year' } },
+    yAxis: { title: { text: 'Annual Amount ($)' }, labels: { formatter(){ return '$' + Highcharts.numberFormat(this.value, 0); } } },
     legend: { align:'center', verticalAlign:'top' },
-    tooltip: {
-      shared: true,
-      xDateFormat: '%Y',
-      formatter: function(){
-        const year = Highcharts.dateFormat('%Y', this.x ?? (this.points && this.points[0]?.x));
-        const pts = this.points || [this.point];
-        const totalIncome = pts.filter(p => p.series.type === 'column').reduce((s,p)=>s+p.y,0);
-        const needPt = pts.find(p => p.series.type === 'line');
-        const needVal = needPt ? needPt.y : null;
-        const lines = pts.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>');
-        return `<b>${year}</b><br/>${lines}<br/><b>Total income: $${Highcharts.numberFormat(totalIncome,0)}</b>` + (needVal!=null ? `<br/><b>Need: $${Highcharts.numberFormat(needVal,0)}</b>` : '');
-      }
-    },
+    tooltip: { shared: true, xDateFormat: '%Y', formatter: function(){
+      const year = Highcharts.dateFormat('%Y', this.x ?? (this.points && this.points[0]?.x));
+      const pts = this.points || [this.point];
+      const totalIncome = pts.filter(p => p.series.type === 'column').reduce((s,p)=>s+p.y,0);
+      const needPt = pts.find(p => p.series.type === 'line');
+      const needVal = needPt ? needPt.y : null;
+      const lines = pts.map(p => `<span style="color:${p.color}">●</span> ${p.series.name}: <b>$${Highcharts.numberFormat(p.y,0)}</b>`).join('<br/>' );
+      return `<b>${year}</b><br/>${lines}<br/><b>Total income: $${Highcharts.numberFormat(totalIncome,0)}</b>` + (needVal!=null ? `<br/><b>Need: $${Highcharts.numberFormat(needVal,0)}</b>` : '');
+    }},
     plotOptions: { column: { stacking: 'normal' } },
     credits: { enabled:false },
     series: [
