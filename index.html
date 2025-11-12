@@ -68,19 +68,11 @@
   .kicker{ font-weight:800; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--brand); margin-bottom:10px }
   .title{ font-size: clamp(28px, 4.5vw, 48px); line-height:1.08; margin:0 0 10px 0; font-weight:800 }
   .sub{ color:var(--muted); font-size:15px; max-width:800px }
-  .cta-row{ margin-top:18px; display:flex; gap:10px; flex-wrap:wrap }
-  .btn{ background:var(--brand); color:#fff; border:0; padding:14px 18px; font-weight:800; border-radius:14px; cursor:pointer }
-  .btn:hover{ background:var(--brand-700) }
-  .btn.secondary{ background:#eef2ff; color:#1f2a59 }
   .strip{ display:flex; align-items:center; gap:10px; background:var(--soft); border:1px solid var(--stroke); border-radius:12px; padding:10px 12px; margin-top:14px; color:var(--muted); font-size:13px }
 
-  /* Cards / sections */
+  /* Sections */
   .section{ padding:24px 0 }
-  .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px }
-  @media (max-width:960px){ .grid-3{ grid-template-columns:1fr 1fr } }
-  @media (max-width:640px){ .grid-3{ grid-template-columns:1fr } }
   .card{ background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px }
-  .card h3{ margin:0 0 6px 0; font-size:18px }
   .muted{ color:var(--muted) }
 
   /* Community preview */
@@ -90,10 +82,12 @@
   /* Feedback form */
   .form-row{ display:grid; grid-template-columns:1fr; gap:12px }
   label{ font-size:14px; font-weight:600 }
-  input[type=text], textarea, select{
+  input[type=text], textarea{
     width:100%; padding:12px 14px; border-radius:14px; border:1px solid var(--stroke); background:#fdfdfd; color:inherit; font-size:16px;
   }
   textarea{ min-height:110px; resize:vertical }
+  .btn{ background:var(--brand); color:#fff; border:0; padding:14px 18px; font-weight:800; border-radius:14px; cursor:pointer }
+  .btn:hover{ background:var(--brand-700) }
 
   /* Modal */
   .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; padding:20px; z-index:2000 }
@@ -133,7 +127,9 @@
       </p>
 
       <div class="strip" role="status" aria-live="polite">
-        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/>
+        </svg>
         Free forever. No login required. No data is collected by us. Data lives on your browser and is deleted when you shut it down.
       </div>
     </div>
@@ -146,16 +142,20 @@
         <h2 style="margin:0 0 8px 0; font-size:22px;">Tell Us What to Build Next</h2>
         <p class="muted" style="margin:0 0 12px 0;">We build based on your feedback. What’s your #1 challenge right now?</p>
 
-        <!-- RESTORED: feedback form without email -->
-          <form id="featureForm" action="https://formspree.io/f/mrbrbbeb" method="POST">
-  
-  <button type="submit" class="btn">Send Feedback</button>
-</form>
-<p id="featureHint" style="margin-top:8px; color:var(--muted)">Your feedback is sent directly to the StakxAI team.</p>
+        <!-- Single Formspree form (no JS interception) -->
+        <form id="featureForm" action="https://formspree.io/f/mrbrbbeb" method="POST">
+          <input type="hidden" name="_subject" value="New StakxAI Feature Request">
+          <label for="topic">Topic</label>
+          <input type="text" id="topic" name="topic" required>
 
-          <!-- Optional live list -->
-          <div id="featureList" style="margin-top:12px;"></div>
+          <label for="message">What should we build next?</label>
+          <textarea id="message" name="message" required></textarea>
+
+          <button type="submit" class="btn">Send Feedback</button>
         </form>
+        <p id="featureHint" class="muted" style="margin-top:8px;">
+          Your feedback is sent directly to the StakxAI team.
+        </p>
       </div>
     </div>
   </section>
@@ -239,16 +239,6 @@
   </div>
 </div>
 
-<form action="https://formspree.io/f/mrbrbbeb" method="POST">
-  <label for="topic">Topic</label>
-  <input id="topic" name="topic" required>
-
-  <label for="message">What should we build next?</label>
-  <textarea id="message" name="message" required></textarea>
-
-  <button type="submit">Send Feedback</button>
-</form>
-
 <script>
   // Basic nav toggle
   const navBtn = document.querySelector('.nav-toggle');
@@ -280,97 +270,6 @@
   closeAsk?.addEventListener('click', closeModal);
   askModal?.addEventListener('click', (e)=>{ if(e.target === askModal) closeModal(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && askModal.style.display === 'flex') closeModal(); });
-
-  // ---- Feedback (local only) ----
-  const LS_KEY = 'stakx_feature_requests';
-
-  function getReqs(){
-    try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
-    catch { return []; }
-  }
-  function setReqs(arr){
-    localStorage.setItem(LS_KEY, JSON.stringify(arr));
-  }
-
-  function renderRequests(){
-    const el = document.getElementById('featureList');
-    if (!el) return;
-    const items = getReqs();
-    if (items.length === 0){
-      el.innerHTML = '<p class="muted" style="margin:8px 0 0;">No feedback yet.</p>';
-      return;
-    }
-    el.innerHTML = `
-      <div class="card" style="margin-top:8px;">
-        <h3 style="margin:0 0 8px 0; font-size:16px;">Saved Feedback (local)</h3>
-        <div style="display:flex; flex-direction:column; gap:8px;">
-          ${items.map(i => `
-            <div style="border:1px dashed var(--stroke); border-radius:10px; padding:8px 10px;">
-              <div style="font-size:12px; color:#6b7280;">${new Date(i.at).toLocaleString()}</div>
-              <div style="font-weight:700;">${i.topic}</div>
-              <div>${i.message.replace(/</g,'&lt;')}</div>
-            </div>`).join('')}
-        </div>
-      </div>`;
-  }
-
-  function exportCSV(){
-    const rows = getReqs();
-    if (rows.length === 0){ alert('No feedback to export.'); return; }
-    const header = ['id','topic','message','at'];
-    const csv = [
-      header.join(','),
-      ...rows.map(r => {
-        const safe = s => `"${String(s ?? '').replace(/"/g,'""')}"`;
-        return [r.id, r.topic, r.message, r.at].map(safe).join(',');
-      })
-    ].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'stakxai_feedback.csv';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  function clearAll(){
-    if (!confirm('Clear all saved feedback from this browser?')) return;
-    localStorage.removeItem(LS_KEY);
-    const hint = document.getElementById('featureHint');
-    if (hint){ hint.textContent = 'Cleared. (Local only)'; hint.style.color = '#b91c1c'; }
-    renderRequests();
-  }
-
-  document.addEventListener('DOMContentLoaded', ()=> {
-    const featureForm = document.getElementById('featureForm');
-    const exportBtn = document.getElementById('exportFeedback');
-    const clearBtn = document.getElementById('clearFeedback');
-
-    featureForm?.addEventListener('submit', (e)=>{
-      e.preventDefault();
-      const topic = document.getElementById('topic').value.trim();
-      const message = document.getElementById('message').value.trim();
-      if (!topic || !message) return;
-
-      const items = getReqs();
-      items.push({ id: Date.now(), topic, message, at: new Date().toISOString() });
-      setReqs(items);
-
-      e.target.reset();
-      const hint = document.getElementById('featureHint');
-      if (hint){ hint.textContent = 'Thanks! Saved locally.'; hint.style.color = 'var(--success, #15803d)'; }
-      renderRequests();
-    });
-
-    exportBtn?.addEventListener('click', exportCSV);
-    clearBtn?.addEventListener('click', clearAll);
-
-    renderRequests();
-  });
 </script>
 
 </body>
