@@ -145,7 +145,39 @@
 
       <div class="strip" role="status" aria-live="polite">
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></svg>
-        Free forever. No login required. Built with AI, guided by the community.
+        Free forever. No login required. No data is collected by us. Data lives on your broswer and deleted when you shut it down.
+      </div>
+    </div>
+  </section>
+
+  <!-- Community -->
+  <section id="community" class="section">
+    <div class="wrap">
+      <div class="card">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>
+            <h2 style="margin:0 0 6px 0; font-size:22px;">The StakxAI Community</h2>
+            <p class="muted" style="margin:0">Ask questions, share wins, and learn from others. You’re not alone.</p>
+          </div>
+          <div>
+            <button class="btn" id="openAsk2">Ask a Question</button>
+          </div>
+        </div>
+
+        <div class="qa" style="margin-top:14px;">
+          <div class="qa-item">
+            <strong>Q:</strong> What percent should my rent be of take-home pay?<br/>
+            <span class="muted">Top Answer:</span> Many target 25–30%, but local costs matter. If you’re above 35%, consider a roommate or move-in incentives.
+          </div>
+          <div class="qa-item">
+            <strong>Q:</strong> Roth vs Traditional—how do I choose?<br/>
+            <span class="muted">Top Answer:</span> If you expect higher income/taxes later, Roth can shine. If your current tax rate is high, Traditional may help now.
+          </div>
+          <div class="qa-item">
+            <strong>Q:</strong> What’s a realistic monthly savings rate?<br/>
+            <span class="muted">Top Answer:</span> 15–20% is a solid goal. Start smaller and step up each quarter.
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -191,44 +223,11 @@
       </div>
     </div>
   </section>
-  
-  <!-- Community -->
-  <section id="community" class="section">
-    <div class="wrap">
-      <div class="card">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-          <div>
-            <h2 style="margin:0 0 6px 0; font-size:22px;">The StakxAI Community</h2>
-            <p class="muted" style="margin:0">Ask questions, share wins, and learn from others. You’re not alone.</p>
-          </div>
-          <div>
-            <button class="btn" id="openAsk2">Ask a Question</button>
-          </div>
-        </div>
-
-        <div class="qa" style="margin-top:14px;">
-          <div class="qa-item">
-            <strong>Q:</strong> What percent should my rent be of take-home pay?<br/>
-            <span class="muted">Top Answer:</span> Many target 25–30%, but local costs matter. If you’re above 35%, consider a roommate or move-in incentives.
-          </div>
-          <div class="qa-item">
-            <strong>Q:</strong> Roth vs Traditional—how do I choose?<br/>
-            <span class="muted">Top Answer:</span> If you expect higher income/taxes later, Roth can shine. If your current tax rate is high, Traditional may help now.
-          </div>
-          <div class="qa-item">
-            <strong>Q:</strong> What’s a realistic monthly savings rate?<br/>
-            <span class="muted">Top Answer:</span> 15–20% is a solid goal. Start smaller and step up each quarter.
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
 <footer>
   <div class="wrap footer-row">
-    <div>© <span id="year"></span> StakxAI • Free forever • <a href="#" class="muted" style="text-decoration:none">Mission</a></div>
-    <div class="muted">Built with AI. Guided by the community.</div>
-    <div class="muted"> No data is collected by us. Data lives on your broswer and deleted when you shut it down.</div>
+    <div>© 2025 StakxAI • Free • Rack Your Stackx</div>
+    <div class="muted"></div>
   </div>
 </footer>
 
@@ -282,8 +281,9 @@
     });
   }
 
-  // Year
-  document.getElementById('year').textContent = new Date().getFullYear();
+  // Year (guard in case element doesn't exist)
+  const yEl = document.getElementById('year');
+  if (yEl) yEl.textContent = new Date().getFullYear();
 
   // Modal behavior
   const askModal = document.getElementById('askModal');
@@ -371,3 +371,4 @@
 
 </body>
 </html>
+
