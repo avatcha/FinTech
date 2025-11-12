@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -104,6 +104,10 @@
     .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59; font-weight:700; font-size:12px; }
     .center-title{ text-align:center; }
 
+    /* Kicker + info strip */
+    .kicker{ font-weight:800; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--brand); margin:10px 0 8px 0; }
+    .strip{ display:flex; align-items:center; gap:10px; background:var(--soft); border:1px solid var(--stroke); border-radius:12px; padding:10px 12px; color:var(--muted); font-size:13px; }
+
     *,*::before,*::after{ box-sizing:border-box; }
   </style>
 
@@ -113,15 +117,25 @@
 
 <header class="site-header">
   <div class="cb-wrap header-inner">
-    <a class="brand" href="#">stakxAi</a>
+    <a class="brand" href="/index.html">stakxAi</a>
     <button class="nav-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="Toggle navigation">☰</button>
     <nav id="primary-nav" class="nav-links">
-      <a href="index.html#retirement">Retirement Planner</a>
-      <a href="budget/easy.html">Budget Tool</a>
-      <a href="questions.html">Healthcare Plan Options</a>
+      <a href="/retirement.html">Retirement Planning</a>
+      <a href="/budget/easy.html">Budget Tool</a>
+      <a href="/questions.html">Healthcare Tool</a>
+      <a href="/community.html">Community Boards</a>
     </nav>
   </div>
 </header>
+
+<!-- Top kicker + info strip -->
+<div class="cb-wrap" style="padding-top:12px;">
+  <div class="kicker">Rack your Stakx.</div>
+  <div class="strip" role="status" aria-live="polite">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></svg>
+    Free forever. No login required. No data is collected by us. Data lives on your broswer and deleted when you shut it down.
+  </div>
+</div>
 
 <div class="cb-wrap">
   <div class="cb-header" id="retirement">
@@ -253,7 +267,7 @@
 
       <!-- Disclaimer -->
       <div class="cb-sub" style="margin:0 0 12px 0; text-align:center;">
-        <em>Note: The estimate does not include general taxes, but includes taxes on non‑retirement account assets.</em>
+        <em>Note: The estimate does not include general taxes, but includes taxes on non-retirement account assets.</em>
       </div>
 
       <div id="sp-rest" style="display:none;">
@@ -550,3 +564,4 @@ document.addEventListener('change', (e) => {
 
 </body>
 </html>
+
