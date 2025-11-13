@@ -6,283 +6,769 @@
   <title>Healthcare Questionnaire</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root { --pad-x:24px; --stroke:#e5e9f2; --card:#fff; --text:#0a0f2c; --brand:#1a73e8; --brand-700:#0f5ad2; --soft:#f7f9ff; --muted:#6b7280; }
-    * , *::before, *::after { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body { font-family: 'Inter', sans-serif; background: #f7f9fc; color: var(--text); margin: 0; padding-top: 80px; }
-    .stk-container { max-width: 1200px; margin: 0 auto; padding: 0 var(--pad-x); }
-    .stk-header { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: rgba(255,255,255,0.9); border-bottom: 1px solid var(--stroke); backdrop-filter: blur(8px); }
-    .stk-header-inner { display: flex; align-items: center; justify-content: space-between; min-height: 60px; }
-    .stk-brand { color: var(--text); text-decoration: none; font-weight: 800; font-size: 20px; }
-    .stk-nav { display: flex; gap: 18px; align-items: center; }
-    .stk-nav a { color: inherit; text-decoration: none; font-weight: 600; font-size: 14px; }
-    .stk-nav a:hover { text-decoration: underline; }
-    .stk-toggle { display: none; border: 0; background: none; font-size: 26px; cursor: pointer; }
-    @media (max-width: 820px) {
-      .stk-toggle { display: block; }
-      .stk-nav { display: none; position: absolute; right: var(--pad-x); top: 60px; background: var(--card); border: 1px solid var(--stroke); border-radius: 12px; box-shadow: 0 8px 24px rgba(2,6,23,.15); padding: 12px; }
-      .stk-nav.open { display: block; }
-      .stk-nav a { display: block; padding: 8px 10px; }
+    :root{
+      --pad-x:24px; --stroke:#e5e9f2; --card:#fff; --text:#0a0f2c; --brand:#1a73e8; --brand-700:#0f5ad2;
+      --soft:#f7f9ff; --muted:#6b7280; --danger:#b91c1c; --ok:#166534;
     }
-    .stk-kicker { font-weight: 800; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); margin: 10px 0 8px 0; }
-    .stk-strip { display: flex; align-items: center; gap: 10px; background: var(--soft); border: 1px solid var(--stroke); border-radius: 12px; padding: 10px 12px; color: var(--muted); font-size: 13px; }
-    .stk-strip svg { flex: 0 0 auto; }
-    .wizard { background: white; width: 100%; max-width: 600px; margin: 24px auto; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #e4e7ed; }
-    h1 { margin-top: 0; }
-    .step { display: none; }
-    .active { display: block; }
-    label { display: block; font-weight: 600; margin-bottom: 6px; }
-    input, select, button { width: 100%; padding: 12px; margin-bottom: 16px; font-size: 16px; border-radius: 12px; border: 1px solid #d5d9e2; }
-    button { background: #1a73e8; color: white; font-weight: 700; cursor: pointer; border: none; }
-    button:hover { background: #0f5ad2; }
-    .nav-buttons { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; }
-    .small { font-size: 12px; color: var(--muted); }
-    .badge { display:inline-block; padding:3px 8px; border-radius:999px; font-size:12px; margin-right:6px; background:#eef2ff; }
-    .ok { background:#ecfdf5; color:#166534; }
-    .warn { background:#fff7ed; color:#b45309; }
+    * , *::before, *::after { box-sizing:border-box; }
+    html, body { height:100%; }
+    body { font-family:'Inter',sans-serif; background:#f7f9fc; color:var(--text); margin:0; padding-top:80px; }
+
+    .stk-container { max-width:1200px; margin:0 auto; padding:0 var(--pad-x); }
+
+    /* Header */
+    .stk-header{ position:fixed; inset:0 0 auto 0; z-index:1000; background:rgba(255,255,255,.9); border-bottom:1px solid var(--stroke); backdrop-filter:blur(8px); }
+    .stk-header-inner{ display:flex; align-items:center; justify-content:space-between; min-height:60px; }
+    .stk-brand{ color:var(--text); text-decoration:none; font-weight:800; font-size:20px; letter-spacing:.2px; }
+    .stk-nav{ display:flex; gap:18px; align-items:center; }
+    .stk-nav a{ color:inherit; text-decoration:none; font-weight:600; font-size:14px; }
+    .stk-nav a:hover{ text-decoration:underline; }
+    .stk-toggle{ display:none; border:0; background:none; font-size:26px; cursor:pointer; }
+    @media (max-width:820px){
+      .stk-toggle{ display:block; }
+      .stk-nav{ display:none; position:absolute; right:var(--pad-x); top:60px; background:var(--card); border:1px solid var(--stroke); border-radius:12px; box-shadow:0 8px 24px rgba(2,6,23,.15); padding:12px; }
+      .stk-nav.open{ display:block; }
+      .stk-nav a{ display:block; padding:8px 10px; }
+    }
+
+    /* Info strip */
+    .stk-kicker{ font-weight:800; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--brand); margin:10px 0 8px 0; }
+    .stk-strip{ display:flex; align-items:center; gap:10px; background:var(--soft); border:1px solid var(--stroke); border-radius:12px; padding:10px 12px; color:var(--muted); font-size:13px; }
+    .stk-strip svg{ flex:0 0 auto; }
+
+    /* Wizard */
+    .wizard{ background:#fff; width:100%; max-width:760px; margin:24px auto; padding:24px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08); border:1px solid #e4e7ed; }
+    .steps{ display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+    .step-chip{ padding:6px 10px; border-radius:999px; border:1px solid var(--stroke); font-size:12px; color:var(--muted); }
+    .step-chip.active{ background:#eef2ff; color:#1f2a59; font-weight:700; }
+    h1{ margin:0 0 6px 0; }
+    .small{ font-size:12px; color:var(--muted); }
+
+    .step{ display:none; }
+    .step.active{ display:block; }
+
+    label{ display:block; font-weight:600; margin:14px 0 6px; }
+    input, select, button, textarea{
+      width:100%; padding:12px; font-size:16px; border-radius:12px; border:1px solid #d5d9e2; background:#fff;
+    }
+    textarea{ resize:vertical; min-height:80px; }
+    button{ background:var(--brand); color:#fff; font-weight:700; cursor:pointer; border:none; }
+    button:hover{ background:var(--brand-700); }
+    .btn-secondary{ background:#eef2ff; color:#1f2a59; font-weight:700; border:1px solid #c7d2fe; }
+    .btn-ghost{ background:#fff; color:var(--text); border:1px solid var(--stroke); }
+
+    .nav-buttons{ display:flex; justify-content:space-between; gap:12px; margin-top:16px; }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width:720px){ .row{ grid-template-columns:1fr; } }
+
+    .hint{ font-size:12px; color:var(--muted); margin-top:6px; }
+    .limit-note{ font-size:12px; color:var(--muted); text-align:right; margin-top:-8px; }
+    .error{ color:var(--danger); font-size:13px; margin-top:6px; }
+
+    /* Tag pills for providers/hospitals/drugs */
+    .tagbox{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .tag{ display:inline-flex; gap:6px; align-items:center; padding:6px 10px; border:1px solid var(--stroke); border-radius:999px; background:#fff; font-size:13px; }
+    .tag button{ background:transparent; color:var(--danger); border:none; padding:0; font-size:14px; width:auto; }
+
+    /* Multi-select checklist */
+    .checklist{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px 16px; margin-top:8px; }
+    @media (max-width:720px){ .checklist{ grid-template-columns:1fr; } }
+    .checklist label{ display:flex; align-items:center; gap:10px; font-weight:500; margin:0; }
+    .checklist input[type=checkbox]{ width:auto; }
+
+    .inline{ display:flex; gap:10px; align-items:center; }
+    .inline > *{ width:auto; }
+
+    .badge{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700; }
+    .badge.ok{ background:#ecfdf5; color:var(--ok); border:1px solid #bbf7d0; }
+    .badge.warn{ background:#fff7ed; color:#b45309; border:1px solid #fde68a; }
   </style>
 </head>
-
 <body>
+
+  <!-- Header -->
   <header class="stk-header">
     <div class="stk-container stk-header-inner">
       <a class="stk-brand" href="index.html">stakxAi</a>
-      <button class="stk-toggle">☰</button>
-      <nav id="stk-primary-nav" class="stk-nav">
+      <button class="stk-toggle" aria-expanded="false" aria-controls="stk-primary-nav" aria-label="Toggle navigation">☰</button>
+      <nav id="stk-primary-nav" class="stk-nav" aria-label="Primary">
         <a href="retirement.html">Retirement Planning</a>
         <a href="budget/easy.html">Budget Tool</a>
-        <a href="questions.html">Healthcare Tool</a>
+        <a href="questions.html" aria-current="page">Healthcare Tool</a>
         <a href="community.html">Community Boards</a>
       </nav>
     </div>
   </header>
 
+  <!-- Info strip -->
   <div class="stk-container" style="margin-top:12px;">
     <div class="stk-kicker">Rack your Stakx.</div>
-    <div class="stk-strip">
-      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></svg>
-      Free forever. No login required. No data is collected by us.
+    <div class="stk-strip" role="status" aria-live="polite">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></svg>
+      Free forever. No login required. We don’t collect data. Answers live in your browser until you leave.
     </div>
   </div>
 
-  <div class="wizard">
-    <h1>Healthcare Questionnaire</h1>
-    <p class="small">Answers are temporary and not saved.</p>
+  <!-- Wizard -->
+  <div class="wizard" role="form" aria-labelledby="title">
+    <div class="steps" aria-hidden="true">
+      <span class="step-chip active" id="chip1">1 • Location & Age</span>
+      <span class="step-chip" id="chip2">2 • Household & Income</span>
+      <span class="step-chip" id="chip3">3 • Coverage & Timing</span>
+      <span class="step-chip" id="chip4">4 • Priorities</span>
+      <span class="step-chip" id="chip5">5 • Care Needs</span>
+      <span class="step-chip" id="chip6">6 • Medications</span>
+      <span class="step-chip" id="chip7">7 • Path Clarifiers</span>
+    </div>
+
+    <h1 id="title">Healthcare Questionnaire</h1>
+    <p class="small">Answers are not saved. You can stop anytime.</p>
 
     <!-- STEP 1 -->
-    <div class="step active" id="step1">
-      <h2>Step 1: About You</h2>
-      <label>Age</label>
-      <input id="age" type="number" placeholder="e.g., 45" />
-      <label>ZIP Code</label>
-      <input id="zip" placeholder="12345" />
-      <div id="zipErr" class="small" style="color:red; display:none;"></div>
+    <section class="step active" id="step1" aria-label="Step 1">
+      <h2>Step 1: Location & Age</h2>
+
+      <div class="row">
+        <div>
+          <label for="zip">ZIP Code</label>
+          <input id="zip" inputmode="numeric" maxlength="5" placeholder="12345" />
+          <div class="hint">We’ll suggest counties if the ZIP spans more than one.</div>
+          <div id="zipErr" class="error" role="alert" style="display:none;"></div>
+        </div>
+
+        <div>
+          <label for="age">Age</label>
+          <input id="age" type="number" min="0" max="120" placeholder="e.g., 67" />
+          <div id="ageErr" class="error" role="alert" style="display:none;"></div>
+        </div>
+      </div>
 
       <div id="countyWrap" style="display:none;">
-        <label>County</label>
+        <label for="county">Confirm County</label>
         <select id="county"></select>
+        <div class="hint">ZIPs can cross county lines.</div>
       </div>
 
       <div class="nav-buttons">
         <span></span>
         <button id="next1">Next</button>
       </div>
-    </div>
+    </section>
 
     <!-- STEP 2 -->
-    <div class="step" id="step2">
-      <h2>Step 2: Coverage Status</h2>
-      <label>Current Coverage</label>
-      <select id="coverage">
-        <option value="none">None</option>
-        <option value="employer">Employer</option>
-        <option value="medicare">Medicare</option>
-        <option value="medicaid">Medicaid</option>
-        <option value="cobra">COBRA</option>
-      </select>
-      <div class="nav-buttons">
-        <button onclick="prevStep()">Back</button>
-        <button onclick="nextStep()">Next</button>
+    <section class="step" id="step2" aria-label="Step 2">
+      <h2>Step 2: Household & Income</h2>
+
+      <div class="row">
+        <div>
+          <label for="hhSize">Household size (including you)</label>
+          <input id="hhSize" type="number" min="1" placeholder="e.g., 2" />
+        </div>
+        <div>
+          <label for="incomeAnnual">Household income before taxes (yearly)</label>
+          <input id="incomeAnnual" type="number" min="0" placeholder="e.g., 54000" />
+        </div>
       </div>
-    </div>
+
+      <label>Any of these apply this year?</label>
+      <div class="checklist" id="adjustmentsBox">
+        <label><input type="checkbox" value="ira_withdrawal"> IRA/401k withdrawals</label>
+        <label><input type="checkbox" value="business_losses"> Business losses</label>
+        <label><input type="checkbox" value="tax_exempt_interest"> Tax-exempt interest</label>
+        <label><input type="checkbox" value="social_security"> Social Security benefits</label>
+      </div>
+      <div class="hint">We’ll estimate MAGI & FPL to check subsidies/Medicaid and Medicare IRMAA/LIS.</div>
+
+      <div class="nav-buttons">
+        <button class="btn-ghost" id="back2">Back</button>
+        <button id="next2">Next</button>
+      </div>
+    </section>
 
     <!-- STEP 3 -->
-    <div class="step" id="step3">
-      <h2>Step 3: Household Info</h2>
-      <label>Household Income</label>
-      <input id="income" type="number" placeholder="e.g., 54000" />
-      <label>Household Size</label>
-      <input id="hhSize" type="number" placeholder="e.g., 2" />
-      <div class="nav-buttons">
-        <button onclick="prevStep()">Back</button>
-        <button onclick="nextStep()">Next</button>
+    <section class="step" id="step3" aria-label="Step 3">
+      <h2>Step 3: Current Coverage & Timing</h2>
+
+      <div class="row">
+        <div>
+          <label for="currentCoverage">Current coverage</label>
+          <select id="currentCoverage">
+            <option value="none">No current coverage</option>
+            <option value="employer">Employer coverage</option>
+            <option value="cobra">COBRA</option>
+            <option value="medicare">Medicare</option>
+            <option value="medicaid">Medicaid</option>
+            <option value="va_tricare">VA / TRICARE</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="coverageEnds">When does that coverage end? (optional)</label>
+          <input id="coverageEnds" type="month" />
+        </div>
       </div>
-    </div>
+
+      <div class="nav-buttons">
+        <button class="btn-ghost" id="back3">Back</button>
+        <button id="next3">Next</button>
+      </div>
+    </section>
 
     <!-- STEP 4 -->
-    <div class="step" id="step4">
-      <h2>Step 4: Preferences</h2>
-      <label>Preferred Pharmacy</label>
-      <select id="pharmacy">
-        <option value="preferred">Preferred retail</option>
-        <option value="standard">Standard retail</option>
-        <option value="mail">Mail order</option>
-      </select>
-      <label>Use prescription medications?</label>
-      <select id="usesDrugs"><option value="no">No</option><option value="yes">Yes</option></select>
-      <div class="nav-buttons">
-        <button onclick="prevStep()">Back</button>
-        <button onclick="nextStep()">Next</button>
+    <section class="step" id="step4" aria-label="Step 4">
+      <h2>Step 4: What matters most? (pick up to 3)</h2>
+
+      <div class="checklist" id="prioritiesBox" aria-describedby="prioNote">
+        <label><input type="checkbox" value="lowest_premium"> Lowest monthly premium</label>
+        <label><input type="checkbox" value="lowest_total_cost"> Lowest total yearly cost</label>
+        <label><input type="checkbox" value="low_deductible"> Low deductible</label>
+        <label><input type="checkbox" value="keep_doctors"> Keeping my doctors</label>
+        <label><input type="checkbox" value="drug_costs"> Prescription drug costs</label>
+        <label><input type="checkbox" value="dental_vision_hearing"> Dental / Vision / Hearing</label>
+        <label><input type="checkbox" value="network_flex_ppo"> Network flexibility (PPO / OON)</label>
+        <label><input type="checkbox" value="simplicity_hmo"> Simplicity (HMO)</label>
+        <label><input type="checkbox" value="chronic_condition_support"> Chronic condition support</label>
+        <label><input type="checkbox" value="pt_ot_chiro"> Physical / Occupational / Chiropractic</label>
+        <label><input type="checkbox" value="mental_health"> Mental health coverage</label>
+        <label><input type="checkbox" value="travel_coverage"> Travel / out-of-area coverage</label>
+        <label><input type="checkbox" value="predictable_costs"> Predictable costs (Medigap lean)</label>
       </div>
-    </div>
+      <div class="limit-note" id="prioNote">0 of 3 selected</div>
+      <div id="prioErr" class="error" role="alert" style="display:none;"></div>
+
+      <div class="nav-buttons">
+        <button class="btn-ghost" id="back4">Back</button>
+        <button id="next4">Next</button>
+      </div>
+    </section>
 
     <!-- STEP 5 -->
-    <div class="step" id="step5">
-      <h2>Step 5: Medicare Details (if applicable)</h2>
-      <label>Medicare Status</label>
-      <select id="medicareStatus">
-        <option value="none">Not enrolled</option>
-        <option value="A_only">Part A only</option>
-        <option value="B_only">Part B only</option>
-        <option value="A_and_B">Parts A + B</option>
-      </select>
-      <label>Preferred Plan Style</label>
-      <select id="planStylePref">
-        <option value="ma">Medicare Advantage (C)</option>
-        <option value="ab_medigap">A+B + Medigap + D</option>
-      </select>
-      <div id="medicareBadges" style="margin-top:6px;"></div>
-      <div class="nav-buttons">
-        <button onclick="prevStep()">Back</button>
-        <button onclick="nextStep()">Next</button>
+    <section class="step" id="step5" aria-label="Step 5">
+      <h2>Step 5: Care Needs & Access</h2>
+
+      <label for="providersInput">Doctors to keep (optional)</label>
+      <div class="inline">
+        <input id="providersInput" placeholder="e.g., Dr. Jane Smith (Cardiology)" />
+        <button type="button" class="btn-secondary" id="addProvider">Add</button>
       </div>
-    </div>
+      <div class="tagbox" id="providersTags"></div>
+
+      <label for="hospitalsInput">Hospitals / systems to keep (optional)</label>
+      <div class="inline">
+        <input id="hospitalsInput" placeholder="e.g., NYU Langone" />
+        <button type="button" class="btn-secondary" id="addHospital">Add</button>
+      </div>
+      <div class="tagbox" id="hospitalsTags"></div>
+
+      <label for="maxDistanceMiles">How far will you travel for care?</label>
+      <div class="inline">
+        <input id="maxDistanceMiles" type="range" min="5" max="50" value="15" />
+        <span id="distLabel" class="small">15 miles</span>
+      </div>
+
+      <label>Which services are important?</label>
+      <div class="checklist" id="servicesBox">
+        <label><input type="checkbox" value="physical_therapy"> Physical therapy</label>
+        <label><input type="checkbox" value="occupational_therapy"> Occupational therapy</label>
+        <label><input type="checkbox" value="chiropractic"> Chiropractic</label>
+        <label><input type="checkbox" value="mental_health"> Mental health therapy</label>
+        <label><input type="checkbox" value="specialists_no_referral"> Specialists without referrals</label>
+        <label><input type="checkbox" value="out_of_network_option"> Out-of-network option</label>
+        <label><input type="checkbox" value="virtual_care"> Virtual care</label>
+        <label><input type="checkbox" value="urgent_care"> Urgent care</label>
+      </div>
+
+      <label for="travel">Do you live in another state part of the year?</label>
+      <select id="travel">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <div class="nav-buttons">
+        <button class="btn-ghost" id="back5">Back</button>
+        <button id="next5">Next</button>
+      </div>
+    </section>
 
     <!-- STEP 6 -->
-    <div class="step" id="step6">
-      <h2>Step 6: All Set!</h2>
-      <p>See plan suggestions based on your answers.</p>
-      <button onclick="goToPlans()">See My Plans</button>
-      <div class="nav-buttons">
-        <button onclick="prevStep()">Back</button>
-        <span></span>
+    <section class="step" id="step6" aria-label="Step 6">
+      <h2>Step 6: Medications & Pharmacy</h2>
+
+      <label for="usesDrugs">Do you use prescription medications?</label>
+      <select id="usesDrugs">
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <div id="drugBlock" style="display:none;">
+        <div class="row">
+          <div>
+            <label for="drugName">Medication name</label>
+            <input id="drugName" placeholder="e.g., atorvastatin" />
+          </div>
+          <div>
+            <label for="fillsPerMonth">Fills per month (30-day equivalent)</label>
+            <input id="fillsPerMonth" type="number" min="0" step="1" value="1" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label for="pharmacyPref">Pharmacy preference</label>
+            <select id="pharmacyPref">
+              <option value="preferred">Preferred retail</option>
+              <option value="standard">Standard retail</option>
+              <option value="mail">Mail order</option>
+            </select>
+          </div>
+          <div>
+            <label for="okGenerics">Willing to use generics when available?</label>
+            <select id="okGenerics">
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="inline">
+          <button type="button" class="btn-secondary" id="addDrug">Add medication</button>
+          <span class="hint">You can add multiple medications.</span>
+        </div>
+        <div class="tagbox" id="drugsTags"></div>
       </div>
-    </div>
+
+      <div class="nav-buttons">
+        <button class="btn-ghost" id="back6">Back</button>
+        <button id="next6">Next</button>
+      </div>
+    </section>
+
+    <!-- STEP 7 -->
+    <section class="step" id="step7" aria-label="Step 7">
+      <h2>Step 7: Path Clarifiers</h2>
+
+      <!-- Under-65 clarifier -->
+      <div id="under65Block" style="display:none;">
+        <label for="tobacco">Do you use tobacco?</label>
+        <select id="tobacco">
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+        <div id="acaBadges" class="hint" style="margin-top:8px;"></div>
+      </div>
+
+      <!-- Medicare clarifiers -->
+      <div id="medicareBlock" style="display:none;">
+        <label for="medicareStatus">Do you already have Medicare?</label>
+        <select id="medicareStatus">
+          <option value="neither">Neither A nor B</option>
+          <option value="A_only">Part A only</option>
+          <option value="B_only">Part B only</option>
+          <option value="A_and_B">Parts A and B</option>
+        </select>
+
+        <label for="planStylePref">Which style fits you better?</label>
+        <select id="planStylePref">
+          <option value="ma_bundle">All-in-one with extras (Medicare Advantage)</option>
+          <option value="ab_medigap">National access & predictable costs (A+B+Medigap+D)</option>
+        </select>
+
+        <div id="medicareBadges" class="hint" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn-ghost" id="back7">Back</button>
+        <button id="finish">See My Plans</button>
+      </div>
+    </section>
   </div>
 
   <script>
-    const state = {};
+    // Mobile nav
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.querySelector('.stk-toggle');
+      const nav = document.getElementById('stk-primary-nav');
+      if (!btn || !nav) return;
+      btn.addEventListener('click', () => {
+        const opened = nav.classList.toggle('open');
+        btn.setAttribute('aria-expanded', opened ? 'true' : 'false');
+      });
+    });
+
+    // In-memory state (no storage)
+    const state = {
+      zip: "", county: "", age: "", hhSize: "", incomeAnnual: "", incomeAdjustments: [],
+      currentCoverage: "none", coverageEnds: "",
+      priorities: [],
+      providers: [], hospitals: [], maxDistanceMiles: 15, servicesImportant: [], travel: "no",
+      usesDrugs: "no", drugs: [], pharmacyPref: "preferred", okGenerics: "yes",
+      // derived
+      magi: null, fplPct: null, subsidyEligible: false, medicaidEligible: false, chipEligible: false,
+      irmaaBracket: null, lisEligible: false,
+      // path clarifiers
+      route: "", tobacco: "no", medicareStatus: "neither", planStylePref: "ma_bundle"
+    };
+
+    // Stepper
     let current = 1;
-
-    // Header toggle
-    document.querySelector('.stk-toggle').addEventListener('click',()=>{
-      document.querySelector('.stk-nav').classList.toggle('open');
-    });
-
+    const totalSteps = 7;
     function showStep(n){
-      document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));
-      document.getElementById("step"+n).classList.add("active");
-    }
-    function nextStep(){ if(current<6) current++; showStep(current);}
-    function prevStep(){ if(current>1) current--; showStep(current); }
-
-    // --- ZIP → County lookup ---
-    function countiesForZip(zip){
-      const map={
-        "10001":["New York County"],
-        "30301":["Fulton County"],
-        "60601":["Cook County"],
-        "90001":["Los Angeles County"],
-        "73301":["Travis County"],
-        "80112":["Arapahoe County","Douglas County"]
-      };
-      return map[zip]||[];
-    }
-
-    document.getElementById('zip').addEventListener('change', ()=>{
-      const zip=document.getElementById('zip').value.trim();
-      state.zip=zip;
-      const err=document.getElementById('zipErr');
-      const wrap=document.getElementById('countyWrap');
-      const sel=document.getElementById('county');
-      if(!/^\d{5}$/.test(zip)){err.textContent='Enter 5-digit ZIP';err.style.display='block';wrap.style.display='none';state.county="";return;}
-      err.style.display='none';
-      const list=countiesForZip(zip);
-      if(list.length===1){sel.innerHTML=`<option>${list[0]}</option>`;wrap.style.display='none';state.county=list[0];return;}
-      if(list.length>1){sel.innerHTML=list.map(c=>`<option>${c}</option>`).join('');wrap.style.display='block';sel.onchange=()=>state.county=sel.value;state.county=sel.value;return;}
-      wrap.style.display='none';state.county="";
-    });
-
-    document.getElementById('next1').addEventListener('click',()=>{
-      const zip=document.getElementById('zip').value.trim();
-      const age=document.getElementById('age').value.trim();
-      if(!/^\d{5}$/.test(zip)){document.getElementById('zipErr').style.display='block';return;}
-      if(!age||Number(age)<0||Number(age)>120){alert("Enter valid age");return;}
-      state.zip=zip;state.age=age;
-      const wrap=document.getElementById('countyWrap');
-      if(wrap.style.display!=='none'){state.county=document.getElementById('county').value;}
-      current=2;showStep(current);
-    });
-
-    // --- Derived logic ---
-    function fplLine(hh){const base=15590;return base+(hh-1)*5540;}
-    function computeDerived(){
-      const hh=Number(state.hhSize||0);
-      const inc=Number(state.incomeAnnual||0);
-      state.magi=inc;
-      const fpl=fplLine(hh);
-      state.fplPct=Math.round((state.magi/fpl)*100);
-      state.subsidyEligible=state.fplPct>=100&&state.fplPct<=600;
-      state.medicaidEligible=state.fplPct<138;
-
-      const onMedicare=Number(state.age)>=65&&(state.medicareStatus==="A_only"||state.medicareStatus==="B_only"||state.medicareStatus==="A_and_B");
-      if(onMedicare){
-        if(state.magi>206000)state.irmaaBracket="High";
-        else if(state.magi>103000)state.irmaaBracket="Medium";
-        else state.irmaaBracket="Base";
-        state.lisEligible=state.fplPct<=150;
-      } else {state.irmaaBracket=null;state.lisEligible=false;}
-
-      if(Number(state.age)>=65){
-        state.route=state.planStylePref==="ab_medigap"?"AB_Medigap_D":"MA";
-        if(state.medicaidEligible)state.route="DSNP";
-      } else {
-        if(state.medicaidEligible)state.route="medicaid_chip";
-        else if(state.subsidyEligible)state.route="ACA_subsidized";
-        else state.route="ACA_fullpay";
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step'+n).classList.add('active');
+      for (let i=1;i<=totalSteps;i++){
+        const chip = document.getElementById('chip'+i);
+        if (chip) chip.classList.toggle('active', i===n);
+      }
+      // path-specific visibility on Step 7
+      if (n === 7){
+        const age = Number(state.age || 0);
+        const under = document.getElementById('under65Block');
+        const med = document.getElementById('medicareBlock');
+        if (age >= 65){ under.style.display='none'; med.style.display='block'; renderMedicareBadges(); }
+        else { under.style.display='block'; med.style.display='none'; renderAcaBadges(); }
       }
     }
 
+    // ZIP -> counties (placeholder deterministic demo)
+    function countiesForZip(zip){
+      // Minimal demo mapping; keep logic client-side.
+      const map = {
+        "10001": ["New York County"], "30301": ["Fulton County"], "60601": ["Cook County"],
+        "90001": ["Los Angeles County"], "73301": ["Travis County"],
+      };
+      if (map[zip]) return map[zip];
+      // Fallback: pretend single county with the ZIP as label
+      return [`County for ${zip}`];
+    }
+
+    // FPL calculator (contiguous U.S., rough 2025 est.)
+    function fplLine(hhSize, stateCode){
+      // Contiguous baseline: first person $15,060; +$5,380 each additional
+      const base = 15060, add = 5380;
+      if (!hhSize || hhSize < 1) return null;
+      let line = base + (hhSize - 1) * add;
+      // Alaska/Hawaii rough tweaks if desired later (need stateCode)
+      return line;
+    }
+
+    function computeDerived(){
+      const hh = Number(state.hhSize||0);
+      const inc = Number(state.incomeAnnual||0);
+      // Crude MAGI: income + simple addbacks if flagged
+      let addbacks = 0;
+      if (state.incomeAdjustments.includes('ira_withdrawal')) addbacks += 0;
+      if (state.incomeAdjustments.includes('tax_exempt_interest')) addbacks += 0;
+      if (state.incomeAdjustments.includes('social_security')) addbacks += 0;
+      state.magi = Math.max(0, inc + addbacks);
+
+      // FPL %
+      const fpl = fplLine(hh, null);
+      state.fplPct = fpl ? Math.round((state.magi / fpl) * 100) : null;
+
+      // Simple flags (illustrative only)
+      state.subsidyEligible = (state.fplPct!=null) && (state.fplPct >= 100) && (state.fplPct <= 600);
+      state.medicaidEligible = (state.fplPct!=null) && (state.fplPct < 138);
+      state.chipEligible = false; // need child counts to refine later
+
+      // Medicare: rough IRMAA & LIS hints (illustrative)
+      // We'll just tag bracket names for UI hints
+      if (Number(state.age||0) >= 65){
+        // Very rough thresholds; exact depends on filing status
+        if (state.magi > 206000) state.irmaaBracket = "High";
+        else if (state.magi > 103000) state.irmaaBracket = "Medium";
+        else state.irmaaBracket = "Base";
+        state.lisEligible = (state.fplPct!=null) && (state.fplPct <= 150);
+      } else {
+        state.irmaaBracket = null; state.lisEligible = false;
+      }
+
+      // Route guess
+      if (Number(state.age||0) >= 65){
+        state.route = state.planStylePref === 'ab_medigap' ? 'AB_Medigap_D' : 'MA';
+        if (state.medicaidEligible) state.route = 'DSNP';
+      } else {
+        if (state.medicaidEligible) state.route = 'medicaid_chip';
+        else if (state.subsidyEligible) state.route = 'ACA_subsidized';
+        else state.route = 'ACA_fullpay'; // can include off_exchange on results
+      }
+    }
+
+    // Providers/hospitals/drugs tags
+    function addTag(list, value, renderFn){
+      const v = (value||"").trim();
+      if (!v) return;
+      list.push(v);
+      renderFn();
+    }
+    function removeTag(list, idx, renderFn){
+      list.splice(idx,1);
+      renderFn();
+    }
+    function renderProviders(){
+      const box = document.getElementById('providersTags');
+      box.innerHTML = "";
+      state.providers.forEach((p,i)=>{
+        const el = document.createElement('span');
+        el.className='tag';
+        el.innerHTML = `${escapeHtml(p)} <button type="button" aria-label="Remove" onclick="removeProvider(${i})">×</button>`;
+        box.appendChild(el);
+      });
+    }
+    function renderHospitals(){
+      const box = document.getElementById('hospitalsTags');
+      box.innerHTML = "";
+      state.hospitals.forEach((p,i)=>{
+        const el = document.createElement('span');
+        el.className='tag';
+        el.innerHTML = `${escapeHtml(p)} <button type="button" aria-label="Remove" onclick="removeHospital(${i})">×</button>`;
+        box.appendChild(el);
+      });
+    }
+    function renderDrugs(){
+      const box = document.getElementById('drugsTags');
+      box.innerHTML = "";
+      state.drugs.forEach((d,i)=>{
+        const el = document.createElement('span');
+        el.className='tag';
+        el.innerHTML = `${escapeHtml(d.name)} • ${d.fillsPerMonth}/mo <button type="button" aria-label="Remove" onclick="removeDrug(${i})">×</button>`;
+        box.appendChild(el);
+      });
+    }
+    window.removeProvider = (i)=> removeTag(state.providers,i,renderProviders);
+    window.removeHospital = (i)=> removeTag(state.hospitals,i,renderHospitals);
+    window.removeDrug = (i)=> removeTag(state.drugs,i,renderDrugs);
+
+    function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+    // Priorities cap
+    function enforcePriorityCap(){
+      const checks = Array.from(document.querySelectorAll('#prioritiesBox input[type=checkbox]'));
+      const chosen = checks.filter(c=>c.checked);
+      document.getElementById('prioNote').textContent = `${chosen.length} of 3 selected`;
+      if (chosen.length >= 3){
+        checks.forEach(c => { if (!c.checked) c.disabled = true; });
+      } else {
+        checks.forEach(c => c.disabled = false);
+      }
+    }
+
+    // Badges render
+    function renderAcaBadges(){
+      computeDerived();
+      const el = document.getElementById('acaBadges');
+      const badges = [];
+      if (state.medicaidEligible) badges.push(`<span class="badge ok">Medicaid likely</span>`);
+      if (state.subsidyEligible) badges.push(`<span class="badge ok">ACA subsidies likely</span>`);
+      if (!state.subsidyEligible && !state.medicaidEligible) badges.push(`<span class="badge warn">Full-pay</span>`);
+      el.innerHTML = badges.join(' ');
+    }
     function renderMedicareBadges(){
-      const el=document.getElementById('medicareBadges');
-      const onMedicare=Number(state.age)>=65&&(state.medicareStatus==="A_only"||state.medicareStatus==="B_only"||state.medicareStatus==="A_and_B");
-      if(!onMedicare){el.innerHTML="";return;}
       computeDerived();
-      const badges=[];
-      if(state.irmaaBracket)badges.push(`<span class="badge warn">IRMAA: ${state.irmaaBracket}</span>`);
-      if(state.lisEligible)badges.push(`<span class="badge ok">Extra Help (LIS)</span>`);
-      if(state.medicaidEligible)badges.push(`<span class="badge ok">Dual-Eligible (D-SNP)</span>`);
-      el.innerHTML=badges.join('');
+      const el = document.getElementById('medicareBadges');
+      const badges = [];
+      if (state.irmaaBracket) badges.push(`<span class="badge warn">IRMAA: ${state.irmaaBracket}</span>`);
+      if (state.lisEligible) badges.push(`<span class="badge ok">Extra Help (LIS) likely</span>`);
+      if (state.medicaidEligible) badges.push(`<span class="badge ok">Dual-eligible (D-SNP) likely</span>`);
+      el.innerHTML = badges.join(' ');
     }
 
-    document.getElementById('medicareStatus').addEventListener('change',e=>{
-      state.medicareStatus=e.target.value;computeDerived();renderMedicareBadges();
-    });
-    document.getElementById('planStylePref').addEventListener('change',e=>{
-      state.planStylePref=e.target.value;computeDerived();renderMedicareBadges();
+    // Event bindings
+    document.getElementById('zip').addEventListener('change', ()=>{
+      const zip = document.getElementById('zip').value.trim();
+      state.zip = zip;
+      const err = document.getElementById('zipErr');
+      if (!/^\d{5}$/.test(zip)){ err.textContent='Enter a 5-digit ZIP.'; err.style.display='block'; document.getElementById('countyWrap').style.display='none'; return; }
+      err.style.display='none';
+      const list = countiesForZip(zip);
+      const sel = document.getElementById('county');
+      sel.innerHTML = "";
+      list.forEach(c => {
+        const opt = document.createElement('option'); opt.value=c; opt.textContent=c; sel.appendChild(opt);
+      });
+      document.getElementById('countyWrap').style.display = 'block';
+      state.county = sel.value || "";
+      sel.addEventListener('change', ()=> state.county = sel.value);
     });
 
-    function goToPlans(){
-      state.coverage=document.getElementById('coverage').value;
-      state.incomeAnnual=document.getElementById('income').value;
-      state.hhSize=document.getElementById('hhSize').value;
-      state.pharmacy=document.getElementById('pharmacy').value;
-      state.usesDrugs=document.getElementById('usesDrugs').value;
+    document.getElementById('age').addEventListener('change', ()=>{
+      state.age = document.getElementById('age').value.trim();
+      const err = document.getElementById('ageErr');
+      const n = Number(state.age||0);
+      if (!isFinite(n) || n<0 || n>120){ err.textContent='Enter a valid age.'; err.style.display='block'; }
+      else { err.style.display='none'; }
+    });
+
+    // Step 1 nav
+    document.getElementById('next1').addEventListener('click', ()=>{
+      // Validate
+      const zip = document.getElementById('zip').value.trim();
+      const age = document.getElementById('age').value.trim();
+      if (!/^\d{5}$/.test(zip)){ document.getElementById('zipErr').textContent='Enter a 5-digit ZIP.'; document.getElementById('zipErr').style.display='block'; return; }
+      if (!age || Number(age)<0 || Number(age)>120){ document.getElementById('ageErr').textContent='Enter a valid age.'; document.getElementById('ageErr').style.display='block'; return; }
+      state.zip = zip; state.age = age;
+      // county may be single; ensure set
+      const sel = document.getElementById('county');
+      if (document.getElementById('countyWrap').style.display !== 'none'){
+        state.county = sel.value || "";
+        if (!state.county){ document.getElementById('zipErr').textContent='Please select a county.'; document.getElementById('zipErr').style.display='block'; return; }
+      } else {
+        const list = countiesForZip(zip); state.county = list[0] || "";
+      }
+      current=2; showStep(current);
+    });
+
+    // Step 2 bindings
+    document.getElementById('hhSize').addEventListener('change', e => state.hhSize = e.target.value.trim());
+    document.getElementById('incomeAnnual').addEventListener('change', e => state.incomeAnnual = e.target.value.trim());
+    document.querySelectorAll('#adjustmentsBox input[type=checkbox]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const vals = Array.from(document.querySelectorAll('#adjustmentsBox input[type=checkbox]')).filter(x=>x.checked).map(x=>x.value);
+        state.incomeAdjustments = vals;
+      });
+    });
+    document.getElementById('back2').addEventListener('click', ()=>{ current=1; showStep(current); });
+    document.getElementById('next2').addEventListener('click', ()=>{
+      // basic presence check
+      if (!state.hhSize || Number(state.hhSize)<1){ alert('Enter household size.'); return; }
+      if (state.incomeAnnual==="" || Number(state.incomeAnnual)<0){ alert('Enter household income (can be 0).'); return; }
       computeDerived();
-      const q=new URLSearchParams(state).toString();
-      window.location.href="plans.html?"+q;
-    }
+      current=3; showStep(current);
+    });
+
+    // Step 3
+    document.getElementById('currentCoverage').addEventListener('change', e=> state.currentCoverage = e.target.value);
+    document.getElementById('coverageEnds').addEventListener('change', e=> state.coverageEnds = e.target.value);
+    document.getElementById('back3').addEventListener('click', ()=>{ current=2; showStep(current); });
+    document.getElementById('next3').addEventListener('click', ()=>{ current=4; showStep(current); });
+
+    // Step 4 priorities
+    document.querySelectorAll('#prioritiesBox input[type=checkbox]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        enforcePriorityCap();
+        const chosen = Array.from(document.querySelectorAll('#prioritiesBox input[type=checkbox]')).filter(x=>x.checked).map(x=>x.value);
+        state.priorities = chosen;
+      });
+    });
+    document.getElementById('back4').addEventListener('click', ()=>{ current=3; showStep(current); });
+    document.getElementById('next4').addEventListener('click', ()=>{
+      if (state.priorities.length === 0){ const e=document.getElementById('prioErr'); e.textContent='Pick at least one priority (up to 3).'; e.style.display='block'; return; }
+      document.getElementById('prioErr').style.display='none';
+      current=5; showStep(current);
+    });
+
+    // Step 5 providers/hospitals/services
+    document.getElementById('maxDistanceMiles').addEventListener('input', e=>{
+      state.maxDistanceMiles = Number(e.target.value);
+      document.getElementById('distLabel').textContent = `${state.maxDistanceMiles} miles`;
+    });
+    document.querySelectorAll('#servicesBox input[type=checkbox]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        state.servicesImportant = Array.from(document.querySelectorAll('#servicesBox input[type=checkbox]')).filter(x=>x.checked).map(x=>x.value);
+      });
+    });
+    document.getElementById('travel').addEventListener('change', e=> state.travel = e.target.value);
+
+    document.getElementById('addProvider').addEventListener('click', ()=>{
+      const v = document.getElementById('providersInput').value;
+      addTag(state.providers, v, renderProviders);
+      document.getElementById('providersInput').value = "";
+    });
+    document.getElementById('addHospital').addEventListener('click', ()=>{
+      const v = document.getElementById('hospitalsInput').value;
+      addTag(state.hospitals, v, renderHospitals);
+      document.getElementById('hospitalsInput').value = "";
+    });
+
+    document.getElementById('back5').addEventListener('click', ()=>{ current=4; showStep(current); });
+    document.getElementById('next5').addEventListener('click', ()=>{ current=6; showStep(current); });
+
+    // Step 6 meds
+    document.getElementById('usesDrugs').addEventListener('change', (e)=>{
+      state.usesDrugs = e.target.value;
+      document.getElementById('drugBlock').style.display = state.usesDrugs === 'yes' ? 'block' : 'none';
+    });
+    document.getElementById('pharmacyPref').addEventListener('change', e=> state.pharmacyPref = e.target.value);
+    document.getElementById('okGenerics').addEventListener('change', e=> state.okGenerics = e.target.value);
+    document.getElementById('addDrug').addEventListener('click', ()=>{
+      const name = (document.getElementById('drugName').value || '').trim();
+      const fills = Number(document.getElementById('fillsPerMonth').value || '1');
+      if (!name) return;
+      state.drugs.push({ name, fillsPerMonth: Math.max(0, Math.floor(fills)) });
+      renderDrugs();
+      document.getElementById('drugName').value = ""; document.getElementById('fillsPerMonth').value = "1";
+    });
+    document.getElementById('back6').addEventListener('click', ()=>{ current=5; showStep(current); });
+    document.getElementById('next6').addEventListener('click', ()=>{
+      // go to clarifiers
+      current=7; showStep(current);
+    });
+
+    // Step 7 clarifiers
+    document.getElementById('tobacco').addEventListener('change', e=> state.tobacco = e.target.value);
+    document.getElementById('medicareStatus').addEventListener('change', e=> state.medicareStatus = e.target.value);
+    document.getElementById('planStylePref').addEventListener('change', e=>{
+      state.planStylePref = e.target.value;
+      // reroute and re-badge
+      computeDerived(); renderMedicareBadges();
+    });
+    document.getElementById('back7').addEventListener('click', ()=>{ current=6; showStep(current); });
+
+    // Finish → plans.html
+    document.getElementById('finish').addEventListener('click', ()=>{
+      computeDerived(); // final pass
+
+      // Build the query; arrays/objects as JSON to keep it simple
+      const q = new URLSearchParams();
+      const push = (k,v)=>{ if (v===undefined || v===null || v==="") return; q.set(k, String(v)); };
+
+      push('zip', state.zip);
+      push('county', state.county);
+      push('age', state.age);
+      push('hhSize', state.hhSize);
+      push('incomeAnnual', state.incomeAnnual);
+      if (state.incomeAdjustments.length) push('incomeAdjustments', JSON.stringify(state.incomeAdjustments));
+
+      push('magi', state.magi);
+      push('fplPct', state.fplPct);
+      push('subsidyEligible', state.subsidyEligible);
+      push('medicaidEligible', state.medicaidEligible);
+      push('chipEligible', state.chipEligible);
+      if (state.irmaaBracket) push('irmaaBracket', state.irmaaBracket);
+      push('lisEligible', state.lisEligible);
+
+      push('currentCoverage', state.currentCoverage);
+      push('coverageEnds', state.coverageEnds);
+
+      if (state.priorities.length) push('priorities', JSON.stringify(state.priorities));
+      if (state.servicesImportant.length) push('servicesImportant', JSON.stringify(state.servicesImportant));
+      if (state.providers.length) push('providers', JSON.stringify(state.providers));
+      if (state.hospitals.length) push('hospitals', JSON.stringify(state.hospitals));
+      push('maxDistanceMiles', state.maxDistanceMiles);
+      push('travel', state.travel);
+
+      push('usesDrugs', state.usesDrugs);
+      if (state.drugs.length) push('drugs', JSON.stringify(state.drugs));
+      push('pharmacyPref', state.pharmacyPref);
+      push('okGenerics', state.okGenerics);
+
+      // Path flags
+      if (Number(state.age||0) < 65){
+        push('tobacco', state.tobacco);
+      } else {
+        push('medicareStatus', state.medicareStatus);
+        push('planStylePref', state.planStylePref);
+      }
+      push('route', state.route);
+
+      // Navigate
+      window.location.href = "plans.html?" + q.toString();
+    });
+
+    // Init helpers
+    enforcePriorityCap();
+    showStep(current);
+
   </script>
 </body>
 </html>
