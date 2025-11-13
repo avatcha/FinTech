@@ -1,3 +1,6 @@
+<!-- =========================
+     questions.html  (IRMAA removed)
+     ========================= -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +43,6 @@
     .small { font-size: 12px; color: var(--muted); }
     .badge { display:inline-block; padding:3px 8px; border-radius:999px; font-size:12px; margin-right:6px; background:#eef2ff; }
     .ok { background:#ecfdf5; color:#166534; }
-    .warn { background:#fff7ed; color:#b45309; }
   </style>
 </head>
 
@@ -152,6 +154,7 @@
         <option value="ma">Medicare Advantage (C)</option>
         <option value="ab_medigap">A+B + Medigap + D</option>
       </select>
+      <!-- IRMAA badge REMOVED; only keep helpful eligibility hints -->
       <div id="medicareBadges" style="margin-top:6px;"></div>
       <div class="nav-buttons">
         <button onclick="prevStep()">Back</button>
@@ -172,7 +175,7 @@
   </div>
 
   <script>
-    const state = {};
+    const state = { medicareStatus: 'none' };
     let current = 1;
 
     // Header toggle
@@ -187,7 +190,7 @@
     function nextStep(){ if(current<6) current++; showStep(current);}
     function prevStep(){ if(current>1) current--; showStep(current); }
 
-    // --- ZIP → County lookup ---
+    // --- ZIP → County lookup (graceful) ---
     function countiesForZip(zip){
       const map={
         "10001":["New York County"],
@@ -195,7 +198,7 @@
         "60601":["Cook County"],
         "90001":["Los Angeles County"],
         "73301":["Travis County"],
-        "80112":["Arapahoe County","Douglas County"]
+        "80112":["Arapahoe County","Douglas County"] // multi-county demo
       };
       return map[zip]||[];
     }
@@ -225,32 +228,30 @@
       current=2;showStep(current);
     });
 
-    // --- Derived logic ---
+    // --- Derived logic (IRMAA removed) ---
     function fplLine(hh){const base=15590;return base+(hh-1)*5540;}
     function computeDerived(){
       const hh=Number(state.hhSize||0);
       const inc=Number(state.incomeAnnual||0);
       state.magi=inc;
       const fpl=fplLine(hh);
-      state.fplPct=Math.round((state.magi/fpl)*100);
-      state.subsidyEligible=state.fplPct>=100&&state.fplPct<=600;
-      state.medicaidEligible=state.fplPct<138;
+      state.fplPct = (fpl && inc) ? Math.round((state.magi/fpl)*100) : null;
 
-      const onMedicare=Number(state.age)>=65&&(state.medicareStatus==="A_only"||state.medicareStatus==="B_only"||state.medicareStatus==="A_and_B");
-      if(onMedicare){
-        if(state.magi>206000)state.irmaaBracket="High";
-        else if(state.magi>103000)state.irmaaBracket="Medium";
-        else state.irmaaBracket="Base";
-        state.lisEligible=state.fplPct<=150;
-      } else {state.irmaaBracket=null;state.lisEligible=false;}
+      state.subsidyEligible = state.fplPct!=null && state.fplPct>=100 && state.fplPct<=600;
+      state.medicaidEligible = state.fplPct!=null && state.fplPct<138;
 
+      // Only set LIS (Extra Help) hint for true Medicare contexts; no IRMAA
+      const onMedicare = Number(state.age)>=65 && (state.medicareStatus==="A_only"||state.medicareStatus==="B_only"||state.medicareStatus==="A_and_B");
+      state.lisEligible = onMedicare && state.fplPct!=null && state.fplPct<=150;
+
+      // Route
       if(Number(state.age)>=65){
-        state.route=state.planStylePref==="ab_medigap"?"AB_Medigap_D":"MA";
-        if(state.medicaidEligible)state.route="DSNP";
+        state.route = state.planStylePref==="ab_medigap" ? "AB_Medigap_D" : "MA";
+        if(state.medicaidEligible) state.route = "DSNP";
       } else {
-        if(state.medicaidEligible)state.route="medicaid_chip";
-        else if(state.subsidyEligible)state.route="ACA_subsidized";
-        else state.route="ACA_fullpay";
+        if(state.medicaidEligible) state.route = "medicaid_chip";
+        else if(state.subsidyEligible) state.route = "ACA_subsidized";
+        else state.route = "ACA_fullpay";
       }
     }
 
@@ -260,9 +261,8 @@
       if(!onMedicare){el.innerHTML="";return;}
       computeDerived();
       const badges=[];
-      if(state.irmaaBracket)badges.push(`<span class="badge warn">IRMAA: ${state.irmaaBracket}</span>`);
-      if(state.lisEligible)badges.push(`<span class="badge ok">Extra Help (LIS)</span>`);
-      if(state.medicaidEligible)badges.push(`<span class="badge ok">Dual-Eligible (D-SNP)</span>`);
+      if(state.lisEligible) badges.push(`<span class="badge ok">Extra Help (LIS) likely</span>`);
+      if(state.medicaidEligible) badges.push(`<span class="badge ok">Dual-Eligible (D-SNP) likely</span>`);
       el.innerHTML=badges.join('');
     }
 
@@ -283,6 +283,292 @@
       const q=new URLSearchParams(state).toString();
       window.location.href="plans.html?"+q;
     }
+  </script>
+</body>
+</html>
+
+<!-- =========================
+     plans.html  (IRMAA removed)
+     ========================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Plan Options</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --pad-x:24px; --stroke:#e5e9f2; --card:#fff; --text:#0a0f2c; --brand:#1a73e8; --muted:#6b7280; --ok:#166534; --warn:#b45309;
+    }
+    *{ box-sizing:border-box; } body{ margin:0; font-family:'Inter',sans-serif; background:#f7f9fc; color:var(--text); padding-top:80px; }
+    .wrap{ max-width:1200px; margin:0 auto; padding:0 var(--pad-x); }
+    header{ position:fixed; inset:0 0 auto 0; background:rgba(255,255,255,.9); border-bottom:1px solid var(--stroke); backdrop-filter:blur(8px); z-index:1000; }
+    .header-inner{ display:flex; align-items:center; justify-content:space-between; min-height:60px; }
+    .brand{ text-decoration:none; color:var(--text); font-weight:800; font-size:20px; }
+    .nav{ display:flex; gap:18px; }
+    .nav a{ color:inherit; text-decoration:none; font-weight:600; font-size:14px; }
+    .nav a:hover{ text-decoration:underline; }
+
+    .card{ background:#fff; border:1px solid var(--stroke); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.06); padding:18px; }
+    .grid{ display:grid; gap:16px; }
+    .grid-2{ grid-template-columns: 1fr 1fr; } @media (max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
+    h1{ margin:10px 0 4px; } h2{ margin:0 0 8px; font-size:18px; }
+    .small{ color:var(--muted); font-size:12px; }
+    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid #c7d2fe; background:#eef2ff; color:#1f2a59; }
+    .badge.ok{ background:#ecfdf5; border-color:#bbf7d0; color:var(--ok); }
+    .badge.warn{ background:#fff7ed; border-color:#fde68a; color:var(--warn); }
+    .kvs{ display:grid; grid-template-columns: 180px 1fr; gap:8px 12px; }
+    .pill{ display:inline-block; padding:4px 10px; border:1px solid var(--stroke); border-radius:999px; background:#fff; font-size:13px; margin:2px 6px 2px 0; }
+    table{ width:100%; border-collapse:collapse; } th, td{ border-top:1px solid var(--stroke); padding:10px; text-align:left; font-size:14px; }
+    .toolbar{ display:flex; gap:10px; flex-wrap:wrap; }
+    button{ padding:10px 14px; border-radius:12px; border:1px solid var(--stroke); background:#fff; font-weight:700; cursor:pointer; }
+    button.primary{ background:#1a73e8; color:#fff; border: none; }
+    .hint{ font-size:12px; color:var(--muted); }
+    .divider{ height:1px; background:var(--stroke); margin:12px 0; }
+    .sticky-head{ position:sticky; top:80px; background:#fff; z-index:500; border-bottom:1px solid var(--stroke); padding:10px 0; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:12px; color:#475569; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap header-inner">
+      <a class="brand" href="index.html">stakxAi</a>
+      <nav class="nav">
+        <a href="retirement.html">Retirement Planning</a>
+        <a href="budget/easy.html">Budget Tool</a>
+        <a href="questions.html">Healthcare Tool</a>
+        <a href="community.html">Community Boards</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="sticky-head">
+      <h1>Your Plan Options</h1>
+      <div id="routeBadges" class="toolbar"></div>
+      <div class="hint">Educational demo. We don’t save your answers; this page only reads what your browser just sent.</div>
+    </div>
+
+    <!-- Summary -->
+    <section class="grid grid-2" style="margin-top:12px;">
+      <div class="card">
+        <h2>Your Inputs</h2>
+        <div class="kvs" id="inputsKV"></div>
+        <div class="divider"></div>
+        <div>
+          <strong>Priorities:</strong>
+          <div id="prioPills" style="margin-top:6px;"></div>
+        </div>
+        <div style="margin-top:8px;">
+          <strong>Important Services:</strong>
+          <div id="servicesPills" style="margin-top:6px;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Care Team & Medications</h2>
+        <div><strong>Doctors:</strong> <div id="providersPills" style="margin-top:6px;"></div></div>
+        <div style="margin-top:8px;"><strong>Hospitals:</strong> <div id="hospitalsPills" style="margin-top:6px;"></div></div>
+        <div style="margin-top:8px;"><strong>Max distance:</strong> <span id="distLabel"></span></div>
+        <div style="margin-top:8px;"><strong>Travel:</strong> <span id="travelLabel"></span></div>
+        <div class="divider"></div>
+        <div><strong>Medications:</strong></div>
+        <table id="drugsTable" style="margin-top:6px;">
+          <thead><tr><th>Name</th><th>Fills/mo</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="hint" id="pharmacyHint" style="margin-top:6px;"></div>
+      </div>
+    </section>
+
+    <!-- Recommendations placeholder -->
+    <section class="card" style="margin-top:16px;">
+      <h2>Recommended Track & Next Steps</h2>
+      <div id="trackBlock" style="margin-top:6px;"></div>
+      <div id="badgesBlock" style="margin-top:8px;"></div>
+      <div class="divider"></div>
+      <div id="todoBlock" class="hint">
+        <strong>TODO (coming next):</strong>
+        <ul>
+          <li>Load real (or mocked) plans for this route.</li>
+          <li>Score plans using your priorities (premium vs total cost vs access, etc.).</li>
+          <li>Show a comparison grid with ✅/❌ for each plan against your needs.</li>
+        </ul>
+      </div>
+      <div style="margin-top:12px;" class="toolbar">
+        <button onclick="history.back()">← Edit my answers</button>
+        <a href="questions.html"><button class="primary">Start over</button></a>
+      </div>
+    </section>
+
+    <!-- Debug (optional) -->
+    <section class="card" style="margin-top:16px;">
+      <h2>Debug: Raw Params</h2>
+      <pre id="rawParams" class="mono"></pre>
+    </section>
+  </main>
+
+  <script>
+    // Parse query
+    const params = Object.fromEntries(new URLSearchParams(location.search));
+    const parseJSON = (k, def=[]) => { try { return params[k] ? JSON.parse(params[k]) : def; } catch { return def; } };
+
+    // Normalized inputs we might show later (kept here for compatibility)
+    const priorities = parseJSON('priorities');
+    const services = parseJSON('servicesImportant');
+    const providers = parseJSON('providers');
+    const hospitals = parseJSON('hospitals');
+    const drugs = parseJSON('drugs');
+    const age = Number(params.age || 0);
+    const route = params.route || '';
+    const subsidy = toBool(params.subsidyEligible);
+    const medicaid = toBool(params.medicaidEligible);
+    const lis = toBool(params.lisEligible); // still helpful; IRMAA removed entirely
+
+    // Badges (IRMAA removed)
+    const routeBadges = document.getElementById('routeBadges');
+    routeBadges.innerHTML = [
+      badgeForRoute(route),
+      medicaid ? `<span class="badge ok">Medicaid likely</span>` : '',
+      subsidy ? `<span class="badge ok">ACA subsidies likely</span>` : '',
+      lis ? `<span class="badge ok">Extra Help (LIS) likely</span>` : ''
+    ].filter(Boolean).join(' ');
+
+    // Inputs KV
+    const kv = [
+      ['ZIP / County', `${escapeHtml(params.zip || '')} • ${escapeHtml(params.county || '')}`],
+      ['Age', escapeHtml(params.age || '')],
+      ['Household Size', escapeHtml(params.hhSize || '')],
+      ['Household Income (yr)', formatMoney(params.incomeAnnual)],
+      ['Estimated MAGI', formatMoney(params.magi)],
+      ['FPL % (rough)', params.fplPct ? `${escapeHtml(params.fplPct)}%` : '—'],
+      ['Coverage Now', labelCoverage(params.coverage)],
+    ];
+    renderKV('inputsKV', kv);
+
+    // Pills
+    renderPills('prioPills', priorities, 'priority');
+    renderPills('servicesPills', services, 'service');
+    renderPills('providersPills', providers);
+    renderPills('hospitalsPills', hospitals);
+
+    document.getElementById('distLabel').textContent = (params.maxDistanceMiles || '—') + ' miles';
+    document.getElementById('travelLabel').textContent = (params.travel || 'no') === 'yes' ? 'Yes' : 'No';
+
+    // Drugs table
+    const tbody = document.querySelector('#drugsTable tbody');
+    if (!drugs.length) {
+      document.getElementById('drugsTable').style.display = 'none';
+    } else {
+      drugs.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(d.name || '')}</td><td>${Number(d.fillsPerMonth||0)}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    const pharmTxt = (params.usesDrugs === 'yes')
+      ? `Pharmacy: ${labelPharm(params.pharmacy)}`
+      : `No current prescriptions`;
+    document.getElementById('pharmacyHint').textContent = pharmTxt;
+
+    // Track block
+    const trackBlock = document.getElementById('trackBlock');
+    trackBlock.innerHTML = routeExplainer(route, age);
+
+    // badgesBlock for quick at-a-glance needs
+    document.getElementById('badgesBlock').innerHTML = [
+      priorities.length ? `<div><strong>We’ll optimize for:</strong> ${priorities.map(p=>`<span class="badge">${escapeHtml(labelPriority(p))}</span>`).join(' ')}</div>` : '',
+      services.length ? `<div style="margin-top:6px;"><strong>Needs to check:</strong> ${services.map(s=>`<span class="badge">${escapeHtml(labelService(s))}</span>`).join(' ')}</div>` : ''
+    ].join('');
+
+    // Debug
+    document.getElementById('rawParams').textContent = JSON.stringify(params, null, 2);
+
+    // Utilities
+    function renderKV(id, rows){
+      const el = document.getElementById(id); el.innerHTML='';
+      rows.forEach(([k,v])=>{
+        const kEl = document.createElement('div'); kEl.className='small'; kEl.textContent=k;
+        const vEl = document.createElement('div'); vEl.textContent = v;
+        el.appendChild(kEl); el.appendChild(vEl);
+      });
+    }
+    function renderPills(id, items, kind){
+      const el = document.getElementById(id); el.innerHTML='';
+      if (!items || !items.length){ el.innerHTML = '<span class="small">None</span>'; return; }
+      items.forEach(x=>{
+        const span = document.createElement('span');
+        span.className='pill';
+        span.textContent = kind==='priority' ? labelPriority(x) : kind==='service' ? labelService(x) : x;
+        el.appendChild(span);
+      });
+    }
+    function badgeForRoute(r){
+      switch(r){
+        case 'ACA_subsidized': return `<span class="badge ok">ACA (subsidized)</span>`;
+        case 'ACA_fullpay': return `<span class="badge">ACA / off-exchange</span>`;
+        case 'medicaid_chip': return `<span class="badge ok">Medicaid/CHIP track</span>`;
+        case 'MA': return `<span class="badge ok">Medicare Advantage (Part C)</span>`;
+        case 'AB_Medigap_D': return `<span class="badge ok">Original Medicare (A+B) + Medigap + D</span>`;
+        case 'DSNP': return `<span class="badge ok">Dual-Eligible (D-SNP)</span>`;
+        default: return `<span class="badge">Route pending</span>`;
+      }
+    }
+    function routeExplainer(r, age){
+      if (age >= 65){
+        if (r === 'MA') return `✅ <strong>Medicare Advantage</strong> (Part C) — bundled benefits (often dental/vision/hearing), networks apply, MOOP caps.`;
+        if (r === 'AB_Medigap_D') return `✅ <strong>Original Medicare + Medigap + Part D</strong> — broad/national access, more predictable costs; separate drug plan.`;
+        if (r === 'DSNP') return `✅ <strong>Dual-Eligible SNP</strong> — coordinates Medicare & Medicaid for eligible members.`;
+        return `We’ll sort between Medicare Advantage and A+B+Medigap+D based on your preferences.`;
+      } else {
+        if (r === 'medicaid_chip') return `✅ <strong>Medicaid/CHIP likely</strong> based on your MAGI/FPL; verify eligibility with your state.`;
+        if (r === 'ACA_subsidized') return `✅ <strong>ACA with subsidies</strong> — we’ll show marketplace plans and apply estimated APTC/CSR.`;
+        if (r === 'ACA_fullpay') return `✅ <strong>ACA full-pay</strong> — we’ll show marketplace and off-exchange options.`;
+        return `We’ll determine ACA/Medicaid/off-exchange based on MAGI and household.`;
+      }
+    }
+    function labelCoverage(v){
+      return ({
+        none:'None', employer:'Employer', cobra:'COBRA',
+        medicare:'Medicare', medicaid:'Medicaid', va_tricare:'VA/TRICARE', other:'Other'
+      })[v] || '—';
+    }
+    function labelPriority(p){
+      const map = {
+        lowest_premium:'Lowest premium',
+        lowest_total_cost:'Lowest total cost',
+        low_deductible:'Low deductible',
+        keep_doctors:'Keep my doctors',
+        drug_costs:'Drug costs',
+        dental_vision_hearing:'Dental/Vision/Hearing',
+        network_flex_ppo:'Network flexibility (PPO/OON)',
+        simplicity_hmo:'Simplicity (HMO)',
+        chronic_condition_support:'Chronic condition support',
+        pt_ot_chiro:'PT/OT/Chiropractic',
+        mental_health:'Mental health',
+        travel_coverage:'Travel coverage',
+        predictable_costs:'Predictable costs'
+      };
+      return map[p] || p;
+    }
+    function labelService(s){
+      const map = {
+        physical_therapy:'Physical therapy',
+        occupational_therapy:'Occupational therapy',
+        chiropractic:'Chiropractic',
+        mental_health:'Mental health therapy',
+        specialists_no_referral:'Specialists without referrals',
+        out_of_network_option:'Out-of-network option',
+        virtual_care:'Virtual care',
+        urgent_care:'Urgent care'
+      };
+      return map[s] || s;
+    }
+    function labelPharm(v){ return ({preferred:'Preferred retail', standard:'Standard retail', mail:'Mail order'})[v] || v; }
+    function toBool(v){ return String(v)==='true' || String(v)==='1' || v===true; }
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+    function formatMoney(x){ if (x==null || x==='') return '—'; const n=Number(x); if (!isFinite(n)) return '—'; return n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}); }
   </script>
 </body>
 </html>
