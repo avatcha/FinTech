@@ -9,35 +9,98 @@
     :root{
       --pad-x:24px; --stroke:#e5e9f2; --card:#fff; --text:#0a0f2c; --brand:#1a73e8; --muted:#6b7280; --ok:#166534; --warn:#b45309;
     }
-    *{ box-sizing:border-box; } body{ margin:0; font-family:'Inter',sans-serif; background:#f7f9fc; color:var(--text); padding-top:80px; }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:'Inter',sans-serif;
+      background:#f7f9fc;
+      color:var(--text);
+      padding-top:80px;
+    }
     .wrap{ max-width:1200px; margin:0 auto; padding:0 var(--pad-x); }
-    header{ position:fixed; inset:0 0 auto 0; background:rgba(255,255,255,.9); border-bottom:1px solid var(--stroke); backdrop-filter:blur(8px); z-index:1000; }
+    header{
+      position:fixed;
+      inset:0 0 auto 0;
+      background:rgba(255,255,255,.9);
+      border-bottom:1px solid var(--stroke);
+      backdrop-filter:blur(8px);
+      z-index:1000;
+    }
     .header-inner{ display:flex; align-items:center; justify-content:space-between; min-height:60px; }
     .brand{ text-decoration:none; color:var(--text); font-weight:800; font-size:20px; }
     .nav{ display:flex; gap:18px; }
     .nav a{ color:inherit; text-decoration:none; font-weight:600; font-size:14px; }
     .nav a:hover{ text-decoration:underline; }
 
-    .card{ background:#fff; border:1px solid var(--stroke); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.06); padding:18px; }
+    .card{
+      background:#fff;
+      border:1px solid var(--stroke);
+      border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,.06);
+      padding:18px;
+    }
     .grid{ display:grid; gap:16px; }
-    .grid-2{ grid-template-columns: 1fr 1fr; } @media (max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
-    h1{ margin:10px 0 4px; } h2{ margin:0 0 8px; font-size:18px; }
+    .grid-2{ grid-template-columns: 1fr 1fr; }
+    @media (max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
+    h1{ margin:10px 0 4px; }
+    h2{ margin:0 0 8px; font-size:18px; }
     .small{ color:var(--muted); font-size:12px; }
-    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid #c7d2fe; background:#eef2ff; color:#1f2a59; }
+    .badge{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      border:1px solid #c7d2fe;
+      background:#eef2ff;
+      color:#1f2a59;
+    }
     .badge.ok{ background:#ecfdf5; border-color:#bbf7d0; color:var(--ok); }
     .badge.warn{ background:#fff7ed; border-color:#fde68a; color:var(--warn); }
-    .kvs{ display:grid; grid-template-columns: 180px 1fr; gap:8px 12px; }
-    .pill{ display:inline-block; padding:4px 10px; border:1px solid var(--stroke); border-radius:999px; background:#fff; font-size:13px; margin:2px 6px 2px 0; }
-    table{ width:100%; border-collapse:collapse; } th, td{ border-top:1px solid var(--stroke); padding:10px; text-align:left; font-size:14px; }
+    .kvs{
+      display:grid;
+      grid-template-columns: 180px 1fr;
+      gap:8px 12px;
+    }
+    .pill{
+      display:inline-block;
+      padding:4px 10px;
+      border:1px solid var(--stroke);
+      border-radius:999px;
+      background:#fff;
+      font-size:13px;
+      margin:2px 6px 2px 0;
+    }
+    table{ width:100%; border-collapse:collapse; }
+    th, td{
+      border-top:1px solid var(--stroke);
+      padding:10px;
+      text-align:left;
+      font-size:14px;
+    }
     .toolbar{ display:flex; gap:10px; flex-wrap:wrap; }
-    button{ padding:10px 14px; border-radius:12px; border:1px solid var(--stroke); background:#fff; font-weight:700; cursor:pointer; }
-    button.primary{ background:#1a73e8; color:#fff; border: none; }
+    button{
+      padding:10px 14px;
+      border-radius:12px;
+      border:1px solid var(--stroke);
+      background:#fff;
+      font-weight:700;
+      cursor:pointer;
+    }
+    button.primary{ background:#1a73e8; color:#fff; border:none; }
     .hint{ font-size:12px; color:var(--muted); }
     .checks{ display:flex; gap:8px; align-items:center; }
-    .good{ color:#16a34a; font-weight:800; } .bad{ color:#b91c1c; font-weight:800; }
+    .good{ color:#16a34a; font-weight:800; }
+    .bad{ color:#b91c1c; font-weight:800; }
     .divider{ height:1px; background:var(--stroke); margin:12px 0; }
-    .sticky-head{ position:sticky; top:80px; background:#fff; z-index:500; border-bottom:1px solid var(--stroke); padding:10px 0; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:12px; color:#475569; }
+    .sticky-head{
+      position:sticky;
+      top:80px;
+      background:#fff;
+      z-index:500;
+      border-bottom:1px solid var(--stroke);
+      padding:10px 0;
+    }
   </style>
 </head>
 <body>
@@ -110,12 +173,6 @@
         <button onclick="history.back()">← Edit my answers</button>
         <a href="questions.html"><button class="primary">Start over</button></a>
       </div>
-    </section>
-
-    <!-- Debug (optional) -->
-    <section class="card" style="margin-top:16px;">
-      <h2>Debug: Raw Params</h2>
-      <pre id="rawParams" class="mono"></pre>
     </section>
   </main>
 
@@ -196,9 +253,6 @@
       priorities.length ? `<div><strong>We’ll optimize for:</strong> ${priorities.map(p=>`<span class="badge">${escapeHtml(labelPriority(p))}</span>`).join(' ')}</div>` : '',
       services.length ? `<div style="margin-top:6px;"><strong>Needs to check:</strong> ${services.map(s=>`<span class="badge">${escapeHtml(labelService(s))}</span>`).join(' ')}</div>` : ''
     ].join('');
-
-    // Debug
-    document.getElementById('rawParams').textContent = JSON.stringify(params, null, 2);
 
     // Utilities
     function renderKV(id, rows){
@@ -283,8 +337,12 @@
     function labelPharm(v){ return ({preferred:'Preferred retail', standard:'Standard retail', mail:'Mail order'})[v] || v; }
     function toBool(v){ return String(v)==='true' || String(v)==='1' || v===true; }
     function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
-    function formatMoney(x){ if (x==null || x==='') return '—'; const n=Number(x); if (!isFinite(n)) return '—'; return n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}); }
+    function formatMoney(x){
+      if (x==null || x==='') return '—';
+      const n=Number(x);
+      if (!isFinite(n)) return '—';
+      return n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+    }
   </script>
 </body>
 </html>
-
