@@ -138,7 +138,6 @@
     const subsidy = toBool(params.subsidyEligible);
     const medicaid = toBool(params.medicaidEligible);
     const lis = toBool(params.lisEligible);
-    const irmaa = params.irmaaBracket || null;
 
     // Badges
     const routeBadges = document.getElementById('routeBadges');
@@ -146,8 +145,7 @@
       badgeForRoute(route),
       medicaid ? `<span class="badge ok">Medicaid likely</span>` : '',
       subsidy ? `<span class="badge ok">ACA subsidies likely</span>` : '',
-      lis ? `<span class="badge ok">Extra Help (LIS) likely</span>` : '',
-      irmaa ? `<span class="badge warn">IRMAA: ${escapeHtml(irmaa)}</span>` : ''
+      lis ? `<span class="badge ok">Extra Help (LIS) likely</span>` : ''
     ].filter(Boolean).join(' ');
 
     // Inputs KV
@@ -289,3 +287,4 @@
   </script>
 </body>
 </html>
+
