@@ -26,10 +26,25 @@
       backdrop-filter:blur(8px);
       z-index:1000;
     }
-    .header-inner{ display:flex; align-items:center; justify-content:space-between; min-height:60px; }
-    .brand{ text-decoration:none; color:var(--text); font-weight:800; font-size:20px; }
-    .nav{ display:flex; gap:18px; }
-    .nav a{ color:inherit; text-decoration:none; font-weight:600; font-size:14px; }
+    .header-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      min-height:60px;
+    }
+    .brand{
+      text-decoration:none;
+      color:var(--text);
+      font-weight:800;
+      font-size:20px;
+    }
+    .nav{ display:flex; gap:18px; flex-wrap:wrap; }
+    .nav a{
+      color:inherit;
+      text-decoration:none;
+      font-weight:600;
+      font-size:14px;
+    }
     .nav a:hover{ text-decoration:underline; }
 
     .card{
@@ -41,7 +56,9 @@
     }
     .grid{ display:grid; gap:16px; }
     .grid-2{ grid-template-columns: 1fr 1fr; }
-    @media (max-width:900px){ .grid-2{ grid-template-columns:1fr; } }
+    @media (max-width:900px){
+      .grid-2{ grid-template-columns:1fr; }
+    }
     h1{ margin:10px 0 4px; }
     h2{ margin:0 0 8px; font-size:18px; }
     .small{ color:var(--muted); font-size:12px; }
@@ -55,8 +72,16 @@
       background:#eef2ff;
       color:#1f2a59;
     }
-    .badge.ok{ background:#ecfdf5; border-color:#bbf7d0; color:var(--ok); }
-    .badge.warn{ background:#fff7ed; border-color:#fde68a; color:var(--warn); }
+    .badge.ok{
+      background:#ecfdf5;
+      border-color:#bbf7d0;
+      color:var(--ok);
+    }
+    .badge.warn{
+      background:#fff7ed;
+      border-color:#fde68a;
+      color:var(--warn);
+    }
     .kvs{
       display:grid;
       grid-template-columns: 180px 1fr;
@@ -71,13 +96,17 @@
       font-size:13px;
       margin:2px 6px 2px 0;
     }
-    table{ width:100%; border-collapse:collapse; }
+    table{
+      width:100%;
+      border-collapse:collapse;
+    }
     th, td{
       border-top:1px solid var(--stroke);
       padding:10px;
       text-align:left;
       font-size:14px;
     }
+    th{ background:#f9fafb; }
     .toolbar{ display:flex; gap:10px; flex-wrap:wrap; }
     button{
       padding:10px 14px;
@@ -87,20 +116,38 @@
       font-weight:700;
       cursor:pointer;
     }
-    button.primary{ background:#1a73e8; color:#fff; border:none; }
+    button.primary{
+      background:#1a73e8;
+      color:#fff;
+      border:none;
+    }
     .hint{ font-size:12px; color:var(--muted); }
-    .checks{ display:flex; gap:8px; align-items:center; }
-    .good{ color:#16a34a; font-weight:800; }
-    .bad{ color:#b91c1c; font-weight:800; }
+    .checks{ display:flex; gap:8px; align-items:flex-start; flex-wrap:wrap; }
     .divider{ height:1px; background:var(--stroke); margin:12px 0; }
     .sticky-head{
       position:sticky;
       top:80px;
-      background:#fff;
+      background:#f7f9fc;
       z-index:500;
-      border-bottom:1px solid var(--stroke);
-      padding:10px 0;
+      padding:10px 0 6px;
+      border-bottom:1px solid rgba(226,232,240,.6);
     }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      font-size:12px;
+      color:#475569;
+    }
+    .score-pill{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#eff6ff;
+      font-size:11px;
+      font-weight:700;
+      color:#1d4ed8;
+    }
+    .tagline{ color:var(--muted); font-size:13px; }
+    .soft{ background:#f1f5f9; border-radius:12px; padding:8px 10px; margin-top:6px; }
   </style>
 </head>
 <body>
@@ -120,7 +167,9 @@
     <div class="sticky-head">
       <h1>Your Plan Options</h1>
       <div id="routeBadges" class="toolbar"></div>
-      <div class="hint">Educational demo. We don’t save your answers; this page only reads what your browser just sent.</div>
+      <div class="hint">
+        Educational demo. Plans and numbers are based on ACA landscape data; verify details on Healthcare.gov or your state marketplace before enrolling.
+      </div>
     </div>
 
     <!-- Summary -->
@@ -155,36 +204,62 @@
       </div>
     </section>
 
-    <!-- Recommendations placeholder -->
+    <!-- Recommended track -->
     <section class="card" style="margin-top:16px;">
       <h2>Recommended Track & Next Steps</h2>
       <div id="trackBlock" class="checks" style="margin-top:6px;"></div>
       <div id="badgesBlock" style="margin-top:8px;"></div>
       <div class="divider"></div>
-<div id="todoBlock" class="hint">
-  <strong>How to use this page:</strong>
-  <ul>
-    <li>Use the “Recommended track” as a starting point (not a final decision).</li>
-    <li>Compare real plans on Healthcare.gov, your state marketplace, or Medicare.gov.</li>
-    <li>Check that your doctors, hospitals, and medications are covered before enrolling.</li>
-  </ul>
-</div>
+      <div id="todoBlock" class="hint">
+        <strong>How to use this page:</strong>
+        <ul>
+          <li>Use the “Recommended track” and top plans as a starting point, not a final decision.</li>
+          <li>Compare real details on Healthcare.gov, your state marketplace, or with a licensed broker.</li>
+          <li>Always confirm doctors, hospitals, and medications are covered before enrolling.</li>
+        </ul>
+      </div>
       <div style="margin-top:12px;" class="toolbar">
         <button onclick="history.back()">← Edit my answers</button>
         <a href="questions.html"><button class="primary">Start over</button></a>
       </div>
     </section>
+
+    <!-- Matching plans -->
+    <section class="card" style="margin-top:16px;">
+      <h2>Plans that fit this path</h2>
+      <p class="tagline">
+        Ranked based on what you said matters most (premium, total cost, deductibles, PPO/HMO preferences, etc.).
+      </p>
+      <div id="plansStatus" class="hint" style="margin-top:6px;">Loading ACA plans...</div>
+      <div id="plansSoftNote" class="soft" style="display:none;">
+        ACA plans only for now. Medicare and off-exchange plans are not yet shown in this table.
+      </div>
+      <table id="plansTable" style="margin-top:8px; display:none;">
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th>Carrier</th>
+            <th>Metal</th>
+            <th>Type</th>
+            <th>Est. Premium / mo</th>
+            <th>Deductible</th>
+            <th>Max OOP</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody id="plansBody"></tbody>
+      </table>
+    </section>
   </main>
 
   <script>
-    // Parse query safely
+    // ---- URL params & helpers ----
     const params = Object.fromEntries(new URLSearchParams(location.search));
     const parseJSON = (k, def=[]) => {
       try { return params[k] ? JSON.parse(params[k]) : def; }
       catch { return def; }
     };
 
-    // Normalize
     const priorities = parseJSON('priorities');
     const services = parseJSON('servicesImportant');
     const providers = parseJSON('providers');
@@ -196,16 +271,16 @@
     const medicaid = toBool(params.medicaidEligible);
     const lis = toBool(params.lisEligible);
 
-    // Badges
+    // ---- Badges at top ----
     const routeBadges = document.getElementById('routeBadges');
     routeBadges.innerHTML = [
       badgeForRoute(route),
       medicaid ? `<span class="badge ok">Medicaid likely</span>` : '',
-      subsidy ? `<span class="badge ok">ACA subsidies likely</span>` : '',
+      subsidy ? `<span class="badge ok">ACA savings likely</span>` : '',
       lis ? `<span class="badge ok">Extra Help (LIS) likely</span>` : ''
     ].filter(Boolean).join(' ');
 
-    // Inputs KV
+    // ---- Inputs summary ----
     const kv = [
       ['ZIP / County', `${escapeHtml(params.zip || '')} • ${escapeHtml(params.county || '')}`],
       ['Age', escapeHtml(params.age || '')],
@@ -218,7 +293,6 @@
     ];
     renderKV('inputsKV', kv);
 
-    // Pills
     renderPills('prioPills', priorities);
     renderPills('servicesPills', services);
     renderPills('providersPills', providers);
@@ -227,15 +301,15 @@
     document.getElementById('distLabel').textContent = (params.maxDistanceMiles || '—') + ' miles';
     document.getElementById('travelLabel').textContent = (params.travel || 'no') === 'yes' ? 'Yes' : 'No';
 
-    // Drugs table
-    const tbody = document.querySelector('#drugsTable tbody');
+    // ---- Medications ----
+    const tbodyDrugs = document.querySelector('#drugsTable tbody');
     if (!drugs.length) {
       document.getElementById('drugsTable').style.display = 'none';
     } else {
       drugs.forEach(d => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${escapeHtml(d.name || '')}</td><td>${Number(d.fillsPerMonth||0)}</td>`;
-        tbody.appendChild(tr);
+        tbodyDrugs.appendChild(tr);
       });
     }
     const pharmTxt = (params.usesDrugs === 'yes')
@@ -243,18 +317,259 @@
       : `No current prescriptions`;
     document.getElementById('pharmacyHint').textContent = pharmTxt;
 
-    // Track block
+    // ---- Recommended track text ----
     const trackBlock = document.getElementById('trackBlock');
     const trackExplainer = routeExplainer(route, age);
     trackBlock.innerHTML = trackExplainer;
 
-    // badgesBlock for quick at-a-glance needs
     document.getElementById('badgesBlock').innerHTML = [
-      priorities.length ? `<div><strong>We’ll optimize for:</strong> ${priorities.map(p=>`<span class="badge">${escapeHtml(labelPriority(p))}</span>`).join(' ')}</div>` : '',
-      services.length ? `<div style="margin-top:6px;"><strong>Needs to check:</strong> ${services.map(s=>`<span class="badge">${escapeHtml(labelService(s))}</span>`).join(' ')}</div>` : ''
+      priorities.length ? `<div><strong>We’ll lean toward:</strong> ${priorities.map(p=>`<span class="badge">${escapeHtml(labelPriority(p))}</span>`).join(' ')}</div>` : '',
+      services.length ? `<div style="margin-top:6px;"><strong>Things to double-check:</strong> ${services.map(s=>`<span class="badge">${escapeHtml(labelService(s))}</span>`).join(' ')}</div>` : ''
     ].join('');
 
-    // Utilities
+    // ---- Load & score ACA plans ----
+    const plansStatusEl = document.getElementById('plansStatus');
+    const plansTableEl = document.getElementById('plansTable');
+    const plansBodyEl = document.getElementById('plansBody');
+    const plansSoftNoteEl = document.getElementById('plansSoftNote');
+
+    // Show note: ACA only (for now)
+    plansSoftNoteEl.style.display = 'block';
+
+    // Only really makes sense for under-65 ACA-ish routes, but we won't block others.
+    fetch('aca%202026.csv')
+      .then(r => {
+        if (!r.ok) throw new Error('Network error');
+        return r.text();
+      })
+      .then(text => {
+        const rows = parseCsv(text);
+        if (!rows.length) throw new Error('No rows parsed');
+        const headers = rows[0];
+        const dataRows = rows.slice(1);
+        const objs = rowsToObjects(headers, dataRows);
+
+        const countyName = (params.county || '').trim().toLowerCase();
+        let candidates = objs;
+
+        if (countyName) {
+          const countyFiltered = objs.filter(p => (p['County Name'] || '').toLowerCase() === countyName);
+          if (countyFiltered.length) {
+            candidates = countyFiltered;
+          }
+        }
+
+        // Filter out catastrophic unless under 30
+        candidates = candidates.filter(p => {
+          const metal = (p['Metal Level'] || '').trim();
+          if (metal === 'Catastrophic' && age >= 30) return false;
+          return true;
+        });
+
+        if (!candidates.length) {
+          plansStatusEl.textContent = 'No ACA plans found for this area in the dataset. Showing nothing for now.';
+          return;
+        }
+
+        const scored = scorePlansForUser(candidates, age, priorities);
+        if (!scored.length) {
+          plansStatusEl.textContent = 'We could not compute scores for any plans (missing premium data).';
+          return;
+        }
+
+        const top = scored.slice(0, 10);
+        plansBodyEl.innerHTML = '';
+        top.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${escapeHtml(p.name)}</td>
+            <td>${escapeHtml(p.issuer)}</td>
+            <td>${escapeHtml(p.metal)}</td>
+            <td>${escapeHtml(p.planType)}</td>
+            <td>${formatMoney(p.premiumMonthly)}</td>
+            <td>${formatMoney(p.deductible)}</td>
+            <td>${formatMoney(p.oopMax)}</td>
+            <td><span class="score-pill">${Math.round(p.score)}/100</span></td>
+          `;
+          plansBodyEl.appendChild(tr);
+        });
+
+        plansStatusEl.textContent = `Showing top ${top.length} ACA plans ranked for your priorities.`;
+        plansTableEl.style.display = 'table';
+      })
+      .catch(err => {
+        console.error(err);
+        plansStatusEl.textContent = 'Could not load ACA plans file (aca 2026.csv). Make sure it is in the same folder as this page.';
+      });
+
+    // ---- Scoring logic ----
+    function scorePlansForUser(plans, age, priorities){
+      const premCol = premiumColumnForAge(age);
+      const enriched = plans.map(p => {
+        const premiumRaw = toNumber(p[premCol]);
+        const dedRaw = parseDollar(p['Medical Deductible - Individual - Standard']);
+        const oopRaw = parseDollar(p['Medical Maximum Out Of Pocket - Individual - Standard']);
+        return {
+          raw: p,
+          premiumMonthly: premiumRaw,
+          deductible: dedRaw,
+          oopMax: oopRaw,
+          metal: (p['Metal Level'] || '').trim(),
+          issuer: (p['Issuer Name'] || '').trim(),
+          name: (p['Plan Marketing Name'] || '').trim(),
+          planType: (p['Plan Type'] || '').trim()
+        };
+      }).filter(p => isFinite(p.premiumMonthly));
+
+      if (!enriched.length) return [];
+
+      const totalCostArr = enriched.map(p => p.premiumMonthly * 12 + (isFinite(p.deductible) ? p.deductible : 0));
+      const premiumArr = enriched.map(p => p.premiumMonthly);
+      const dedArr = enriched.map(p => isFinite(p.deductible) ? p.deductible : null).filter(x=>x!=null);
+      const oopArr = enriched.map(p => isFinite(p.oopMax) ? p.oopMax : null).filter(x=>x!=null);
+
+      const [minPrem, maxPrem] = [Math.min(...premiumArr), Math.max(...premiumArr)];
+      const [minTot, maxTot] = [Math.min(...totalCostArr), Math.max(...totalCostArr)];
+      const [minDed, maxDed] = dedArr.length ? [Math.min(...dedArr), Math.max(...dedArr)] : [0,1];
+      const [minOop, maxOop] = oopArr.length ? [Math.min(...oopArr), Math.max(...oopArr)] : [0,1];
+
+      const hasPrio = (k)=> priorities.includes(k);
+
+      enriched.forEach((p,i)=>{
+        const totalCost = totalCostArr[i];
+        let score = 0;
+
+        // Lowest premium
+        if (hasPrio('lowest_premium')){
+          const s = normalize(p.premiumMonthly, minPrem, maxPrem, true);
+          score += s * 40;
+        }
+
+        // Lowest total yearly cost
+        if (hasPrio('lowest_total_cost')){
+          const s = normalize(totalCost, minTot, maxTot, true);
+          score += s * 40;
+        }
+
+        // Low deductible
+        if (hasPrio('low_deductible') && isFinite(p.deductible)){
+          const s = normalize(p.deductible, minDed, maxDed, true);
+          score += s * 25;
+        }
+
+        // Predictable costs: deductible + OOP max
+        if (hasPrio('predictable_costs')){
+          let parts = [];
+          if (isFinite(p.deductible)) parts.push(normalize(p.deductible, minDed, maxDed, true));
+          if (isFinite(p.oopMax)) parts.push(normalize(p.oopMax, minOop, maxOop, true));
+          const s = parts.length ? parts.reduce((a,b)=>a+b,0)/parts.length : 0.5;
+          score += s * 25;
+        }
+
+        // PPO / flexibility
+        if (hasPrio('network_flex_ppo')){
+          if (p.planType === 'PPO') score += 15;
+          else if (p.planType === 'EPO') score += 7;
+          else score -= 5;
+        }
+
+        // Simplicity (HMO)
+        if (hasPrio('simplicity_hmo')){
+          if (p.planType === 'HMO') score += 15;
+          else score -= 5;
+        }
+
+        // Travel coverage
+        if (hasPrio('travel_coverage')){
+          if (p.planType === 'PPO') score += 10;
+          else score -= 5;
+        }
+
+        // Slight nudge: metal vs cost focus
+        if (hasPrio('lowest_premium') && p.metal === 'Bronze') score += 3;
+        if (hasPrio('predictable_costs') && (p.metal === 'Gold' || p.metal === 'Platinum')) score += 5;
+
+        // Clamp 0-100
+        p.score = Math.max(0, Math.min(100, score));
+      });
+
+      enriched.sort((a,b)=> b.score - a.score);
+      return enriched;
+    }
+
+    function premiumColumnForAge(age){
+      if (!isFinite(age) || age <= 0) return 'Premium Adult Individual Age 40 ';
+      if (age < 27) return 'Premium Adult Individual Age 21';
+      if (age < 30) return 'Premium Adult Individual Age 27';
+      if (age < 40) return 'Premium Adult Individual Age 30 ';
+      if (age < 50) return 'Premium Adult Individual Age 40 ';
+      if (age < 60) return 'Premium Adult Individual Age 50 ';
+      return 'Premium Adult Individual Age 60 ';
+    }
+
+    function normalize(val, min, max, invert){
+      if (!isFinite(val) || !isFinite(min) || !isFinite(max) || max === min) return 0.5;
+      let s = (val - min) / (max - min);
+      s = Math.max(0, Math.min(1, s));
+      if (invert) s = 1 - s;
+      return s;
+    }
+
+    // ---- CSV parsing ----
+    function parseCsv(text){
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+
+      for (let i=0;i<text.length;i++){
+        const c = text[i];
+
+        if (inQuotes){
+          if (c === '"'){
+            const next = text[i+1];
+            if (next === '"'){ cell += '"'; i++; }
+            else { inQuotes = false; }
+          } else {
+            cell += c;
+          }
+        } else {
+          if (c === '"'){
+            inQuotes = true;
+          } else if (c === ','){
+            row.push(cell);
+            cell = '';
+          } else if (c === '\r'){
+            // ignore \r
+          } else if (c === '\n'){
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = '';
+          } else {
+            cell += c;
+          }
+        }
+      }
+      if (cell.length || row.length){
+        row.push(cell);
+        rows.push(row);
+      }
+      // drop empty trailing rows
+      return rows.filter(r => r.some(c=>c && c.trim().length));
+    }
+
+    function rowsToObjects(headers, rows){
+      return rows.map(r => {
+        const o = {};
+        headers.forEach((h,idx)=>{
+          o[h] = r[idx] !== undefined ? r[idx] : '';
+        });
+        return o;
+      });
+    }
+
+    // ---- Small label/utility functions ----
     function renderKV(id, rows){
       const el = document.getElementById(id); el.innerHTML='';
       rows.forEach(([k,v])=>{
@@ -275,26 +590,26 @@
     }
     function badgeForRoute(r){
       switch(r){
-        case 'ACA_subsidized': return `<span class="badge ok">ACA (subsidized)</span>`;
+        case 'ACA_subsidized': return `<span class="badge ok">ACA (with savings)</span>`;
         case 'ACA_fullpay': return `<span class="badge">ACA / off-exchange</span>`;
         case 'medicaid_chip': return `<span class="badge ok">Medicaid/CHIP track</span>`;
-        case 'MA': return `<span class="badge ok">Medicare Advantage (Part C)</span>`;
-        case 'AB_Medigap_D': return `<span class="badge ok">Original Medicare (A+B) + Medigap + D</span>`;
+        case 'MA': return `<span class="badge ok">Medicare Advantage</span>`;
+        case 'AB_Medigap_D': return `<span class="badge ok">Original Medicare + Medigap + D</span>`;
         case 'DSNP': return `<span class="badge ok">Dual-Eligible (D-SNP)</span>`;
         default: return `<span class="badge">Route pending</span>`;
       }
     }
     function routeExplainer(r, age){
       if (age >= 65){
-        if (r === 'MA') return `✅ <strong>Medicare Advantage</strong> (Part C) — bundled benefits (often dental/vision/hearing), networks apply, MOOP caps.`;
-        if (r === 'AB_Medigap_D') return `✅ <strong>Original Medicare + Medigap + Part D</strong> — broad/national access, more predictable costs; separate drug plan.`;
-        if (r === 'DSNP') return `✅ <strong>Dual-Eligible SNP</strong> — coordinates Medicare & Medicaid for eligible members.`;
-        return `We’ll sort between Medicare Advantage and A+B+Medigap+D based on your preferences.`;
+        if (r === 'MA') return `✅ <strong>Medicare Advantage</strong> (Part C) — bundled benefits, networks apply, annual max out-of-pocket caps.`;
+        if (r === 'AB_Medigap_D') return `✅ <strong>Original Medicare + Medigap + Part D</strong> — broad/national access and more predictable costs (separate drug plan).`;
+        if (r === 'DSNP') return `✅ <strong>Dual-Eligible SNP</strong> — coordinates Medicare & Medicaid for those who qualify.`;
+        return `We’ll lean between Medicare Advantage and A+B+Medigap+D based on your age and preferences.`;
       } else {
-        if (r === 'medicaid_chip') return `✅ <strong>Medicaid/CHIP likely</strong> based on your MAGI/FPL; verify eligibility with your state.`;
-        if (r === 'ACA_subsidized') return `✅ <strong>ACA with subsidies</strong> — we’ll show marketplace plans and apply estimated APTC/CSR.`;
-        if (r === 'ACA_fullpay') return `✅ <strong>ACA full-pay</strong> — we’ll show marketplace and off-exchange options.`;
-        return `We’ll determine ACA/Medicaid/off-exchange based on MAGI and household.`;
+        if (r === 'medicaid_chip') return `✅ <strong>Medicaid/CHIP likely</strong> based on your estimated income; verify eligibility with your state.`;
+        if (r === 'ACA_subsidized') return `✅ <strong>ACA with savings</strong> — marketplace plans where advance credits can reduce your premium.`;
+        if (r === 'ACA_fullpay') return `✅ <strong>ACA full-pay</strong> — marketplace/off-exchange options without income-based savings.`;
+        return `We’ll sort between Medicaid, ACA with savings, and ACA full-pay based on your info.`;
       }
     }
     function labelCoverage(v){
@@ -305,18 +620,18 @@
     }
     function labelPriority(p){
       const map = {
-        lowest_premium:'Lowest premium',
-        lowest_total_cost:'Lowest total cost',
+        lowest_premium:'Lowest monthly premium',
+        lowest_total_cost:'Lowest total yearly cost',
         low_deductible:'Low deductible',
         keep_doctors:'Keep my doctors',
-        drug_costs:'Drug costs',
-        dental_vision_hearing:'Dental/Vision/Hearing',
-        network_flex_ppo:'Network flexibility (PPO/OON)',
+        drug_costs:'Prescription drug costs',
+        dental_vision_hearing:'Dental / Vision / Hearing',
+        network_flex_ppo:'Network flexibility (PPO / out-of-network)',
         simplicity_hmo:'Simplicity (HMO)',
         chronic_condition_support:'Chronic condition support',
-        pt_ot_chiro:'PT/OT/Chiropractic',
-        mental_health:'Mental health',
-        travel_coverage:'Travel coverage',
+        pt_ot_chiro:'PT / OT / Chiropractic',
+        mental_health:'Mental health coverage',
+        travel_coverage:'Travel / out-of-area coverage',
         predictable_costs:'Predictable costs'
       };
       return map[p] || p;
@@ -339,9 +654,21 @@
     function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
     function formatMoney(x){
       if (x==null || x==='') return '—';
-      const n=Number(x);
+      const n = Number(x);
       if (!isFinite(n)) return '—';
       return n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+    }
+    function toNumber(v){
+      if (v==null) return NaN;
+      const s = String(v).replace(/[^0-9.\-]/g,'');
+      if (!s) return NaN;
+      const n = Number(s);
+      return isFinite(n) ? n : NaN;
+    }
+    function parseDollar(v){
+      if (!v) return NaN;
+      const n = toNumber(v);
+      return isFinite(n) ? n : NaN;
     }
   </script>
 </body>
