@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -179,7 +179,7 @@
         <label><input type="checkbox" value="tax_exempt_interest"> Tax-exempt interest</label>
         <label><input type="checkbox" value="social_security"> Social Security benefits</label>
       </div>
-      <div class="hint">We’ll estimate MAGI & FPL to check subsidies/Medicaid and Medicare IRMAA/LIS.</div>
+      <div class="hint">We’ll estimate MAGI &amp; FPL to check Medicaid, Medicare Extra Help (LIS), and your likely path.</div>
 
       <div class="nav-buttons">
         <button class="btn-ghost" id="back2">Back</button>
@@ -371,7 +371,7 @@
         <label for="planStylePref">Which style fits you better?</label>
         <select id="planStylePref">
           <option value="ma_bundle">All-in-one with extras (Medicare Advantage)</option>
-          <option value="ab_medigap">National access & predictable costs (A+B+Medigap+D)</option>
+          <option value="ab_medigap">National access &amp; predictable costs (A+B+Medigap+D)</option>
         </select>
 
         <div id="medicareBadges" class="hint" style="margin-top:8px;"></div>
@@ -405,7 +405,7 @@
       usesDrugs: "no", drugs: [], pharmacyPref: "preferred", okGenerics: "yes",
       // derived
       magi: null, fplPct: null, subsidyEligible: false, medicaidEligible: false, chipEligible: false,
-      irmaaBracket: null, lisEligible: false,
+      lisEligible: false,
       // path clarifiers
       route: "", tobacco: "no", medicareStatus: "neither", planStylePref: "ma_bundle"
     };
@@ -432,23 +432,19 @@
 
     // ZIP -> counties (placeholder deterministic demo)
     function countiesForZip(zip){
-      // Minimal demo mapping; keep logic client-side.
       const map = {
         "10001": ["New York County"], "30301": ["Fulton County"], "60601": ["Cook County"],
         "90001": ["Los Angeles County"], "73301": ["Travis County"],
       };
       if (map[zip]) return map[zip];
-      // Fallback: pretend single county with the ZIP as label
       return [`County for ${zip}`];
     }
 
     // FPL calculator (contiguous U.S., rough 2025 est.)
     function fplLine(hhSize, stateCode){
-      // Contiguous baseline: first person $15,060; +$5,380 each additional
       const base = 15060, add = 5380;
       if (!hhSize || hhSize < 1) return null;
       let line = base + (hhSize - 1) * add;
-      // Alaska/Hawaii rough tweaks if desired later (need stateCode)
       return line;
     }
 
@@ -469,18 +465,13 @@
       // Simple flags (illustrative only)
       state.subsidyEligible = (state.fplPct!=null) && (state.fplPct >= 100) && (state.fplPct <= 600);
       state.medicaidEligible = (state.fplPct!=null) && (state.fplPct < 138);
-      state.chipEligible = false; // need child counts to refine later
+      state.chipEligible = false;
 
-      // Medicare: rough IRMAA & LIS hints (illustrative)
-      // We'll just tag bracket names for UI hints
+      // Medicare: rough LIS hint (illustrative)
       if (Number(state.age||0) >= 65){
-        // Very rough thresholds; exact depends on filing status
-        if (state.magi > 206000) state.irmaaBracket = "High";
-        else if (state.magi > 103000) state.irmaaBracket = "Medium";
-        else state.irmaaBracket = "Base";
         state.lisEligible = (state.fplPct!=null) && (state.fplPct <= 150);
       } else {
-        state.irmaaBracket = null; state.lisEligible = false;
+        state.lisEligible = false;
       }
 
       // Route guess
@@ -490,7 +481,7 @@
       } else {
         if (state.medicaidEligible) state.route = 'medicaid_chip';
         else if (state.subsidyEligible) state.route = 'ACA_subsidized';
-        else state.route = 'ACA_fullpay'; // can include off_exchange on results
+        else state.route = 'ACA_fullpay';
       }
     }
 
@@ -558,16 +549,17 @@
       computeDerived();
       const el = document.getElementById('acaBadges');
       const badges = [];
-      if (state.medicaidEligible) badges.push(`<span class="badge ok">Medicaid likely</span>`);
-      if (state.subsidyEligible) badges.push(`<span class="badge ok">ACA subsidies likely</span>`);
-      if (!state.subsidyEligible && !state.medicaidEligible) badges.push(`<span class="badge warn">Full-pay</span>`);
+      if (state.medicaidEligible) {
+        badges.push(`<span class="badge ok">Medicaid likely</span>`);
+      } else {
+        badges.push(`<span class="badge warn">May be full-pay on the marketplace</span>`);
+      }
       el.innerHTML = badges.join(' ');
     }
     function renderMedicareBadges(){
       computeDerived();
       const el = document.getElementById('medicareBadges');
       const badges = [];
-      if (state.irmaaBracket) badges.push(`<span class="badge warn">IRMAA: ${state.irmaaBracket}</span>`);
       if (state.lisEligible) badges.push(`<span class="badge ok">Extra Help (LIS) likely</span>`);
       if (state.medicaidEligible) badges.push(`<span class="badge ok">Dual-eligible (D-SNP) likely</span>`);
       el.innerHTML = badges.join(' ');
@@ -601,13 +593,12 @@
 
     // Step 1 nav
     document.getElementById('next1').addEventListener('click', ()=>{
-      // Validate
       const zip = document.getElementById('zip').value.trim();
       const age = document.getElementById('age').value.trim();
       if (!/^\d{5}$/.test(zip)){ document.getElementById('zipErr').textContent='Enter a 5-digit ZIP.'; document.getElementById('zipErr').style.display='block'; return; }
       if (!age || Number(age)<0 || Number(age)>120){ document.getElementById('ageErr').textContent='Enter a valid age.'; document.getElementById('ageErr').style.display='block'; return; }
       state.zip = zip; state.age = age;
-      // county may be single; ensure set
+
       const sel = document.getElementById('county');
       if (document.getElementById('countyWrap').style.display !== 'none'){
         state.county = sel.value || "";
@@ -629,7 +620,6 @@
     });
     document.getElementById('back2').addEventListener('click', ()=>{ current=1; showStep(current); });
     document.getElementById('next2').addEventListener('click', ()=>{
-      // basic presence check
       if (!state.hhSize || Number(state.hhSize)<1){ alert('Enter household size.'); return; }
       if (state.incomeAnnual==="" || Number(state.incomeAnnual)<0){ alert('Enter household income (can be 0).'); return; }
       computeDerived();
@@ -700,7 +690,6 @@
     });
     document.getElementById('back6').addEventListener('click', ()=>{ current=5; showStep(current); });
     document.getElementById('next6').addEventListener('click', ()=>{
-      // go to clarifiers
       current=7; showStep(current);
     });
 
@@ -709,16 +698,14 @@
     document.getElementById('medicareStatus').addEventListener('change', e=> state.medicareStatus = e.target.value);
     document.getElementById('planStylePref').addEventListener('change', e=>{
       state.planStylePref = e.target.value;
-      // reroute and re-badge
       computeDerived(); renderMedicareBadges();
     });
     document.getElementById('back7').addEventListener('click', ()=>{ current=6; showStep(current); });
 
     // Finish → plans.html
     document.getElementById('finish').addEventListener('click', ()=>{
-      computeDerived(); // final pass
+      computeDerived();
 
-      // Build the query; arrays/objects as JSON to keep it simple
       const q = new URLSearchParams();
       const push = (k,v)=>{ if (v===undefined || v===null || v==="") return; q.set(k, String(v)); };
 
@@ -734,7 +721,6 @@
       push('subsidyEligible', state.subsidyEligible);
       push('medicaidEligible', state.medicaidEligible);
       push('chipEligible', state.chipEligible);
-      if (state.irmaaBracket) push('irmaaBracket', state.irmaaBracket);
       push('lisEligible', state.lisEligible);
 
       push('currentCoverage', state.currentCoverage);
@@ -752,7 +738,6 @@
       push('pharmacyPref', state.pharmacyPref);
       push('okGenerics', state.okGenerics);
 
-      // Path flags
       if (Number(state.age||0) < 65){
         push('tobacco', state.tobacco);
       } else {
@@ -761,14 +746,11 @@
       }
       push('route', state.route);
 
-      // Navigate
       window.location.href = "plans.html?" + q.toString();
     });
 
-    // Init helpers
     enforcePriorityCap();
     showStep(current);
-
   </script>
 </body>
 </html>
