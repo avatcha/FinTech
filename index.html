@@ -89,6 +89,26 @@
   .btn{ background:var(--brand); color:#fff; border:0; padding:14px 18px; font-weight:800; border-radius:14px; cursor:pointer }
   .btn:hover{ background:var(--brand-700) }
 
+  /* Suggestions list */
+  .suggestions-list{
+    margin-top:8px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .suggestion-item{
+    border-radius:14px;
+    border:1px solid var(--stroke);
+    padding:10px 12px;
+    background:var(--soft);
+    font-size:14px;
+  }
+  .suggestion-meta{
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:4px;
+  }
+
   /* Modal */
   .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; padding:20px; z-index:2000 }
   .modal{ background:var(--card); border:1px solid var(--stroke); border-radius:16px; box-shadow:0 18px 60px rgba(2,6,23,.2); max-width:640px; width:100%; overflow:hidden }
@@ -165,6 +185,12 @@
         <p id="featureHint" class="muted" style="margin-top:8px;">
           Your feedback is sent directly to the StakxAI team.
         </p>
+
+        <!-- Suggestions displayed on the site (local to this device) -->
+        <div id="suggestionsWrap" style="margin-top:18px;">
+          <h3 style="margin:0 0 6px 0; font-size:16px;">Recent Suggestions (on this device)</h3>
+          <div id="suggestionList" class="suggestions-list"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -279,6 +305,93 @@
   closeAsk?.addEventListener('click', closeModal);
   askModal?.addEventListener('click', (e)=>{ if(e.target === askModal) closeModal(); });
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && askModal.style.display === 'flex') closeModal(); });
+
+  // Suggestions list (saved locally on this device)
+  (function(){
+    const form = document.getElementById('featureForm');
+    const topicInput = document.getElementById('topic');
+    const messageInput = document.getElementById('message');
+    const listEl = document.getElementById('suggestionList');
+    const hint = document.getElementById('featureHint');
+    const STORAGE_KEY = 'stakxSuggestions';
+
+    if (!form || !topicInput || !messageInput || !listEl) return;
+
+    function loadSuggestions(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      }catch(e){
+        return [];
+      }
+    }
+
+    function saveSuggestions(items){
+      try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      }catch(e){}
+    }
+
+    function renderSuggestions(){
+      const items = loadSuggestions();
+      listEl.innerHTML = '';
+      if (!items.length){
+        const empty = document.createElement('div');
+        empty.className = 'muted';
+        empty.textContent = 'No suggestions yet on this device. Be the first to add one.';
+        listEl.appendChild(empty);
+        return;
+      }
+      items.forEach(item=>{
+        const wrapper = document.createElement('div');
+        wrapper.className = 'suggestion-item';
+
+        const meta = document.createElement('div');
+        meta.className = 'suggestion-meta';
+        const date = item.createdAt ? new Date(item.createdAt) : null;
+        const dateText = (date && !isNaN(date)) ? date.toLocaleString() : '';
+        meta.textContent = (item.topic ? item.topic + (dateText ? ' • ' : '') : '') + dateText;
+
+        const body = document.createElement('div');
+        body.textContent = item.message || '';
+
+        wrapper.appendChild(meta);
+        wrapper.appendChild(body);
+        listEl.appendChild(wrapper);
+      });
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault(); // keep it on-site instead of sending away
+
+      const topic = (topicInput.value || '').trim();
+      const message = (messageInput.value || '').trim();
+
+      if (!message){
+        messageInput.focus();
+        return;
+      }
+
+      const items = loadSuggestions();
+      items.unshift({
+        topic: topic || 'General',
+        message,
+        createdAt: new Date().toISOString()
+      });
+      saveSuggestions(items);
+      renderSuggestions();
+      form.reset();
+
+      if (hint){
+        hint.textContent = 'Thanks! Your suggestion is now visible below (saved only on this device).';
+      }
+    });
+
+    // Initial render
+    renderSuggestions();
+  })();
 </script>
 
 </body>
