@@ -75,8 +75,10 @@
   .card{ background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px }
   .muted{ color:var(--muted) }
 
-  /* Suggestions (Cusdis) */
-  #cusdis_thread { margin-top: 10px; }
+  /* Fix Cusdis iframe scroll */
+  #cusdis_thread iframe {
+    height: 680px !important;
+  }
 
   /* Footer */
   footer{ padding:34px 0; color:var(--muted) }
@@ -132,7 +134,7 @@
     <div class="wrap">
       <div class="card">
         <h2 style="margin:0 0 8px 0; font-size:22px;">Tell Us What to Build Next</h2>
-        <p class="muted" style="margin:0 0 12px 0;">What should we build next? Post your ideas—everyone can see and collaborate.</p>
+        <p class="muted" style="margin:0 0 12px 0;">What should we build next? Post your ideas anonymously—everyone can see and contribute.</p>
 
         <!-- Cusdis Live Suggestion Board -->
         <div id="cusdis_thread"
@@ -140,7 +142,10 @@
           data-app-id="65c3ef25-d836-4782-9746-b19bb37cd7d1"
           data-page-id="stakxai-suggestions"
           data-page-url="https://stakxai.com"
-          data-page-title="StakxAI Suggestions">
+          data-page-title="StakxAI Suggestions"
+          data-strict-mode="false"
+          data-allow-anonymous="true"
+          data-use-avatar="false">
         </div>
 
         <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
