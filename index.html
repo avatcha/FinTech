@@ -75,53 +75,15 @@
   .card{ background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px }
   .muted{ color:var(--muted) }
 
-  /* Community preview */
-  .qa{ display:flex; flex-direction:column; gap:12px }
-  .qa-item{ padding:14px; border:1px dashed var(--stroke); border-radius:14px; background:linear-gradient(0deg, rgba(0,0,0,0.02), rgba(0,0,0,0.02)), var(--card) }
-
-  /* Feedback form */
-  .form-row{ display:grid; grid-template-columns:1fr; gap:12px }
-  label{ font-size:14px; font-weight:600 }
-  input[type=text], textarea{
-    width:100%; padding:12px 14px; border-radius:14px; border:1px solid var(--stroke); background:#fdfdfd; color:inherit; font-size:16px;
-  }
-  textarea{ min-height:110px; resize:vertical }
-  .btn{ background:var(--brand); color:#fff; border:0; padding:14px 18px; font-weight:800; border-radius:14px; cursor:pointer }
-  .btn:hover{ background:var(--brand-700) }
-
-  /* Suggestions list */
-  .suggestions-list{
-    margin-top:8px;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-  }
-  .suggestion-item{
-    border-radius:14px;
-    border:1px solid var(--stroke);
-    padding:10px 12px;
-    background:var(--soft);
-    font-size:14px;
-  }
-  .suggestion-meta{
-    font-size:12px;
-    color:var(--muted);
-    margin-bottom:4px;
-  }
-
-  /* Modal */
-  .modal-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; padding:20px; z-index:2000 }
-  .modal{ background:var(--card); border:1px solid var(--stroke); border-radius:16px; box-shadow:0 18px 60px rgba(2,6,23,.2); max-width:640px; width:100%; overflow:hidden }
-  .modal header { padding:16px 18px; border-bottom:1px solid var(--stroke); display:flex; align-items:center; justify-content:space-between }
-  .modal .content{ padding:18px }
-  .close{ background:none; border:0; font-size:22px; cursor:pointer; color:var(--muted) }
+  /* Suggestions (Cusdis) */
+  #cusdis_thread { margin-top: 10px; }
 
   /* Footer */
   footer{ padding:34px 0; color:var(--muted) }
   .footer-row{ display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between }
 </style>
 
-  <!-- Google Analytics -->
+<!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-XEV62MEYDB"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -130,6 +92,7 @@
   gtag('config', 'G-XEV62MEYDB');
 </script>
 </head>
+
 <body>
 
 <header class="site-header">
@@ -140,7 +103,7 @@
       <a href="retirement.html">Retirement Planner</a>
       <a href="budget/easy.html">Budget Tool</a>
       <a href="questions.html">Healthcare Plan Options</a>
-      <a href="#community">Community Boards</a>
+      <a href="#suggestions">Suggestions</a>
     </nav>
   </div>
 </header>
@@ -164,68 +127,28 @@
     </div>
   </section>
 
-  <!-- Tell Us What to Build Next -->
-  <section class="section">
+  <!-- Suggestions Section -->
+  <section id="suggestions" class="section">
     <div class="wrap">
       <div class="card">
         <h2 style="margin:0 0 8px 0; font-size:22px;">Tell Us What to Build Next</h2>
-        <p class="muted" style="margin:0 0 12px 0;">We build based on your feedback. What’s your #1 challenge right now?</p>
+        <p class="muted" style="margin:0 0 12px 0;">What should we build next? Post your ideas—everyone can see and collaborate.</p>
 
-        <!-- Single Formspree form (no JS interception) -->
-        <form id="featureForm" action="https://formspree.io/f/mrbrbbeb" method="POST">
-          <input type="hidden" name="_subject" value="New StakxAI Feature Request">
-          <label for="topic">Topic</label>
-          <input type="text" id="topic" name="topic" required>
-
-          <label for="message">What should we build next?</label>
-          <textarea id="message" name="message" required></textarea>
-
-          <button type="submit" class="btn">Send Feedback</button>
-        </form>
-        <p id="featureHint" class="muted" style="margin-top:8px;">
-          Your feedback is sent directly to the StakxAI team.
-        </p>
-
-        <!-- Suggestions displayed on the site (local to this device) -->
-        <div id="suggestionsWrap" style="margin-top:18px;">
-          <h3 style="margin:0 0 6px 0; font-size:16px;">Recent Suggestions (on this device)</h3>
-          <div id="suggestionList" class="suggestions-list"></div>
+        <!-- Cusdis Live Suggestion Board -->
+        <div id="cusdis_thread"
+          data-host="https://cusdis.com"
+          data-app-id="65c3ef25-d836-4782-9746-b19bb37cd7d1"
+          data-page-id="stakxai-suggestions"
+          data-page-url="https://stakxai.com"
+          data-page-title="StakxAI Suggestions">
         </div>
+
+        <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
+
       </div>
     </div>
   </section>
 
-  <!-- Community -->
-  <section id="community" class="section">
-    <div class="wrap">
-      <div class="card">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-          <div>
-            <h2 style="margin:0 0 6px 0; font-size:22px;">The StakxAI Community</h2>
-            <p class="muted" style="margin:0">Ask questions, share wins, and learn from others. You’re not alone.</p>
-          </div>
-          <div>
-            <button class="btn" id="openAsk2">Ask a Question</button>
-          </div>
-        </div>
-
-        <div class="qa" style="margin-top:14px;">
-          <div class="qa-item">
-            <strong>Q:</strong> What percent should my rent be of take-home pay?<br/>
-            <span class="muted">Top Answer:</span> Many target 25–30%, but local costs matter. If you’re above 35%, consider a roommate or move-in incentives.
-          </div>
-          <div class="qa-item">
-            <strong>Q:</strong> Roth vs Traditional—how do I choose?<br/>
-            <span class="muted">Top Answer:</span> If you expect higher income/taxes later, Roth can shine. If your current tax rate is high, Traditional may help now.
-          </div>
-          <div class="qa-item">
-            <strong>Q:</strong> What’s a realistic monthly savings rate?<br/>
-            <span class="muted">Top Answer:</span> 15–20% is a solid goal. Start smaller and step up each quarter.
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 </main>
 
 <footer>
@@ -234,45 +157,6 @@
     <div class="muted"></div>
   </div>
 </footer>
-
-<!-- Ask Question Modal -->
-<div class="modal-backdrop" id="askModal" role="dialog" aria-modal="true" aria-labelledby="askTitle">
-  <div class="modal">
-    <header>
-      <h3 id="askTitle" style="margin:0; font-size:18px;">Ask the Community</h3>
-      <button class="close" id="closeAsk" aria-label="Close">×</button>
-    </header>
-    <div class="content">
-      <form id="askForm">
-        <div style="margin-bottom:10px;">
-          <label for="askTopic">Topic</label>
-          <select id="askTopic" required>
-            <option value="">Choose…</option>
-            <option>Budgeting</option>
-            <option>Debt</option>
-            <option>Investing</option>
-            <option>Retirement</option>
-            <option>Healthcare</option>
-            <option>Taxes</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div style="margin-bottom:10px;">
-          <label for="askTitleInput">Question title</label>
-          <input type="text" id="askTitleInput" placeholder="e.g., What’s a realistic starter portfolio?" required />
-        </div>
-        <div style="margin-bottom:14px;">
-          <label for="askBody">Details (optional)</label>
-          <textarea id="askBody" placeholder="Add context so others can help more effectively…"></textarea>
-        </div>
-        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <button class="btn" type="submit">Post Question</button>
-          <span class="muted" id="askHint">Saved locally for now—connect to your forum later.</span>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
 
 <script>
   // Basic nav toggle
@@ -284,114 +168,6 @@
       navBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
   }
-
-  // Modal behavior (Ask a Question)
-  const askModal = document.getElementById('askModal');
-  const openAsk = document.getElementById('openAsk');
-  const openAsk2 = document.getElementById('openAsk2');
-  const closeAsk = document.getElementById('closeAsk');
-
-  function openModal(){
-    askModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    setTimeout(()=> document.getElementById('askTitleInput')?.focus(), 50);
-  }
-  function closeModal(){
-    askModal.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-  openAsk?.addEventListener('click', openModal);
-  openAsk2?.addEventListener('click', openModal);
-  closeAsk?.addEventListener('click', closeModal);
-  askModal?.addEventListener('click', (e)=>{ if(e.target === askModal) closeModal(); });
-  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && askModal.style.display === 'flex') closeModal(); });
-
-  // Suggestions list (saved locally on this device)
-  (function(){
-    const form = document.getElementById('featureForm');
-    const topicInput = document.getElementById('topic');
-    const messageInput = document.getElementById('message');
-    const listEl = document.getElementById('suggestionList');
-    const hint = document.getElementById('featureHint');
-    const STORAGE_KEY = 'stakxSuggestions';
-
-    if (!form || !topicInput || !messageInput || !listEl) return;
-
-    function loadSuggestions(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-      }catch(e){
-        return [];
-      }
-    }
-
-    function saveSuggestions(items){
-      try{
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-      }catch(e){}
-    }
-
-    function renderSuggestions(){
-      const items = loadSuggestions();
-      listEl.innerHTML = '';
-      if (!items.length){
-        const empty = document.createElement('div');
-        empty.className = 'muted';
-        empty.textContent = 'No suggestions yet on this device. Be the first to add one.';
-        listEl.appendChild(empty);
-        return;
-      }
-      items.forEach(item=>{
-        const wrapper = document.createElement('div');
-        wrapper.className = 'suggestion-item';
-
-        const meta = document.createElement('div');
-        meta.className = 'suggestion-meta';
-        const date = item.createdAt ? new Date(item.createdAt) : null;
-        const dateText = (date && !isNaN(date)) ? date.toLocaleString() : '';
-        meta.textContent = (item.topic ? item.topic + (dateText ? ' • ' : '') : '') + dateText;
-
-        const body = document.createElement('div');
-        body.textContent = item.message || '';
-
-        wrapper.appendChild(meta);
-        wrapper.appendChild(body);
-        listEl.appendChild(wrapper);
-      });
-    }
-
-    form.addEventListener('submit', function(e){
-      e.preventDefault(); // keep it on-site instead of sending away
-
-      const topic = (topicInput.value || '').trim();
-      const message = (messageInput.value || '').trim();
-
-      if (!message){
-        messageInput.focus();
-        return;
-      }
-
-      const items = loadSuggestions();
-      items.unshift({
-        topic: topic || 'General',
-        message,
-        createdAt: new Date().toISOString()
-      });
-      saveSuggestions(items);
-      renderSuggestions();
-      form.reset();
-
-      if (hint){
-        hint.textContent = 'Thanks! Your suggestion is now visible below (saved only on this device).';
-      }
-    });
-
-    // Initial render
-    renderSuggestions();
-  })();
 </script>
 
 </body>
