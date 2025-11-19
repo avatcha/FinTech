@@ -75,9 +75,10 @@
   .card{ background:var(--card); border:1px solid var(--stroke); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px }
   .muted{ color:var(--muted) }
 
-  /* Fix Cusdis iframe scroll */
-  #cusdis_thread iframe {
-    height: 680px !important;
+  /* Make iframes responsive */
+  .embed-wrap iframe{
+    width:100%;
+    border:0;
   }
 
   /* Footer */
@@ -124,7 +125,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
           <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/>
         </svg>
-        Free and private. No login required. No data collected. Data lives on your browser and is deleted when you shut it down.
+        Free and private. No login required. We don't collect your data. Suggestions below are anonymous and for the community.
       </div>
     </div>
   </section>
@@ -134,22 +135,34 @@
     <div class="wrap">
       <div class="card">
         <h2 style="margin:0 0 8px 0; font-size:22px;">Tell Us What to Build Next</h2>
-        <p class="muted" style="margin:0 0 12px 0;">What should we build next? Post your ideas anonymously—everyone can see and contribute.</p>
+        <p class="muted" style="margin:0 0 12px 0;">
+          What should we build next? Share one idea or problem you want solved. No login, no email.
+        </p>
 
-        <!-- Cusdis Live Suggestion Board -->
-        <div id="cusdis_thread"
-          data-host="https://cusdis.com"
-          data-app-id="65c3ef25-d836-4782-9746-b19bb37cd7d1"
-          data-page-id="stakxai-suggestions"
-          data-page-url="https://stakxai.com"
-          data-page-title="StakxAI Suggestions"
-          data-strict-mode="false"
-          data-allow-anonymous="true"
-          data-use-avatar="false">
-          data-auto-approve="true"
+        <div class="embed-wrap" style="margin-bottom:20px;">
+          <!-- Google Form (input) -->
+          <iframe 
+            src="https://docs.google.com/forms/d/e/1FAIpQLSehkOVtam6Tos7fxL0-3zbooL9_2TNtyjYjiAJKAjsiNqpqrw/viewform?embedded=true" 
+            height="520" 
+            frameborder="0" 
+            marginheight="0" 
+            marginwidth="0">
+            Loading…
+          </iframe>
         </div>
 
-        <script async defer src="https://cusdis.com/js/cusdis.es.js"></script>
+        <h3 style="margin:0 0 6px 0; font-size:16px;">Recent Suggestions</h3>
+        <p class="muted" style="margin:0 0 8px 0; font-size:13px;">
+          Suggestions below update automatically as people submit new ideas.
+        </p>
+
+        <div class="embed-wrap">
+          <!-- Google Sheet (read-only list) -->
+          <iframe 
+            src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTY_Orj8Bw2mBIXpaOg_3c3crz_ApbSYBeWooBFl6oYxu9r9JS7qad3KXtHcfMN-Yl7UbYkWmcE-JKn/pubhtml?gid=1689727790&amp;single=true&amp;widget=true&amp;headers=false" 
+            height="500">
+          </iframe>
+        </div>
 
       </div>
     </div>
