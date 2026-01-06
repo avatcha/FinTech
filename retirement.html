@@ -1,18 +1,127 @@
 <!DOCTYPE html> 
 <html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Retirement Calculator</title>
 
-<header class="site-header">
-  <div class="cb-wrap header-inner">
-    <a class="brand" href="index.html">StakxAI</a>
-    <button class="nav-toggle" aria-expanded="false">☰</button>
-    <nav id="primary-nav" class="nav-links">
-      <a href="index.html#tools">Tools</a>
-      <a href="index.html#coming-soon">Coming Soon</a>
-      <a href="feedback.html">Feedback</a>
-    </nav>
-  </div>
-</header>
-  
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f7f9fc; --text:#0a0f2c; --muted:#4a5568; --brand:#1a73e8; --brand-700:#0f5ad2;
+      --card:#fff; --stroke:#e5e9f2; --soft:#f7f9ff; --shadow:0 10px 30px rgba(2,6,23,0.07);
+      --radius:18px; --pad-x:28px; --content-w:1200px;
+    }
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#0b1220; --text:#e7ecf6; --muted:#a5b1cc; --card:#0e172a; --stroke:#1e293b; --soft:#0f1b33; --shadow:none; }
+      .slider{ background:#334155; }
+      input:checked + .slider{ background: #3b82f6; }
+    }
+
+    html, body { height:100%; }
+    body { font-family:'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); margin:0; padding-top:64px; color:var(--text); -webkit-tap-highlight-color: transparent; }
+
+    .cb-wrap { max-width: var(--content-w); margin: 0 auto; padding: 0 var(--pad-x); }
+    .cb-header { margin-bottom: 20px; }
+    .cb-title { font-size: clamp(24px, 3.6vw, 40px); font-weight: 700; margin: 0; line-height:1.1; }
+    .cb-sub { font-size: 15px; color: var(--muted); margin-top: 6px; }
+
+    .cb-stack { display: flex; flex-direction: column; gap: 16px; }
+    .cb-card { background: var(--card); padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--stroke); overflow:hidden; }
+
+    .cb-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (min-width:1100px){ .cb-row { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 640px){ .cb-row { grid-template-columns: 1fr; gap: 12px; } }
+
+    .cb-field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 14px; font-weight: 600; display:block; }
+
+    input[type="month"], input[type="number"], select, input[type="text"] {
+      font-size: 16px;
+      padding: 12px 14px; border-radius: 14px; border: 1px solid var(--stroke); background: #fdfdfd;
+      color: inherit; line-height:1.2; appearance: auto; -moz-appearance: textfield;
+      width:100%; max-width:100%;
+    }
+
+    .cb-card:not(#scenario-inputs) input[type=number]::-webkit-outer-spin-button,
+    .cb-card:not(#scenario-inputs) input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    input:focus, select:focus { border-color: #b8cdfd; outline: none; box-shadow: 0 0 0 4px rgba(0,82,255,0.12); }
+
+    .btn, #runCalc, .btn-primary { background: var(--brand); color: white; border: none; font-size: 16px; padding: 14px 20px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: transform .06s ease, background .15s ease; touch-action: manipulation; }
+    .btn:active, #runCalc:active { transform: translateY(1px) scale(.99); }
+    #runCalc:hover, .btn-primary:hover { background: var(--brand-700); }
+
+   .site-header{
+  position: fixed; top:0; left:0; right:0;
+  z-index:1000;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--stroke);
+}
+    @media (prefers-color-scheme: dark){ .site-header{ background: rgba(10,15,28,.65); } }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; min-height: 60px; }
+    .brand { font-weight: 800; font-size: 20px; text-decoration: none; color: var(--text); letter-spacing:.2px; }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a { color:inherit; font-weight: 600; text-decoration:none; font-size:14px; }
+    .nav-links a:hover { text-decoration: underline; }
+    .nav-toggle { display:none; font-size:26px; background:none; border:0; cursor:pointer; line-height:1; }
+
+    @media (max-width:820px){
+      .nav-toggle { display:block; }
+      .nav-links { display:none; position:absolute; right:var(--pad-x); top:60px; background:var(--card); padding:12px; border:1px solid var(--stroke); border-radius:12px; box-shadow:0 8px 24px rgba(2,6,23,0.15); }
+      .nav-links.open { display:block; }
+      .nav-links a { display:block; padding:8px 10px; }
+    }
+
+    /* Tooltip bits */
+    .label-row{ display:inline-flex; align-items:center; gap:8px; white-space:nowrap; }
+    .click-icon { width:20px; height:20px; border-radius:50%; background:var(--brand); color:white; font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+    .tooltip-click-box {
+      display:none; position:absolute; inset-block-start:-10px; inset-inline-start:0; transform:translateY(-100%);
+      background:#ffffff; padding:14px 16px; border-radius:12px; max-width:min(320px, 80vw);
+      border:1px solid var(--stroke); box-shadow:0 8px 24px rgba(2,6,23,0.15); font-size:13px; z-index:99999;
+      white-space: normal; overflow-wrap: anywhere; pointer-events:auto;
+    }
+    .tooltip-anchor { position:relative; display:inline-block; isolation:isolate; }
+
+    /* Success strip after Run */
+    .success-strip{ display:none; background:var(--soft); border:1px solid var(--stroke); border-radius:12px; padding:12px 14px; margin-top:12px; display:flex; align-items:center; gap:12px; }
+    .success-strip .hint{ font-size:13px; color:var(--muted); }
+
+    /* Scenario Planner */
+    #scenarioGrid { display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+    @media (max-width: 900px){ #scenarioGrid { grid-template-columns: 1fr; } }
+
+    .with-suffix { position: relative; }
+    .with-suffix input[type="number"] { padding-right: 70px; }
+    .with-suffix::after { content: attr(data-suffix); position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--muted); pointer-events: none; }
+
+    #breakdownChart, #scenarioChart { height: clamp(260px, 42vh, 360px); background:transparent; }
+
+    /* Validation */
+    .is-invalid{ border-color:#dc2626 !important; box-shadow:0 0 0 4px rgba(220,38,38,0.12) !important; }
+    .field-hint-error{ color:#b91c1c; font-size:12px; margin-top:6px; }
+
+    .chip { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#1f2a59; font-weight:700; font-size:12px; }
+    .center-title{ text-align:center; }
+
+    /* Kicker + info strip */
+    .kicker{ font-weight:800; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--brand); margin:10px 0 8px 0; }
+    .strip{ display:flex; align-items:center; gap:10px; background:var(--soft); border:1px solid var(--stroke); border-radius:12px; padding:10px 12px; color:var(--muted); font-size:13px; }
+
+    *,*::before,*::after{ box-sizing:border-box; }
+  </style>
+
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>StakxAI — Build Wealth Together</title>
