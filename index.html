@@ -63,7 +63,7 @@
         .hero {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 5rem 2rem;
+            padding: 5rem 2rem 3rem;
             text-align: center;
         }
         
@@ -74,14 +74,8 @@
         
         .hero h1 {
             font-size: 3rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-        
-        .hero p {
-            font-size: 1.3rem;
             margin-bottom: 2rem;
-            opacity: 0.95;
+            font-weight: 700;
         }
         
         .privacy-badge {
@@ -90,7 +84,72 @@
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.9rem;
-            margin-top: 1rem;
+        }
+        
+        /* Wealth Education Section */
+        .wealth-education {
+            background: white;
+            padding: 2rem 2rem;
+            text-align: center;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .wealth-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .wealth-definition {
+            background: #f7fafc;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            text-align: left;
+            margin-bottom: 1.5rem;
+            color: #4a5568;
+        }
+        
+        .wealth-definition .word {
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        .wealth-definition .pronunciation {
+            color: #718096;
+            font-style: italic;
+        }
+        
+        .wealth-statement {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+        
+        .wealth-subtext {
+            font-size: 1.15rem;
+            color: #4a5568;
+            line-height: 1.7;
+        }
+        
+        .build-wealth-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+        
+        .build-wealth-section h3 {
+            font-size: 1.3rem;
+            color: #2d3748;
+            margin-bottom: 0.75rem;
+        }
+        
+        .build-wealth-section p {
+            font-size: 1.05rem;
+            color: #4a5568;
+            line-height: 1.7;
         }
         
         /* Tools Section */
@@ -304,7 +363,11 @@
                 font-size: 2rem;
             }
             
-            .hero p {
+            .wealth-statement {
+                font-size: 1.6rem;
+            }
+            
+            .wealth-subtext {
                 font-size: 1.1rem;
             }
             
@@ -322,17 +385,30 @@
             <ul class="nav-links">
                 <li><a href="#tools">Tools</a></li>
                 <li><a href="#coming-soon">Coming Soon</a></li>
-                <li><a href="#about">About</a></li>
+                <li><a href="feedback.html">Feedback</a></li>
             </ul>
         </nav>
     </header>
     
     <section class="hero">
         <div class="hero-content">
-            <h1>Smart Financial Planning Made Simple</h1>
-            <p>AI-powered tools to help you plan for retirement, manage your budget, and build wealth—completely free and private.</p>
+            <h1>AI-powered tools to help you build wealth</h1>
             <div class="privacy-badge">
                 🔒 100% Private • No Login Required • No Data Collected
+            </div>
+        </div>
+    </section>
+    
+    <section class="wealth-education">
+        <div class="wealth-content">
+            <div class="wealth-definition">
+                <span class="word">wealth</span> <span class="pronunciation">/wĕlth/</span>: The state of being rich; affluence.
+            </div>
+            <div class="wealth-statement">
+                Wealth requires building an ENGINE, not a big paycheck.
+            </div>
+            <div class="wealth-subtext">
+                Anyone can build wealth, all you need is good habits and time. True wealth is when your assets (engine) generate more income than you need to live the life you want.
             </div>
         </div>
     </section>
@@ -354,7 +430,7 @@
             <div class="tool-card">
                 <div class="tool-icon">💰</div>
                 <h3>Snap Budget</h3>
-                <p>Get a quick picture of your finances with a fast, simple breakdown of your income, expenses, debts, and savings.</p>
+                <p>Get a complete picture of your finances with a fast, simple breakdown of your income, expenses, debts, and savings.</p>
                 <a href="budget/easy.html" class="tool-btn">Create Budget →</a>
             </div>
         </div>
@@ -398,7 +474,7 @@
             </div>
             
             <div class="cta-section">
-                <a href="#feedback" class="suggest-btn">Suggest a Feature →</a>
+                <a href="feedback.html" class="suggest-btn">Suggest a Feature →</a>
             </div>
         </div>
     </section>
